@@ -1,5 +1,4 @@
-
-// Dual Station ZVV Departure Board JavaScript with LocalStorage and Customization
+// Dual Station ZVV Departure Board JavaScript with LocalStorage and Individual Line Customization
 
 class DualStationBoard {
     constructor() {
@@ -16,6 +15,7 @@ class DualStationBoard {
             bus: '#ff6b6b',
             train: '#ffd700'
         };
+        this.individualLineColors = {}; // Store individual line colors
         this.updateIntervals = [];
         this.init();
     }
@@ -26,9 +26,9 @@ class DualStationBoard {
         this.setupAutoComplete();
         this.applyCustomColors();
         
-        // Auto-start if we have saved data
+        // Auto-start if we have saved data - go directly to monitoring
         if (this.selectedStations.station1 && this.selectedStations.station2) {
-            this.showCustomizationPhase();
+            this.startMonitoring();
         }
     }
 
@@ -75,6 +75,7 @@ class DualStationBoard {
                 this.selectedStations = config.selectedStations || { station1: null, station2: null };
                 this.customNames = config.customNames || { station1: '', station2: '' };
                 this.customColors = config.customColors || { tram: '#4ecdc4', bus: '#ff6b6b', train: '#ffd700' };
+                this.individualLineColors = config.individualLineColors || {};
                 
                 // Restore input values
                 if (this.selectedStations.station1) {
@@ -104,7 +105,8 @@ class DualStationBoard {
         const config = {
             selectedStations: this.selectedStations,
             customNames: this.customNames,
-            customColors: this.customColors
+            customColors: this.customColors,
+            individualLineColors: this.individualLineColors
         };
         localStorage.setItem('zvv-board-config', JSON.stringify(config));
         console.log('Configuration saved to storage');
@@ -211,7 +213,8 @@ class DualStationBoard {
     }
 
     startMonitoring() {
-        // Hide customization phase
+        // Hide selection and customization phases
+        document.getElementById('station-selection').classList.add('hidden');
         document.getElementById('station-customization').classList.add('hidden');
         
         // Show dual boards
@@ -219,12 +222,16 @@ class DualStationBoard {
         document.getElementById('change-stations').classList.remove('hidden');
 
         // Set custom station names
-        document.getElementById('station1-name').textContent = this.customNames.station1;
-        document.getElementById('station2-name').textContent = this.customNames.station2;
+        document.getElementById('station1-name').textContent = this.customNames.station1 || this.selectedStations.station1.name;
+        document.getElementById('station2-name').textContent = this.customNames.station2 || this.selectedStations.station2.name;
 
         // Start fetching data for both stations
         this.fetchDeparturesForStation(this.selectedStations.station1.id, 'departures1', 'station1-updated');
         this.fetchDeparturesForStation(this.selectedStations.station2.id, 'departures2', 'station2-updated');
+
+        // Clear existing intervals
+        this.updateIntervals.forEach(interval => clearInterval(interval));
+        this.updateIntervals = [];
 
         // Set up intervals for auto-refresh
         this.updateIntervals.push(
@@ -280,11 +287,14 @@ class DualStationBoard {
             }
 
             const lineClass = this.getLineClass(dep.category);
-            const customColor = this.getCustomColor(dep.category);
+            const lineColor = this.getLineColor(dep.line, dep.category);
 
             return `
                 <div class="departure-row">
-                    <div class="line-number ${lineClass}" style="background-color: ${customColor};">${dep.line}</div>
+                    <div class="line-number ${lineClass}" 
+                         style="background-color: ${lineColor}; cursor: pointer;" 
+                         onclick="board.changeLineColor('${dep.line}', '${dep.category}')"
+                         title="Klicken um Farbe zu ändern">${dep.line}</div>
                     <div class="destination">${dep.destination}</div>
                     <div class="platform">${dep.platform || '-'}</div>
                     <div class="departure-time">
@@ -296,6 +306,33 @@ class DualStationBoard {
         }).join('');
 
         container.innerHTML = rows;
+    }
+
+    getLineColor(lineNumber, category) {
+        // Check if there's an individual color set for this line
+        if (this.individualLineColors[lineNumber]) {
+            return this.individualLineColors[lineNumber];
+        }
+        
+        // Otherwise use category default color
+        return this.getCustomColor(category);
+    }
+
+    changeLineColor(lineNumber, category) {
+        // Create a color input dynamically
+        const colorInput = document.createElement('input');
+        colorInput.type = 'color';
+        colorInput.value = this.individualLineColors[lineNumber] || this.getCustomColor(category);
+        
+        colorInput.onchange = (e) => {
+            this.individualLineColors[lineNumber] = e.target.value;
+            this.saveToStorage();
+            // Refresh the display
+            this.fetchDeparturesForStation(this.selectedStations.station1.id, 'departures1', 'station1-updated');
+            this.fetchDeparturesForStation(this.selectedStations.station2.id, 'departures2', 'station2-updated');
+        };
+        
+        colorInput.click();
     }
 
     getLineClass(category) {
@@ -352,6 +389,18 @@ class DualStationBoard {
         this.updateIntervals.forEach(interval => clearInterval(interval));
         this.updateIntervals = [];
 
+        // Clear stored data
+        localStorage.removeItem('zvv-board-config');
+        this.selectedStations = { station1: null, station2: null };
+        this.customNames = { station1: '', station2: '' };
+        this.individualLineColors = {};
+
+        // Clear inputs
+        document.getElementById('station1-input').value = '';
+        document.getElementById('station2-input').value = '';
+        document.getElementById('custom-name1').value = '';
+        document.getElementById('custom-name2').value = '';
+
         // Hide boards and customization, show selection
         document.getElementById('dual-boards').classList.add('hidden');
         document.getElementById('station-customization').classList.add('hidden');
@@ -363,7 +412,10 @@ class DualStationBoard {
     }
 }
 
+// Global reference for onclick handlers
+let board;
+
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new DualStationBoard();
+    board = new DualStationBoard();
 });
