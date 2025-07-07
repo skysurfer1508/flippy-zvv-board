@@ -1,4 +1,3 @@
-
 /* ZVV Dual Flip-Dot Display Styling */
 * {
     margin: 0;
@@ -338,6 +337,97 @@ footer {
     font-size: 0.9rem;
 }
 
+/* Station Customization Phase */
+.station-customization {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.station-customization h2, 
+.station-customization h3 {
+    color: #ffd700;
+    margin-bottom: 20px;
+}
+
+.customization-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 30px;
+}
+
+.custom-input-group {
+    text-align: center;
+}
+
+.custom-input-group label {
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.custom-input-group input {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1rem;
+    font-family: 'Courier New', monospace;
+    background: #333;
+    border: 2px solid #ffd700;
+    border-radius: 8px;
+    color: #ffd700;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.custom-input-group input:focus {
+    border-color: #ffed4e;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.color-customization {
+    background: #333;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.color-inputs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.color-input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.color-input-group label {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.color-input-group input[type="color"] {
+    width: 60px;
+    height: 40px;
+    border: 2px solid #ffd700;
+    border-radius: 8px;
+    background: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.color-input-group input[type="color"]:hover {
+    border-color: #ffed4e;
+    transform: scale(1.05);
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
     .dual-boards {
@@ -389,5 +479,19 @@ footer {
     .header-platform,
     .platform {
         display: none;
+    }
+}
+
+@media (max-width: 1200px) {
+    .customization-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .color-inputs {
+        grid-template-columns: 1fr;
+        gap: 15px;
     }
 }

@@ -1,5 +1,5 @@
 
-// Dual Station ZVV Departure Board JavaScript
+// Dual Station ZVV Departure Board JavaScript with LocalStorage and Customization
 
 class DualStationBoard {
     constructor() {
@@ -7,19 +7,40 @@ class DualStationBoard {
             station1: null,
             station2: null
         };
+        this.customNames = {
+            station1: '',
+            station2: ''
+        };
+        this.customColors = {
+            tram: '#4ecdc4',
+            bus: '#ff6b6b',
+            train: '#ffd700'
+        };
         this.updateIntervals = [];
         this.init();
     }
 
     init() {
+        this.loadFromStorage();
         this.setupEventListeners();
         this.setupAutoComplete();
+        this.applyCustomColors();
+        
+        // Auto-start if we have saved data
+        if (this.selectedStations.station1 && this.selectedStations.station2) {
+            this.showCustomizationPhase();
+        }
     }
 
     setupEventListeners() {
-        // Start monitoring button
+        // Station selection
         document.getElementById('start-monitoring').addEventListener('click', () => {
-            this.startMonitoring();
+            this.showCustomizationPhase();
+        });
+
+        // Apply customization
+        document.getElementById('apply-customization').addEventListener('click', () => {
+            this.applyCustomization();
         });
 
         // Change stations button
@@ -34,6 +55,59 @@ class DualStationBoard {
                 this.validateInputs();
             });
         });
+
+        // Color inputs
+        ['tram-color', 'bus-color', 'train-color'].forEach(colorId => {
+            document.getElementById(colorId).addEventListener('change', (e) => {
+                const type = colorId.replace('-color', '');
+                this.customColors[type] = e.target.value;
+                this.saveToStorage();
+                this.applyCustomColors();
+            });
+        });
+    }
+
+    loadFromStorage() {
+        const saved = localStorage.getItem('zvv-board-config');
+        if (saved) {
+            try {
+                const config = JSON.parse(saved);
+                this.selectedStations = config.selectedStations || { station1: null, station2: null };
+                this.customNames = config.customNames || { station1: '', station2: '' };
+                this.customColors = config.customColors || { tram: '#4ecdc4', bus: '#ff6b6b', train: '#ffd700' };
+                
+                // Restore input values
+                if (this.selectedStations.station1) {
+                    document.getElementById('station1-input').value = this.selectedStations.station1.name;
+                }
+                if (this.selectedStations.station2) {
+                    document.getElementById('station2-input').value = this.selectedStations.station2.name;
+                }
+                
+                // Set color inputs
+                document.getElementById('tram-color').value = this.customColors.tram;
+                document.getElementById('bus-color').value = this.customColors.bus;
+                document.getElementById('train-color').value = this.customColors.train;
+                
+                // Set custom name inputs
+                document.getElementById('custom-name1').value = this.customNames.station1;
+                document.getElementById('custom-name2').value = this.customNames.station2;
+                
+                console.log('Loaded configuration from storage');
+            } catch (error) {
+                console.error('Error loading from storage:', error);
+            }
+        }
+    }
+
+    saveToStorage() {
+        const config = {
+            selectedStations: this.selectedStations,
+            customNames: this.customNames,
+            customColors: this.customColors
+        };
+        localStorage.setItem('zvv-board-config', JSON.stringify(config));
+        console.log('Configuration saved to storage');
     }
 
     setupAutoComplete() {
@@ -53,6 +127,7 @@ class DualStationBoard {
                 suggestions.style.display = 'none';
                 this.selectedStations[stationKey] = null;
                 this.validateInputs();
+                this.saveToStorage();
                 return;
             }
 
@@ -90,6 +165,7 @@ class DualStationBoard {
                     this.selectedStations[stationKey] = station;
                     suggestions.style.display = 'none';
                     this.validateInputs();
+                    this.saveToStorage();
                 });
                 suggestions.appendChild(item);
             });
@@ -107,17 +183,44 @@ class DualStationBoard {
         startBtn.disabled = !isValid;
     }
 
-    startMonitoring() {
+    showCustomizationPhase() {
         // Hide selection phase
         document.getElementById('station-selection').classList.add('hidden');
+        
+        // Show customization phase
+        document.getElementById('station-customization').classList.remove('hidden');
+        
+        // Pre-fill custom names with station names if empty
+        if (!this.customNames.station1) {
+            document.getElementById('custom-name1').value = this.selectedStations.station1.name;
+        }
+        if (!this.customNames.station2) {
+            document.getElementById('custom-name2').value = this.selectedStations.station2.name;
+        }
+        
+        this.saveToStorage();
+    }
+
+    applyCustomization() {
+        // Get custom names
+        this.customNames.station1 = document.getElementById('custom-name1').value || this.selectedStations.station1.name;
+        this.customNames.station2 = document.getElementById('custom-name2').value || this.selectedStations.station2.name;
+        
+        this.saveToStorage();
+        this.startMonitoring();
+    }
+
+    startMonitoring() {
+        // Hide customization phase
+        document.getElementById('station-customization').classList.add('hidden');
         
         // Show dual boards
         document.getElementById('dual-boards').classList.remove('hidden');
         document.getElementById('change-stations').classList.remove('hidden');
 
-        // Set station names
-        document.getElementById('station1-name').textContent = this.selectedStations.station1.name;
-        document.getElementById('station2-name').textContent = this.selectedStations.station2.name;
+        // Set custom station names
+        document.getElementById('station1-name').textContent = this.customNames.station1;
+        document.getElementById('station2-name').textContent = this.customNames.station2;
 
         // Start fetching data for both stations
         this.fetchDeparturesForStation(this.selectedStations.station1.id, 'departures1', 'station1-updated');
@@ -177,10 +280,11 @@ class DualStationBoard {
             }
 
             const lineClass = this.getLineClass(dep.category);
+            const customColor = this.getCustomColor(dep.category);
 
             return `
                 <div class="departure-row">
-                    <div class="line-number ${lineClass}">${dep.line}</div>
+                    <div class="line-number ${lineClass}" style="background-color: ${customColor};">${dep.line}</div>
                     <div class="destination">${dep.destination}</div>
                     <div class="platform">${dep.platform || '-'}</div>
                     <div class="departure-time">
@@ -200,7 +304,34 @@ class DualStationBoard {
         const cat = category.toLowerCase();
         if (cat.includes('bus') || cat.includes('b')) return 'bus';
         if (cat.includes('tram') || cat.includes('t')) return 'tram';
+        if (cat.includes('train') || cat.includes('ic') || cat.includes('ir') || cat.includes('re') || cat.includes('s')) return 'train';
         return '';
+    }
+
+    getCustomColor(category) {
+        if (!category) return this.customColors.train;
+        
+        const cat = category.toLowerCase();
+        if (cat.includes('bus') || cat.includes('b')) return this.customColors.bus;
+        if (cat.includes('tram') || cat.includes('t')) return this.customColors.tram;
+        if (cat.includes('train') || cat.includes('ic') || cat.includes('ir') || cat.includes('re') || cat.includes('s')) return this.customColors.train;
+        return this.customColors.train;
+    }
+
+    applyCustomColors() {
+        // Create dynamic CSS for custom colors
+        let style = document.getElementById('dynamic-colors');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'dynamic-colors';
+            document.head.appendChild(style);
+        }
+        
+        style.textContent = `
+            .line-number.tram { background-color: ${this.customColors.tram} !important; }
+            .line-number.bus { background-color: ${this.customColors.bus} !important; }
+            .line-number.train { background-color: ${this.customColors.train} !important; }
+        `;
     }
 
     updateTimestamp(updatedId, timestamp) {
@@ -221,15 +352,9 @@ class DualStationBoard {
         this.updateIntervals.forEach(interval => clearInterval(interval));
         this.updateIntervals = [];
 
-        // Reset selections
-        this.selectedStations = { station1: null, station2: null };
-        
-        // Clear inputs
-        document.getElementById('station1-input').value = '';
-        document.getElementById('station2-input').value = '';
-        
-        // Hide boards and show selection
+        // Hide boards and customization, show selection
         document.getElementById('dual-boards').classList.add('hidden');
+        document.getElementById('station-customization').classList.add('hidden');
         document.getElementById('change-stations').classList.add('hidden');
         document.getElementById('station-selection').classList.remove('hidden');
         

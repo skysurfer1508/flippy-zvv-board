@@ -34,6 +34,42 @@
                 
                 <button id="start-monitoring" class="start-btn" disabled>Abfahrtszeiten anzeigen</button>
             </div>
+
+            <!-- Station Customization Phase -->
+            <div id="station-customization" class="station-customization hidden">
+                <h2>Stationen anpassen</h2>
+                <div class="customization-container">
+                    <div class="custom-input-group">
+                        <label for="custom-name1">Anzeigename für Station 1:</label>
+                        <input type="text" id="custom-name1" placeholder="Custom Name...">
+                    </div>
+                    
+                    <div class="custom-input-group">
+                        <label for="custom-name2">Anzeigename für Station 2:</label>
+                        <input type="text" id="custom-name2" placeholder="Custom Name...">
+                    </div>
+                </div>
+
+                <div class="color-customization">
+                    <h3>Linien-Farben anpassen</h3>
+                    <div class="color-inputs">
+                        <div class="color-input-group">
+                            <label for="tram-color">Tram-Farbe:</label>
+                            <input type="color" id="tram-color" value="#4ecdc4">
+                        </div>
+                        <div class="color-input-group">
+                            <label for="bus-color">Bus-Farbe:</label>
+                            <input type="color" id="bus-color" value="#ff6b6b">
+                        </div>
+                        <div class="color-input-group">
+                            <label for="train-color">Zug-Farbe:</label>
+                            <input type="color" id="train-color" value="#ffd700">
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="apply-customization" class="start-btn">Anzeige starten</button>
+            </div>
         </header>
 
         <main>
