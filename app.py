@@ -113,4 +113,4 @@ def board():
     return jsonify(stations_cache[cache_key])
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=False)
+    app.run(host='0.0.0.0', port=6162, debug=False)

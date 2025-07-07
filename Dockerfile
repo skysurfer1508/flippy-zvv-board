@@ -19,11 +19,11 @@ COPY . .
 RUN mkdir -p templates static
 
 # Exponiere Port
-EXPOSE 8080
+EXPOSE 6162
 
 # Health Check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/ || exit 1
+    CMD curl -f http://localhost:6162/ || exit 1
 
 # Starte die Anwendung
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--timeout", "120", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:6162", "--workers", "2", "--timeout", "120", "app:app"]
