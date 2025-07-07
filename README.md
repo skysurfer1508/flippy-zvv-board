@@ -1,73 +1,186 @@
-# Welcome to your Lovable project
 
-## Project info
+# ZVV Abfahrtszeiten - Real-time Departure Board
 
-**URL**: https://lovable.dev/projects/ea82773f-a828-4b38-a409-79efe7f01030
+Eine moderne Web-Anwendung zur Anzeige von ZVV-Abfahrtszeiten mit authentischem Flip-Dot-Display-Design.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- 🚊 Echtzeit-Abfahrtszeiten für alle ZVV-Stationen
+- 🔍 Intelligente Stationssuche mit Auto-Suggest
+- ⏰ Verspätungsanzeige in Echtzeit
+- 📱 Responsive Design für alle Geräte
+- 🎨 Authentisches Flip-Dot-Display-Styling
+- 🔄 Automatische Aktualisierung alle 25 Sekunden
 
-**Use Lovable**
+## Technologie-Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/ea82773f-a828-4b38-a409-79efe7f01030) and start prompting.
+- **Backend**: Flask (Python)
+- **Frontend**: Vanilla HTML/CSS/JavaScript
+- **API**: transport.opendata.ch
+- **Container**: Docker & Docker Compose
 
-Changes made via Lovable will be committed automatically to this repo.
+## Schnellstart
 
-**Use your preferred IDE**
+### Mit Docker Compose (empfohlen)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```bash
+# Repository klonen
+git clone <your-repo-url>
+cd zvv-departures
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+# Container starten
+docker-compose up -d
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# App öffnen
+open http://localhost:8080
 ```
 
-**Edit a file directly in GitHub**
+### Mit Docker
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+# Image bauen
+docker build -t zvv-app .
 
-**Use GitHub Codespaces**
+# Container starten
+docker run -p 8080:8080 zvv-app
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Lokale Entwicklung
 
-## What technologies are used for this project?
+```bash
+# Dependencies installieren
+pip install -r requirements.txt
 
-This project is built with:
+# App starten
+python app.py
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+# App öffnen
+open http://localhost:8080
+```
 
-## How can I deploy this project?
+## API Endpoints
 
-Simply open [Lovable](https://lovable.dev/projects/ea82773f-a828-4b38-a409-79efe7f01030) and click on Share -> Publish.
+### `/api/locations`
+Stationssuche mit Auto-Suggest
+- **Parameter**: `query` (String, min. 2 Zeichen)
+- **Response**: Array von Stationen mit `id` und `name`
 
-## Can I connect a custom domain to my Lovable project?
+### `/api/board`
+Abfahrts-Board für eine Station
+- **Parameter**: `station` (String, Station ID)
+- **Response**: Abfahrten mit Linie, Ziel, Zeit und Verspätung
 
-Yes, you can!
+## Deployment
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Portainer
+1. Neue Stack erstellen
+2. Git Repository URL eingeben
+3. Stack Name: `zvv-departures`
+4. Deploy
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### Direkter Git-Build
+```bash
+git clone <your-repo-url>
+cd zvv-departures
+docker-compose up -d
+```
+
+## Konfiguration
+
+### Environment Variables
+- `FLASK_ENV`: `production` oder `development`
+- `PYTHONPATH`: `/app` (für Container)
+
+### Port-Konfiguration
+Standard-Port: `8080`
+Anpassung in `docker-compose.yml` oder `Dockerfile`
+
+## Features im Detail
+
+### Flip-Dot Design
+- Monospace-Schriftart für authentischen Look
+- Gelb-schwarze Farbgebung wie echte ZVV-Displays
+- Animierte Übergänge und Hover-Effekte
+- Responsive Grid-Layout
+
+### Verspätungen
+- Echtzeit-Berechnung über `prognosis.departure`
+- Rote Hervorhebung bei Verspätungen
+- Blinkende Animation für Aufmerksamkeit
+
+### Caching
+- 25-Sekunden-Cache für API-Anfragen
+- Reduziert Load auf transport.opendata.ch
+- Verbesserte Performance
+
+## API-Limitierungen
+
+- Keine GTFS-RT Integration (bewusst ausgelassen)
+- Abhängig von transport.opendata.ch Verfügbarkeit
+- Cache-basierte Aktualisierung (25s Intervall)
+
+## Troubleshooting
+
+### Container startet nicht
+```bash
+# Logs prüfen
+docker-compose logs -f
+
+# Port-Konflikte prüfen
+lsof -i :8080
+```
+
+### API-Fehler
+```bash
+# Health Check
+curl http://localhost:8080/api/locations?query=Zürich
+
+# Container-Status
+docker-compose ps
+```
+
+## Entwicklung
+
+### Struktur
+```
+├── app.py              # Flask Backend
+├── templates/
+│   └── index.html      # Frontend Template
+├── static/
+│   ├── style.css       # Flip-Dot Styling
+│   └── script.js       # Frontend Logic
+├── Dockerfile          # Container Build
+├── docker-compose.yml  # Multi-Container Setup
+└── requirements.txt    # Python Dependencies
+```
+
+### Lokale Entwicklung
+```bash
+# Virtual Environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+
+# Dependencies
+pip install -r requirements.txt
+
+# Development Server
+FLASK_ENV=development python app.py
+```
+
+## Contributing
+
+1. Fork das Repository
+2. Feature Branch erstellen
+3. Änderungen committen
+4. Pull Request erstellen
+
+## Lizenz
+
+MIT License - siehe LICENSE Datei für Details
+
+## Credits
+
+- Daten: [transport.opendata.ch](https://transport.opendata.ch)
+- Design inspiriert von echten ZVV Flip-Dot Displays
+- Built with ❤️ für das ZVV-Netz

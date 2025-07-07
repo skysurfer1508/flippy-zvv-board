@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZVV Abfahrtszeiten</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ZVV Abfahrtszeiten</h1>
+            <div class="search-container">
+                <input type="text" id="station-input" placeholder="Station eingeben..." autocomplete="off">
+                <div id="suggestions" class="suggestions"></div>
+            </div>
+        </header>
+
+        <main>
+            <div id="departure-board" class="departure-board">
+                <div class="board-header">
+                    <div class="header-line">Linie</div>
+                    <div class="header-destination">Ziel</div>
+                    <div class="header-platform">Gleis</div>
+                    <div class="header-time">Abfahrt</div>
+                </div>
+                <div id="departures-list" class="departures-list">
+                    <div class="no-data">Wählen Sie eine Station aus</div>
+                </div>
+            </div>
+
+            <div id="loading" class="loading hidden">
+                <div class="loading-spinner"></div>
+                <p>Lade Abfahrtszeiten...</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>Daten von transport.opendata.ch | Aktualisierung alle 25 Sekunden</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

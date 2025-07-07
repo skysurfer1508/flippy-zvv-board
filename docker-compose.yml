@@ -1,0 +1,29 @@
+
+version: '3.8'
+
+services:
+  zvv-app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - FLASK_ENV=production
+      - PYTHONPATH=/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - zvv-network
+
+networks:
+  zvv-network:
+    driver: bridge
+
+volumes:
+  zvv-logs:
