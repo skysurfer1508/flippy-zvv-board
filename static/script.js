@@ -1,210 +1,244 @@
 
-class ZVVDepartures {
+// Dual Station ZVV Departure Board JavaScript
+
+class DualStationBoard {
     constructor() {
-        this.stationInput = document.getElementById('station-input');
-        this.suggestions = document.getElementById('suggestions');
-        this.departuresList = document.getElementById('departures-list');
-        this.loading = document.getElementById('loading');
-        
-        this.currentStation = null;
-        this.selectedIndex = -1;
-        this.suggestionsData = [];
-        this.refreshInterval = null;
-        
+        this.selectedStations = {
+            station1: null,
+            station2: null
+        };
+        this.updateIntervals = [];
         this.init();
     }
-    
+
     init() {
-        this.stationInput.addEventListener('input', this.handleStationInput.bind(this));
-        this.stationInput.addEventListener('keydown', this.handleKeyDown.bind(this));
-        document.addEventListener('click', this.handleDocumentClick.bind(this));
+        this.setupEventListeners();
+        this.setupAutoComplete();
     }
-    
-    async handleStationInput(event) {
-        const query = event.target.value.trim();
-        
-        if (query.length < 2) {
-            this.hideSuggestions();
-            return;
-        }
-        
+
+    setupEventListeners() {
+        // Start monitoring button
+        document.getElementById('start-monitoring').addEventListener('click', () => {
+            this.startMonitoring();
+        });
+
+        // Change stations button
+        document.getElementById('change-stations').addEventListener('click', () => {
+            this.resetToSelection();
+        });
+
+        // Input validation
+        const inputs = ['station1-input', 'station2-input'];
+        inputs.forEach(inputId => {
+            document.getElementById(inputId).addEventListener('input', () => {
+                this.validateInputs();
+            });
+        });
+    }
+
+    setupAutoComplete() {
+        this.setupAutoCompleteForInput('station1-input', 'suggestions1', 'station1');
+        this.setupAutoCompleteForInput('station2-input', 'suggestions2', 'station2');
+    }
+
+    setupAutoCompleteForInput(inputId, suggestionsId, stationKey) {
+        const input = document.getElementById(inputId);
+        const suggestions = document.getElementById(suggestionsId);
+        let currentTimeout;
+
+        input.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            
+            if (query.length < 2) {
+                suggestions.style.display = 'none';
+                this.selectedStations[stationKey] = null;
+                this.validateInputs();
+                return;
+            }
+
+            clearTimeout(currentTimeout);
+            currentTimeout = setTimeout(() => {
+                this.fetchStations(query, suggestions, input, stationKey);
+            }, 300);
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!input.contains(e.target) && !suggestions.contains(e.target)) {
+                suggestions.style.display = 'none';
+            }
+        });
+    }
+
+    async fetchStations(query, suggestions, input, stationKey) {
         try {
             const response = await fetch(`/api/locations?query=${encodeURIComponent(query)}`);
             const stations = await response.json();
-            
-            this.suggestionsData = stations;
-            this.showSuggestions(stations);
+
+            if (stations.length === 0) {
+                suggestions.style.display = 'none';
+                return;
+            }
+
+            suggestions.innerHTML = '';
+            stations.forEach(station => {
+                const item = document.createElement('div');
+                item.className = 'suggestion-item';
+                item.textContent = station.name;
+                item.addEventListener('click', () => {
+                    input.value = station.name;
+                    this.selectedStations[stationKey] = station;
+                    suggestions.style.display = 'none';
+                    this.validateInputs();
+                });
+                suggestions.appendChild(item);
+            });
+
+            suggestions.style.display = 'block';
         } catch (error) {
             console.error('Error fetching stations:', error);
-            this.hideSuggestions();
+            suggestions.style.display = 'none';
         }
     }
-    
-    handleKeyDown(event) {
-        if (!this.suggestionsData.length) return;
+
+    validateInputs() {
+        const startBtn = document.getElementById('start-monitoring');
+        const isValid = this.selectedStations.station1 && this.selectedStations.station2;
+        startBtn.disabled = !isValid;
+    }
+
+    startMonitoring() {
+        // Hide selection phase
+        document.getElementById('station-selection').classList.add('hidden');
         
-        switch (event.key) {
-            case 'ArrowDown':
-                event.preventDefault();
-                this.selectedIndex = Math.min(this.selectedIndex + 1, this.suggestionsData.length - 1);
-                this.updateSelection();
-                break;
-                
-            case 'ArrowUp':
-                event.preventDefault();
-                this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
-                this.updateSelection();
-                break;
-                
-            case 'Enter':
-                event.preventDefault();
-                if (this.selectedIndex >= 0) {
-                    this.selectStation(this.suggestionsData[this.selectedIndex]);
-                }
-                break;
-                
-            case 'Escape':
-                this.hideSuggestions();
-                break;
-        }
+        // Show dual boards
+        document.getElementById('dual-boards').classList.remove('hidden');
+        document.getElementById('change-stations').classList.remove('hidden');
+
+        // Set station names
+        document.getElementById('station1-name').textContent = this.selectedStations.station1.name;
+        document.getElementById('station2-name').textContent = this.selectedStations.station2.name;
+
+        // Start fetching data for both stations
+        this.fetchDeparturesForStation(this.selectedStations.station1.id, 'departures1', 'station1-updated');
+        this.fetchDeparturesForStation(this.selectedStations.station2.id, 'departures2', 'station2-updated');
+
+        // Set up intervals for auto-refresh
+        this.updateIntervals.push(
+            setInterval(() => {
+                this.fetchDeparturesForStation(this.selectedStations.station1.id, 'departures1', 'station1-updated');
+            }, 25000)
+        );
+
+        this.updateIntervals.push(
+            setInterval(() => {
+                this.fetchDeparturesForStation(this.selectedStations.station2.id, 'departures2', 'station2-updated');
+            }, 25000)
+        );
     }
-    
-    handleDocumentClick(event) {
-        if (!this.suggestions.contains(event.target) && event.target !== this.stationInput) {
-            this.hideSuggestions();
-        }
-    }
-    
-    showSuggestions(stations) {
-        if (!stations.length) {
-            this.hideSuggestions();
-            return;
-        }
-        
-        this.suggestions.innerHTML = stations.map((station, index) => 
-            `<div class="suggestion-item" data-index="${index}" onclick="zvvApp.selectStation(zvvApp.suggestionsData[${index}])">
-                ${this.escapeHtml(station.name)}
-            </div>`
-        ).join('');
-        
-        this.suggestions.style.display = 'block';
-        this.selectedIndex = -1;
-    }
-    
-    hideSuggestions() {
-        this.suggestions.style.display = 'none';
-        this.selectedIndex = -1;
-    }
-    
-    updateSelection() {
-        const items = this.suggestions.querySelectorAll('.suggestion-item');
-        items.forEach((item, index) => {
-            item.classList.toggle('selected', index === this.selectedIndex);
-        });
-    }
-    
-    selectStation(station) {
-        this.currentStation = station;
-        this.stationInput.value = station.name;
-        this.hideSuggestions();
-        this.loadDepartures();
-        this.startAutoRefresh();
-    }
-    
-    async loadDepartures() {
-        if (!this.currentStation) return;
-        
-        this.showLoading();
-        
+
+    async fetchDeparturesForStation(stationId, containerId, updatedId) {
         try {
-            const response = await fetch(`/api/board?station=${encodeURIComponent(this.currentStation.id)}`);
+            const response = await fetch(`/api/board?station=${stationId}`);
             const data = await response.json();
-            
+
             if (data.error) {
-                throw new Error(data.error);
+                this.showError(containerId, data.error);
+                return;
             }
-            
-            this.displayDepartures(data.departures);
+
+            this.displayDepartures(data.departures, containerId);
+            this.updateTimestamp(updatedId, data.updated);
+
         } catch (error) {
-            console.error('Error loading departures:', error);
-            this.showError('Fehler beim Laden der Abfahrtszeiten');
-        } finally {
-            this.hideLoading();
+            console.error('Error fetching departures:', error);
+            this.showError(containerId, 'Fehler beim Laden der Daten');
         }
     }
-    
-    displayDepartures(departures) {
-        if (!departures || !departures.length) {
-            this.departuresList.innerHTML = '<div class="no-data">Keine Abfahrten gefunden</div>';
+
+    displayDepartures(departures, containerId) {
+        const container = document.getElementById(containerId);
+        
+        if (!departures || departures.length === 0) {
+            container.innerHTML = '<div class="no-data">Keine Abfahrten verfügbar</div>';
             return;
         }
-        
-        const now = new Date();
-        const departuresHtml = departures.map(departure => {
-            const departureTime = new Date(departure.departure);
-            const timeStr = departureTime.toLocaleTimeString('de-CH', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
+
+        const rows = departures.map(dep => {
+            const departureTime = new Date(dep.departure);
+            const now = new Date();
+            const diffMinutes = Math.max(0, Math.floor((departureTime - now) / 60000));
             
-            const lineClass = this.getLineClass(departure.category);
-            const delayHtml = departure.delay > 0 ? 
-                `<span class="delay">+${departure.delay}'</span>` : '';
+            let timeDisplay = diffMinutes === 0 ? 'Jetzt' : `${diffMinutes}'`;
+            let delayDisplay = '';
             
+            if (dep.delay > 0) {
+                delayDisplay = `<span class="delay">+${dep.delay}'</span>`;
+            }
+
+            const lineClass = this.getLineClass(dep.category);
+
             return `
                 <div class="departure-row">
-                    <div class="line-number ${lineClass}">${this.escapeHtml(departure.line)}</div>
-                    <div class="destination">${this.escapeHtml(departure.destination)}</div>
-                    <div class="platform">${this.escapeHtml(departure.platform)}</div>
+                    <div class="line-number ${lineClass}">${dep.line}</div>
+                    <div class="destination">${dep.destination}</div>
+                    <div class="platform">${dep.platform || '-'}</div>
                     <div class="departure-time">
-                        ${timeStr}
-                        ${delayHtml}
+                        ${timeDisplay}
+                        ${delayDisplay}
                     </div>
                 </div>
             `;
         }).join('');
-        
-        this.departuresList.innerHTML = departuresHtml;
+
+        container.innerHTML = rows;
     }
-    
+
     getLineClass(category) {
-        switch (category?.toLowerCase()) {
-            case 'bus': return 'bus';
-            case 'tram': return 'tram';
-            default: return '';
-        }
-    }
-    
-    showLoading() {
-        this.loading.classList.remove('hidden');
-    }
-    
-    hideLoading() {
-        this.loading.classList.add('hidden');
-    }
-    
-    showError(message) {
-        this.departuresList.innerHTML = `<div class="no-data" style="color: #ff4444;">${this.escapeHtml(message)}</div>`;
-    }
-    
-    startAutoRefresh() {
-        if (this.refreshInterval) {
-            clearInterval(this.refreshInterval);
-        }
+        if (!category) return '';
         
-        this.refreshInterval = setInterval(() => {
-            if (this.currentStation) {
-                this.loadDepartures();
-            }
-        }, 25000); // 25 Sekunden
+        const cat = category.toLowerCase();
+        if (cat.includes('bus') || cat.includes('b')) return 'bus';
+        if (cat.includes('tram') || cat.includes('t')) return 'tram';
+        return '';
     }
-    
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+
+    updateTimestamp(updatedId, timestamp) {
+        const element = document.getElementById(updatedId);
+        if (element && timestamp) {
+            const date = new Date(timestamp);
+            element.textContent = `Aktualisiert: ${date.toLocaleTimeString('de-CH')}`;
+        }
+    }
+
+    showError(containerId, message) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `<div class="no-data" style="color: #ff4444;">${message}</div>`;
+    }
+
+    resetToSelection() {
+        // Clear intervals
+        this.updateIntervals.forEach(interval => clearInterval(interval));
+        this.updateIntervals = [];
+
+        // Reset selections
+        this.selectedStations = { station1: null, station2: null };
+        
+        // Clear inputs
+        document.getElementById('station1-input').value = '';
+        document.getElementById('station2-input').value = '';
+        
+        // Hide boards and show selection
+        document.getElementById('dual-boards').classList.add('hidden');
+        document.getElementById('change-stations').classList.add('hidden');
+        document.getElementById('station-selection').classList.remove('hidden');
+        
+        // Reset validation
+        this.validateInputs();
     }
 }
 
-// App initialisieren
-const zvvApp = new ZVVDepartures();
+// Initialize the application when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new DualStationBoard();
+});
