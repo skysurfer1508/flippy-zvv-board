@@ -6,8 +6,41 @@ interface FlipDotRowProps {
   formatTime: (departure: Departure) => string;
 }
 
+function getDisplayLineNumber(departure: Departure): string {
+  const category = departure.category;
+  const number = departure.number;
+  const name = departure.name;
+  
+  // If we have both category and number, combine them intelligently
+  if (category && number) {
+    // For trains, combine category + number (e.g., "S12", "IR75", "IC8")
+    if (['S', 'IR', 'IC', 'ICE', 'R', 'RE'].includes(category.toUpperCase())) {
+      return `${category.toUpperCase()}${number}`;
+    }
+    // For other transport types, just use the number
+    return number;
+  }
+  
+  // If we only have category, use it
+  if (category) {
+    return category.toUpperCase();
+  }
+  
+  // If we only have number, use it
+  if (number) {
+    return number;
+  }
+  
+  // Fallback to name, but truncate if too long
+  if (name && name.length > 6) {
+    return name.substring(0, 4) + '..';
+  }
+  
+  return name || '?';
+}
+
 export function FlipDotRow({ departure, formatTime }: FlipDotRowProps) {
-  const lineNumber = departure.number || departure.name;
+  const lineNumber = getDisplayLineNumber(departure);
   const formattedTime = formatTime(departure);
   
   // Enhanced delay parsing with strict type checking
@@ -20,7 +53,10 @@ export function FlipDotRow({ departure, formatTime }: FlipDotRowProps) {
     delayValue,
     delayNumber,
     hasDelay,
-    delayType: typeof delayValue
+    delayType: typeof delayValue,
+    category: departure.category,
+    number: departure.number,
+    displayLineNumber: lineNumber
   });
   
   return (
