@@ -5,7 +5,7 @@ import { StationSelection } from "./StationSelection";
 import { StationCustomization } from "./StationCustomization";
 import { DepartureBoard } from "./DepartureBoard";
 import { SettingsMenu } from "./SettingsMenu";
-import { AppState, StationConfig, SupportedLanguage } from "@/types/zvv";
+import { AppState, StationConfig, SupportedLanguage, Theme } from "@/types/zvv";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
