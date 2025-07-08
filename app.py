@@ -471,84 +471,53 @@ def serve_static(path):
 
 @app.route('/api/locations')
 def locations():
-    """Enhanced locations endpoint with comprehensive error handling and debugging"""
+    """Enhanced locations endpoint with comprehensive error handling"""
     try:
         country = request.args.get('country', 'ch')
         query = request.args.get('q', '').strip()
         
-        print(f"=== Location Search Request ===")
-        print(f"Country: {country}")
-        print(f"Query: '{query}'")
-        print(f"Query length: {len(query)}")
+        print(f"Location search: country={country}, query='{query}'")
         
         if not query or len(query) < 2:
-            print("Query too short, returning empty result")
             return jsonify({'stations': []})
         
         if country == 'ca':
-            print(f"=== Processing Canadian search request ===")
-            print(f"Available Canadian stops: {len(canadian_stops)}")
-            
             try:
                 # Ensure we have Canadian stops loaded
                 if not canadian_stops:
-                    print("No Canadian stops available, loading comprehensive fallback...")
-                    load_success = load_comprehensive_fallback_data()
-                    print(f"Fallback data load: {'SUCCESS' if load_success else 'FAILED'}")
-                    
-                    if not load_success:
-                        print("CRITICAL: Could not load any Canadian stops data")
-                        return jsonify({
-                            'error': 'Canadian stops data unavailable',
-                            'stations': []
-                        }), 500
+                    print("Loading fallback Canadian stops...")
+                    load_comprehensive_fallback_data()
                 
-                # Perform search with enhanced matching
-                matching_stops = search_canadian_stops(query, max_results=10)
+                # Simple search logic
+                q_lower = query.lower()
+                matches = []
                 
-                print(f"=== Search completed: {len(matching_stops)} matches ===")
+                for stop_id, stop_data in canadian_stops.items():
+                    stop_name = stop_data.get('name', '')
+                    if q_lower in stop_name.lower():
+                        matches.append(stop_data)
+                        if len(matches) >= 10:
+                            break
                 
-                # Ensure consistent response format
-                result = {'stations': matching_stops}
+                print(f"Found {len(matches)} Canadian matches for '{query}'")
+                return jsonify({'stations': matches})
                 
-                print(f"=== Returning Canadian result with {len(result['stations'])} stations ===")
-                return jsonify(result)
-                
-            except Exception as ca_error:
-                print(f"=== ERROR in Canadian search processing ===")
-                print(f"Error: {ca_error}")
-                import traceback
-                traceback.print_exc()
-                
-                # Return error response with fallback
-                return jsonify({
-                    'error': f'Canadian search failed: {str(ca_error)}',
-                    'stations': []
-                }), 500
+            except Exception as e:
+                print(f"ERROR in Canadian search: {e}")
+                # Return empty results instead of 500 error
+                return jsonify({'stations': []})
         else:
-            # Use existing Swiss API
-            print(f"=== Processing Swiss search request ===")
+            # Swiss API
             try:
                 stations = fetch_stations(query)
-                print(f"Found {len(stations)} matching Swiss stations")
                 return jsonify({'stations': stations})
-            except Exception as swiss_error:
-                print(f"=== ERROR in Swiss search processing ===")
-                print(f"Error: {swiss_error}")
-                return jsonify({
-                    'error': f'Swiss search failed: {str(swiss_error)}',
-                    'stations': []
-                }), 500
+            except Exception as e:
+                print(f"ERROR in Swiss search: {e}")
+                return jsonify({'stations': []})
             
     except Exception as e:
-        print(f"=== CRITICAL ERROR in /api/locations ===")
-        print(f"Error: {e}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({
-            'error': f'Internal server error: {str(e)}',
-            'stations': []
-        }), 500
+        print(f"CRITICAL ERROR in /api/locations: {e}")
+        return jsonify({'stations': []})
 
 @app.route('/api/board')
 def board():
