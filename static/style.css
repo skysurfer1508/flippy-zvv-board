@@ -1,5 +1,4 @@
-
-/* ZVV Multi-Station Display Styling */
+/* ZVV Dual Flip-Dot Display Styling */
 * {
     margin: 0;
     padding: 0;
@@ -11,12 +10,10 @@ body {
     background: #1a1a1a;
     color: #ffd700;
     min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
-    max-width: 1600px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -27,67 +24,22 @@ header {
 }
 
 h1 {
-    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-size: 2.5rem;
     margin-bottom: 20px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     letter-spacing: 2px;
 }
 
-/* Station Count Selection */
-.station-count-selection {
-    margin-bottom: 30px;
-    text-align: center;
-}
-
-.station-count-selection h3 {
-    font-size: 1.3rem;
-    margin-bottom: 15px;
-    color: #ffd700;
-}
-
-.station-count-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.station-count-btn {
-    width: 50px;
-    height: 50px;
-    border: 2px solid #ffd700;
-    background: #333;
-    color: #ffd700;
-    font-family: 'Courier New', monospace;
-    font-size: 1.2rem;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.station-count-btn:hover {
-    background: #ffd700;
-    color: #1a1a1a;
-    transform: translateY(-2px);
-}
-
-.station-count-btn.active {
-    background: #ffd700;
-    color: #1a1a1a;
-    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
-}
-
-/* Station Selection */
+/* Station Selection Phase */
 .station-selection {
-    max-width: 1200px;
+    max-width: 800px;
     margin: 0 auto;
 }
 
-.station-inputs-container {
+.dual-input-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
     margin-bottom: 30px;
 }
 
@@ -97,7 +49,7 @@ h1 {
 
 .station-input-group label {
     display: block;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     margin-bottom: 10px;
     font-weight: bold;
 }
@@ -109,7 +61,7 @@ h1 {
 .search-container input {
     width: 100%;
     padding: 15px;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-family: 'Courier New', monospace;
     background: #333;
     border: 2px solid #ffd700;
@@ -144,7 +96,6 @@ h1 {
     cursor: pointer;
     border-bottom: 1px solid #555;
     transition: background-color 0.2s ease;
-    font-size: 0.9rem;
 }
 
 .suggestion-item:hover,
@@ -179,19 +130,13 @@ h1 {
     cursor: not-allowed;
 }
 
-/* Multi Station Display */
-.multi-boards {
+/* Dual Board Display */
+.dual-boards {
     display: grid;
-    gap: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
     margin: 20px 0;
 }
-
-.multi-boards.stations-1 { grid-template-columns: 1fr; }
-.multi-boards.stations-2 { grid-template-columns: repeat(2, 1fr); }
-.multi-boards.stations-3 { grid-template-columns: repeat(3, 1fr); }
-.multi-boards.stations-4 { grid-template-columns: repeat(2, 1fr); }
-.multi-boards.stations-5 { grid-template-columns: repeat(3, 1fr); }
-.multi-boards.stations-6 { grid-template-columns: repeat(3, 1fr); }
 
 .board-container {
     background: #000;
@@ -199,7 +144,6 @@ h1 {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-    min-height: 400px;
 }
 
 .station-header {
@@ -211,19 +155,19 @@ h1 {
 }
 
 .station-header h2 {
-    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-size: 1.5rem;
     margin-bottom: 5px;
     font-weight: bold;
 }
 
 .last-updated {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     opacity: 0.8;
 }
 
 .departure-board {
     background: #1a1a1a;
-    min-height: 350px;
+    min-height: 400px;
 }
 
 .board-header {
@@ -234,14 +178,14 @@ h1 {
     color: #ffd700;
     padding: 10px 15px;
     font-weight: bold;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     text-align: center;
     border-bottom: 2px solid #555;
 }
 
 .departures-list {
-    min-height: 300px;
-    max-height: 450px;
+    min-height: 350px;
+    max-height: 500px;
     overflow-y: auto;
 }
 
@@ -251,7 +195,7 @@ h1 {
     gap: 10px;
     padding: 10px 15px;
     border-bottom: 1px solid #333;
-    font-size: 0.9rem;
+    font-size: 1rem;
     align-items: center;
     transition: all 0.3s ease;
     animation: fadeIn 0.5s ease-in;
@@ -282,14 +226,7 @@ h1 {
     font-weight: bold;
     text-align: center;
     min-width: 45px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.line-number:hover {
-    transform: scale(1.05);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    font-size: 0.9rem;
 }
 
 .line-number.bus {
@@ -320,13 +257,13 @@ h1 {
     align-items: center;
     justify-content: center;
     gap: 5px;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
 }
 
 .delay {
     color: #ff4444;
     font-weight: bold;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     padding: 2px 4px;
     background: rgba(255, 68, 68, 0.2);
     border-radius: 4px;
@@ -343,7 +280,7 @@ h1 {
     align-items: center;
     justify-content: center;
     height: 200px;
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #666;
 }
 
@@ -400,9 +337,9 @@ footer {
     font-size: 0.9rem;
 }
 
-/* Station Customization */
+/* Station Customization Phase */
 .station-customization {
-    max-width: 1000px;
+    max-width: 800px;
     margin: 0 auto;
     text-align: center;
 }
@@ -415,8 +352,8 @@ footer {
 
 .customization-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
     margin-bottom: 30px;
 }
 
@@ -426,7 +363,7 @@ footer {
 
 .custom-input-group label {
     display: block;
-    font-size: 1rem;
+    font-size: 1.1rem;
     margin-bottom: 10px;
     font-weight: bold;
     color: #ffd700;
@@ -434,8 +371,8 @@ footer {
 
 .custom-input-group input {
     width: 100%;
-    padding: 12px;
-    font-size: 1rem;
+    padding: 15px;
+    font-size: 1.1rem;
     font-family: 'Courier New', monospace;
     background: #333;
     border: 2px solid #ffd700;
@@ -459,7 +396,7 @@ footer {
 
 .color-inputs {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
 }
 
@@ -471,7 +408,7 @@ footer {
 }
 
 .color-input-group label {
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: bold;
     color: #ffd700;
 }
@@ -491,166 +428,16 @@ footer {
     transform: scale(1.05);
 }
 
-/* Language Selector */
-.language-selector {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-}
-
-.language-btn {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: #ffd700;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-.language-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.4);
-}
-
-.language-menu {
-    position: absolute;
-    bottom: 60px;
-    right: 0;
-    background: #333;
-    border: 2px solid #ffd700;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-    min-width: 120px;
-}
-
-.language-option {
-    width: 100%;
-    padding: 12px;
-    background: #333;
-    color: #ffd700;
-    border: none;
-    font-family: 'Courier New', monospace;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.language-option:hover {
-    background: #ffd700;
-    color: #1a1a1a;
-}
-
-/* Modal for Line Color Change */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-}
-
-.modal-content {
-    background: #333;
-    border: 2px solid #ffd700;
-    border-radius: 12px;
-    max-width: 400px;
-    width: 90%;
-    overflow: hidden;
-}
-
-.modal-header {
-    background: #ffd700;
-    color: #1a1a1a;
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.modal-header h3 {
-    margin: 0;
-    font-size: 1.2rem;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #1a1a1a;
-}
-
-.modal-body {
-    padding: 20px;
-    text-align: center;
-}
-
-.modal-body p {
-    margin-bottom: 15px;
-    color: #ffd700;
-    font-size: 1rem;
-}
-
-.modal-body input[type="color"] {
-    width: 80px;
-    height: 50px;
-    border: 2px solid #ffd700;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.modal-footer {
-    padding: 15px;
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-}
-
-.modal-btn {
-    padding: 10px 20px;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.modal-btn {
-    background: #ffd700;
-    color: #1a1a1a;
-    border: none;
-}
-
-.modal-btn:hover {
-    background: #ffed4e;
-}
-
-.modal-btn.secondary {
-    background: #666;
-    color: #ffd700;
-    border: 2px solid #ffd700;
-}
-
-.modal-btn.secondary:hover {
-    background: #777;
-}
-
 /* Responsive Design */
 @media (max-width: 1200px) {
-    .multi-boards.stations-4,
-    .multi-boards.stations-5,
-    .multi-boards.stations-6 {
-        grid-template-columns: repeat(2, 1fr);
+    .dual-boards {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .dual-input-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
     }
     
     .container {
@@ -659,18 +446,8 @@ footer {
 }
 
 @media (max-width: 768px) {
-    .multi-boards {
-        grid-template-columns: 1fr !important;
-    }
-    
-    .station-count-buttons {
-        gap: 8px;
-    }
-    
-    .station-count-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 1rem;
+    h1 {
+        font-size: 2rem;
     }
     
     .board-header,
@@ -678,28 +455,17 @@ footer {
         grid-template-columns: 60px 1fr 50px 100px;
         gap: 5px;
         padding: 8px 10px;
-        font-size: 0.8rem;
+        font-size: 0.9rem;
     }
     
     .line-number {
         min-width: 35px;
         padding: 2px 4px;
-        font-size: 0.7rem;
+        font-size: 0.8rem;
     }
     
     .station-header h2 {
-        font-size: 1.1rem;
-    }
-    
-    .language-selector {
-        bottom: 15px;
-        right: 15px;
-    }
-    
-    .language-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 1.3rem;
+        font-size: 1.2rem;
     }
 }
 
@@ -714,33 +480,18 @@ footer {
     .platform {
         display: none;
     }
-    
-    .station-inputs-container {
+}
+
+@media (max-width: 1200px) {
+    .customization-container {
         grid-template-columns: 1fr;
-        gap: 15px;
-    }
-    
-    .modal-content {
-        width: 95%;
+        gap: 20px;
     }
 }
 
-/* Print styles */
-@media print {
-    .language-selector,
-    .change-stations-btn,
-    footer {
-        display: none;
-    }
-    
-    .container {
-        max-width: none;
-        padding: 10px;
-    }
-    
-    .board-container {
-        border: 2px solid #000;
-        break-inside: avoid;
-        margin-bottom: 20px;
+@media (max-width: 768px) {
+    .color-inputs {
+        grid-template-columns: 1fr;
+        gap: 15px;
     }
 }
