@@ -59,6 +59,15 @@ function updateBoard(stationId, containerId, stationName) {
                     lineNumber.textContent = departure.line.number;
                     lineNumber.tabIndex = 0;
                     lineNumber.role = 'button';
+                    lineNumber.setAttribute('aria-label', `Farbe für Linie ${departure.line.id} ändern`);
+                    lineNumber.setAttribute('data-line-id', departure.line.id);
+                    
+                    // Apply saved color if exists
+                    const savedColor = localStorage.getItem(`lineColor_${departure.line.id}`);
+                    if (savedColor) {
+                        lineNumber.style.backgroundColor = savedColor;
+                    }
+                    
                     lineNumber.addEventListener('click', () => openColorPicker(departure.line.id));
                     lineNumber.addEventListener('keydown', (event) => {
                         if (event.key === 'Enter' || event.key === ' ') {
@@ -146,8 +155,9 @@ function startMonitoring(stations) {
 
         const stationHeader = document.createElement('div');
         stationHeader.className = 'station-header';
+        const displayName = station.customName || station.name;
         stationHeader.innerHTML = `
-            <h2>${station.name}</h2>
+            <h2 class="stationTitle">${displayName}</h2>
             <p class="last-updated"></p>
         `;
 
@@ -318,8 +328,16 @@ function setupColorPicker() {
     // Apply button functionality
     applyColorBtn.addEventListener('click', () => {
         const selectedColor = colorPicker.value;
-        // Here you would typically send the selectedColor and selectedLineId to your backend
-        // to update the color for the specified line.
+        
+        // Save color to localStorage
+        localStorage.setItem(`lineColor_${selectedLineId}`, selectedColor);
+        
+        // Update all line elements with this ID immediately
+        const lineElements = document.querySelectorAll(`[data-line-id="${selectedLineId}"]`);
+        lineElements.forEach(element => {
+            element.style.backgroundColor = selectedColor;
+        });
+        
         console.log(`Line ${selectedLineId} color updated to: ${selectedColor}`);
         closeColorPicker();
     });
@@ -338,9 +356,28 @@ document.addEventListener('DOMContentLoaded', function() {
     setupLanguageSelector();
     setupColorPicker();
     
-    // Check if we have a stored station count on page load
+    // Check if we have stored stations on page load for full reconstruction
+    const storedSelectedStations = sessionStorage.getItem('selectedStations');
     const storedStationCount = sessionStorage.getItem("stations");
-    if (storedStationCount) {
+    
+    if (storedSelectedStations) {
+        // We have complete station data, restore the board directly
+        try {
+            const stations = JSON.parse(storedSelectedStations);
+            document.getElementById('station-count-selection').classList.add('hidden');
+            document.getElementById('station-selection').classList.add('hidden');
+            document.getElementById('station-customization').classList.add('hidden');
+            document.getElementById('dual-boards').classList.remove('hidden');
+            document.getElementById('change-stations').classList.remove('hidden');
+            
+            // Start monitoring immediately
+            startMonitoring(stations);
+        } catch (e) {
+            console.error('Failed to parse stored stations:', e);
+            sessionStorage.removeItem('selectedStations');
+        }
+    } else if (storedStationCount) {
+        // We only have station count, show station selection
         showStationSelection();
         generateStationInputs(parseInt(storedStationCount));
         // Highlight the stored count button
@@ -582,9 +619,9 @@ function checkFormValidity() {
 }
 
 function setupStartMonitoringButton() {
-    const startButton = document.getElementById('start-monitoring');
+    const nextButton = document.getElementById('start-monitoring');
     
-    startButton.addEventListener('click', function(e) {
+    nextButton.addEventListener('click', function(e) {
         e.preventDefault();
         
         const form = document.getElementById('stationForm');
@@ -612,23 +649,139 @@ function setupStartMonitoringButton() {
             return;
         }
         
-        // Store stations and start monitoring
-        sessionStorage.setItem('selectedStations', JSON.stringify(stations));
+        // Store stations list in sessionStorage
+        sessionStorage.setItem('stationList', JSON.stringify(stations));
         
-        // Hide selection phases and show boards
+        // Hide station selection and show naming phase
         document.getElementById('station-selection').classList.add('hidden');
+        showNamingPhase(stations);
+    });
+}
+
+function showNamingPhase(stations) {
+    const customizationSection = document.getElementById('station-customization');
+    const container = customizationSection.querySelector('.customization-container');
+    
+    // Clear existing content
+    container.innerHTML = '';
+    
+    // Generate name input fields for each station
+    stations.forEach((station, index) => {
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'custom-input-group';
+        
+        const label = document.createElement('label');
+        label.setAttribute('for', `custom-name-${index + 1}`);
+        label.textContent = `Anzeigename für Station ${index + 1}:`;
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = `custom-name-${index + 1}`;
+        input.className = 'nameInput';
+        input.placeholder = 'Custom Name...';
+        input.value = station.name; // Default to station name
+        input.required = true;
+        
+        // Add validation
+        input.addEventListener('input', checkNamingFormValidity);
+        input.addEventListener('blur', checkNamingFormValidity);
+        
+        inputGroup.appendChild(label);
+        inputGroup.appendChild(input);
+        container.appendChild(inputGroup);
+    });
+    
+    // Show the customization section
+    customizationSection.classList.remove('hidden');
+    
+    // Setup start button for naming phase
+    setupNamingStartButton();
+    
+    // Check initial validity
+    checkNamingFormValidity();
+}
+
+function checkNamingFormValidity() {
+    const startButton = document.getElementById('apply-customization');
+    const nameInputs = document.querySelectorAll('.nameInput');
+    
+    if (!startButton) return;
+    
+    let allValid = true;
+    nameInputs.forEach(input => {
+        if (!input.value.trim()) {
+            allValid = false;
+            input.classList.add('error');
+        } else {
+            input.classList.remove('error');
+        }
+    });
+    
+    if (allValid && nameInputs.length > 0) {
+        startButton.disabled = false;
+        startButton.classList.add('active');
+    } else {
+        startButton.disabled = true;
+        startButton.classList.remove('active');
+    }
+}
+
+function setupNamingStartButton() {
+    const startButton = document.getElementById('apply-customization');
+    
+    // Remove existing listeners
+    const newButton = startButton.cloneNode(true);
+    startButton.parentNode.replaceChild(newButton, startButton);
+    
+    newButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const nameInputs = document.querySelectorAll('.nameInput');
+        const stationList = JSON.parse(sessionStorage.getItem('stationList') || '[]');
+        let hasErrors = false;
+        
+        // Validate all name inputs
+        nameInputs.forEach((input, index) => {
+            if (!input.value.trim()) {
+                input.classList.add('error');
+                hasErrors = true;
+            } else {
+                input.classList.remove('error');
+                if (stationList[index]) {
+                    stationList[index].customName = input.value.trim();
+                }
+            }
+        });
+        
+        if (hasErrors) {
+            return;
+        }
+        
+        // Save the final station list with custom names
+        sessionStorage.setItem('selectedStations', JSON.stringify(stationList));
+        
+        // Hide customization phase and show boards
+        document.getElementById('station-customization').classList.add('hidden');
         document.getElementById('dual-boards').classList.remove('hidden');
         document.getElementById('change-stations').classList.remove('hidden');
         
-        // Start the monitoring
-        startMonitoring(stations);
+        // Start monitoring with custom names
+        startMonitoring(stationList);
     });
 }
 
 // Add event listener for the "Change Stations" button
 document.getElementById('change-stations').addEventListener('click', function() {
-    // Clear the selectedStations from sessionStorage
+    // Clear all stored session data
     sessionStorage.removeItem('selectedStations');
+    sessionStorage.removeItem('stationList');
+    sessionStorage.removeItem('stations');
+
+    // Clear monitoring interval
+    if (monitoringInterval) {
+        clearInterval(monitoringInterval);
+        monitoringInterval = null;
+    }
 
     // Show the station count selection and hide the boards
     document.getElementById('station-count-selection').classList.remove('hidden');
