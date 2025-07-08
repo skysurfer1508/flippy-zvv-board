@@ -61,7 +61,7 @@ export function FlipDotRow({ departure, formatTime, prefersReducedMotion = false
     displayLineNumber: lineNumber
   });
 
-  // LED-specific animation variants with retro feel - Fixed TypeScript issues with proper easing
+  // LED-specific animation variants with retro feel
   const ledSlideVariants = {
     enter: {
       y: 40,
@@ -69,19 +69,11 @@ export function FlipDotRow({ departure, formatTime, prefersReducedMotion = false
     },
     center: {
       y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.4,
-        ease: "easeOut"
-      }
+      opacity: 1
     },
     exit: {
       y: -20,
-      opacity: 0,
-      transition: {
-        duration: 0.3,
-        ease: "easeIn"
-      }
+      opacity: 0
     }
   };
   
@@ -93,6 +85,10 @@ export function FlipDotRow({ departure, formatTime, prefersReducedMotion = false
       animate="center"
       exit="exit"
       layout={!prefersReducedMotion}
+      transition={{
+        duration: 0.4,
+        ease: "easeOut"
+      }}
       role="listitem"
       aria-label={`Linie ${lineNumber} nach ${departure.to}, Abfahrt in ${formattedTime}${hasDelay ? `, Verspätung ${delayNumber} Minuten` : ''}`}
     >

@@ -197,7 +197,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
     return "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6";
   };
 
-  // Animation variants for smooth transitions - Fixed TypeScript issues with proper easing
+  // Animation variants for smooth transitions
   const slideVariants = {
     enter: {
       y: 50,
@@ -207,20 +207,12 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
     center: {
       y: 0,
       opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut"
-      }
+      scale: 1
     },
     exit: {
       y: -30,
       opacity: 0,
-      scale: 0.95,
-      transition: {
-        duration: 0.2,
-        ease: "easeIn"
-      }
+      scale: 0.95
     }
   };
 
@@ -337,6 +329,10 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
                         animate="center"
                         exit="exit"
                         layout={!prefersReducedMotion}
+                        transition={{
+                          duration: 0.3,
+                          ease: "easeOut"
+                        }}
                         className="zvv-departure-row grid grid-cols-12 gap-2 px-6 py-4 hover:bg-muted transition-colors departure-item"
                       >
                         {/* Line Number */}
