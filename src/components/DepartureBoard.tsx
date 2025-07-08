@@ -21,6 +21,7 @@ interface StationBoardData {
   stationName: string;
   customName?: string;
   lineColors?: Record<string, string>;
+  lineDirections?: Record<string, string[]>;
   departures: Departure[];
 }
 
@@ -55,6 +56,22 @@ function getDisplayLineNumber(departure: Departure): string {
   }
   
   return name || '?';
+}
+
+function filterDeparturesByDirection(departures: Departure[], station: StationConfig): Departure[] {
+  if (!station.lineDirections) return departures;
+  
+  return departures.filter(departure => {
+    const lineNumber = getDisplayLineNumber(departure);
+    const direction = departure.to;
+    const allowedDirections = station.lineDirections?.[lineNumber];
+    
+    // If no filter set for this line: show all
+    if (!allowedDirections || allowedDirections.length === 0) return true;
+    
+    // Check if direction is in allowed directions
+    return allowedDirections.includes(direction);
+  });
 }
 
 export function DepartureBoard({ stations, language, theme, isFullscreen = false }: DepartureBoardProps) {
@@ -97,6 +114,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
             stationName: station.name,
             customName: station.customName,
             lineColors: station.lineColors,
+            lineDirections: station.lineDirections,
             departures: response?.stationboard || []
           };
         })
@@ -245,7 +263,13 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
                 </div>
               ) : (
                 <AnimatePresence mode="popLayout">
-                  {stationData.departures.slice(0, maxEntries).map((departure, index) => (
+                  {filterDeparturesByDirection(stationData.departures, {
+                    id: stationData.stationId,
+                    name: stationData.stationName,
+                    customName: stationData.customName,
+                    lineColors: stationData.lineColors,
+                    lineDirections: stationData.lineDirections
+                  }).slice(0, maxEntries).map((departure, index) => (
                     <FlipDotRow
                       key={`${departure.name}-${departure.stop.departure}-${index}`}
                       departure={departure}
@@ -301,7 +325,13 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
             ) : (
               <div className={`${isFullscreen ? 'fullscreen-departures' : 'max-h-96 overflow-y-auto'}`}>
                 <AnimatePresence mode="popLayout">
-                  {stationData.departures.slice(0, maxEntries).map((departure, index) => {
+                  {filterDeparturesByDirection(stationData.departures, {
+                    id: stationData.stationId,
+                    name: stationData.stationName,
+                    customName: stationData.customName,
+                    lineColors: stationData.lineColors,
+                    lineDirections: stationData.lineDirections
+                  }).slice(0, maxEntries).map((departure, index) => {
                     const lineNumber = getDisplayLineNumber(departure);
                     const lineColor = getLineColor(departure.category, lineNumber, stationData.lineColors);
                     

@@ -43,4 +43,44 @@ export class ZvvApi {
       return null;
     }
   }
+
+  static async getLineDirections(stationId: string): Promise<Record<string, string[]>> {
+    try {
+      const response = await fetch(
+        `${API_BASE}/stationboard?station=${encodeURIComponent(stationId)}&limit=50`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const directionsMap: Record<string, Set<string>> = {};
+      
+      if (data.stationboard) {
+        data.stationboard.forEach((departure: any) => {
+          const lineNumber = departure.number || departure.name;
+          const direction = departure.to;
+          
+          if (lineNumber && direction) {
+            if (!directionsMap[lineNumber]) {
+              directionsMap[lineNumber] = new Set();
+            }
+            directionsMap[lineNumber].add(direction);
+          }
+        });
+      }
+      
+      // Convert Sets to Arrays
+      const result: Record<string, string[]> = {};
+      Object.keys(directionsMap).forEach(line => {
+        result[line] = Array.from(directionsMap[line]);
+      });
+      
+      return result;
+    } catch (error) {
+      console.error('Error fetching line directions:', error);
+      return {};
+    }
+  }
 }

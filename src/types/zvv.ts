@@ -81,6 +81,7 @@ export interface StationConfig {
   name: string;
   customName?: string;
   lineColors?: Record<string, string>;
+  lineDirections?: Record<string, string[]>;
 }
 
 export type SupportedLanguage = 'de' | 'en' | 'fr' | 'it' | 'gsw';

@@ -124,7 +124,8 @@ export function ZvvApp() {
         id: stationId, 
         name: stationName, 
         customName: newStations[index]?.customName || '',
-        lineColors: newStations[index]?.lineColors || {}
+        lineColors: newStations[index]?.lineColors || {},
+        lineDirections: newStations[index]?.lineDirections || {}
       };
       return {
         ...prev,
