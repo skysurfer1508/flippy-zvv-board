@@ -37,6 +37,7 @@ export function StationSelection({
               STATION {index + 1}
             </h3>
             <StationInput
+              label={`Station ${index + 1}`}
               value={stations[index]?.name || ''}
               onChange={(stationId, stationName) => onStationChange(index, stationId, stationName)}
               placeholder={`Station ${index + 1} suchen...`}
