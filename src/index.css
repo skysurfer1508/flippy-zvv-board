@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -60,7 +59,7 @@ All colors MUST be HSL.
     --flip-dot-frame: 0 0% 20%;
   }
 
-  /* ... keep existing code (theme definitions) */
+  /* Define the dark theme */
   .dark {
     --background: 0 0% 0%;
     --foreground: 45 100% 70%;
@@ -129,7 +128,7 @@ All colors MUST be HSL.
     --flip-dot-frame: 0 0% 20%;
   }
 
-  /* ... keep existing code (other theme definitions) */
+  /* Black and White Theme */
   .theme-blackwhite {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
@@ -295,7 +294,7 @@ All colors MUST be HSL.
 
   /* General delay styling for all themes */
   .delay {
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: hsl(var(--destructive));
     font-weight: bold;
     animation: blink 2s infinite;
@@ -489,7 +488,7 @@ All colors MUST be HSL.
     }
   }
 
-  /* ... keep existing code (remaining styles) */
+  /* Resetting default button styles */
   button {
     -webkit-appearance: none;
     -moz-appearance: none;

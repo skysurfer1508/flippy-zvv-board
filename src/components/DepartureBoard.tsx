@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Loader, Clock, AlertCircle } from "lucide-react";
@@ -316,11 +317,11 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
                         {/* Always render delay container for consistent spacing */}
                         <div className="delay-container" style={{ minHeight: '1.25rem' }}>
                           {hasDelay ? (
-                            <div className="delay font-mono text-xs text-destructive">
+                            <div className="delay font-mono text-sm text-destructive">
                               +{delayNumber}'
                             </div>
                           ) : (
-                            <div className="delay font-mono text-xs text-transparent">
+                            <div className="delay font-mono text-sm text-transparent">
                               &nbsp;
                             </div>
                           )}
