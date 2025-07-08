@@ -25,14 +25,71 @@ interface StationBoardData {
 export function DepartureBoard({ stations, language, theme, fontSize = 100, isFullscreen = false }: DepartureBoardProps) {
   const { t } = useTranslations(language);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [maxEntries, setMaxEntries] = useState(8);
 
   // Check if LED theme is active
   const isLedTheme = theme === 'led';
 
-  // Set global font size CSS variable
+  // Set global font size CSS variable and manage fullscreen body class
   useEffect(() => {
     document.documentElement.style.setProperty('--dynamic-font-size', `${fontSize}%`);
-  }, [fontSize]);
+    
+    // Add or remove fullscreen body class
+    if (isFullscreen) {
+      document.body.classList.add('fullscreen-mode');
+    } else {
+      document.body.classList.remove('fullscreen-mode');
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('fullscreen-mode');
+    };
+  }, [fontSize, isFullscreen]);
+
+  // Calculate dynamic number of entries based on screen height and theme
+  useEffect(() => {
+    const calculateMaxEntries = () => {
+      const windowHeight = window.innerHeight;
+      const fontSizeFactor = fontSize / 100;
+      
+      if (isLedTheme) {
+        // LED theme calculations
+        const headerHeight = 80 * fontSizeFactor;
+        const rowHeight = 60 * fontSizeFactor;
+        const padding = 40;
+        const availableHeight = windowHeight - headerHeight - padding;
+        const calculatedEntries = Math.floor(availableHeight / rowHeight);
+        
+        if (isFullscreen) {
+          setMaxEntries(Math.max(8, Math.min(calculatedEntries, 20)));
+        } else {
+          setMaxEntries(8);
+        }
+      } else {
+        // Standard theme calculations
+        const headerHeight = 120 * fontSizeFactor;
+        const tableHeaderHeight = 50 * fontSizeFactor;
+        const rowHeight = 70 * fontSizeFactor;
+        const padding = 60;
+        const availableHeight = windowHeight - headerHeight - tableHeaderHeight - padding;
+        const calculatedEntries = Math.floor(availableHeight / rowHeight);
+        
+        if (isFullscreen) {
+          setMaxEntries(Math.max(10, Math.min(calculatedEntries, 25)));
+        } else {
+          setMaxEntries(10);
+        }
+      }
+    };
+
+    calculateMaxEntries();
+    
+    if (isFullscreen) {
+      window.addEventListener('resize', calculateMaxEntries);
+      return () => window.removeEventListener('resize', calculateMaxEntries);
+    }
+  }, [isFullscreen, isLedTheme, fontSize]);
 
   const { data: departureData, isLoading, error, refetch } = useQuery({
     queryKey: ['departures', stations.map(s => s.id)],
@@ -132,7 +189,7 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
     return (
       <div className="space-y-8">
         {departureData?.map((stationData) => (
-          <div key={stationData.stationId} className="flip-dot-display dynamic-font-size">
+          <div key={stationData.stationId} className={`flip-dot-display dynamic-font-size ${isFullscreen ? 'fullscreen-flip-dot' : ''}`}>
             <div className="flip-dot-header">
               <div className="text-center">
                 {stationData.customName || stationData.stationName}
@@ -152,7 +209,7 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
                   <div></div>
                 </div>
               ) : (
-                stationData.departures.slice(0, 8).map((departure, index) => (
+                stationData.departures.slice(0, maxEntries).map((departure, index) => (
                   <FlipDotRow
                     key={`${departure.name}-${departure.stop.departure}-${index}`}
                     departure={departure}
@@ -171,7 +228,7 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
   return (
     <div className="space-y-8">
       {departureData?.map((stationData) => (
-        <div key={stationData.stationId} className="zvv-board rounded-lg overflow-hidden border border-border dynamic-font-size">
+        <div key={stationData.stationId} className={`zvv-board rounded-lg overflow-hidden border border-border dynamic-font-size ${isFullscreen ? 'fullscreen-board' : ''}`}>
           {/* Station Header */}
           <div className="zvv-header px-6 py-4 flex items-center justify-between">
             <h2 className="text-2xl font-bold font-mono">
@@ -204,15 +261,15 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
                 {t.noDataAvailable}
               </div>
             ) : (
-              <div className="max-h-96 overflow-y-auto">
-                {stationData.departures.slice(0, 10).map((departure, index) => {
+              <div className={`${isFullscreen ? 'fullscreen-departures' : 'max-h-96 overflow-y-auto'}`}>
+                {stationData.departures.slice(0, maxEntries).map((departure, index) => {
                   const lineNumber = departure.number || departure.name;
                   const lineColor = getLineColor(departure.category, lineNumber, stationData.lineColors);
                   
                   return (
                     <div
                       key={`${departure.name}-${departure.stop.departure}-${index}`}
-                      className="zvv-departure-row grid grid-cols-12 gap-2 px-6 py-4 hover:bg-muted transition-colors"
+                      className="zvv-departure-row grid grid-cols-12 gap-2 px-6 py-4 hover:bg-muted transition-colors departure-item"
                     >
                       {/* Line Number */}
                       <div className="col-span-2 flex items-center">

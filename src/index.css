@@ -222,6 +222,12 @@ All colors MUST be HSL.
     @apply bg-background text-foreground font-mono;
   }
 
+  /* Fullscreen mode - disable scrolling */
+  body.fullscreen-mode {
+    overflow: hidden;
+    height: 100vh;
+  }
+
   /* ZVV Board specific styles */
   .zvv-board {
     background: hsl(var(--zvv-black));
@@ -264,6 +270,42 @@ All colors MUST be HSL.
 
   .dynamic-font-size * {
     font-size: inherit !important;
+  }
+
+  /* Smooth transitions for departure items */
+  .departure-item {
+    transition: all 0.3s ease-in-out;
+    animation: slideInUp 0.5s ease-out;
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Fullscreen specific styles */
+  .fullscreen-board {
+    height: calc(100vh - 60px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fullscreen-departures {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fullscreen-flip-dot {
+    height: 100vh;
+    overflow: hidden;
   }
 
   /* Flip-dot display styles for LED theme - fully responsive and scalable */
@@ -310,10 +352,11 @@ All colors MUST be HSL.
     font-family: 'DotGothic16', 'VT323', monospace;
     font-size: calc((1.2vw + 0.8vh + 10px) * var(--dynamic-font-size) / 100);
     letter-spacing: 0.08em;
-    animation: fadeIn 0.3s ease-in;
+    animation: slideInUp 0.5s ease-out;
     border-bottom: calc(1px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-frame));
     min-height: calc(50px * var(--dynamic-font-size) / 100);
     align-items: center;
+    transition: all 0.3s ease-in-out;
   }
 
   .theme-led .flip-dot-row:hover {
@@ -424,11 +467,19 @@ All colors MUST be HSL.
     .theme-led .flip-dot-header {
       padding: calc(6px * var(--dynamic-font-size) / 100) calc(10px * var(--dynamic-font-size) / 100);
     }
+
+    .fullscreen-board {
+      height: calc(100vh - 40px);
+    }
   }
 
   @media (max-width: 480px) {
     .theme-led .flip-dot-display {
       height: calc(80vh - 60px);
+    }
+
+    .fullscreen-board {
+      height: calc(100vh - 30px);
     }
   }
 
