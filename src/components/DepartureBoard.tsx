@@ -215,10 +215,10 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
     return "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6";
   };
 
-  // Animation variants for smooth transitions
-  const slideVariants = {
+  // Enhanced animation variants for chain reaction effect
+  const chainAnimationVariants = {
     enter: {
-      y: 50,
+      y: 60,
       opacity: 0,
       scale: 0.95
     },
@@ -230,14 +230,38 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
     exit: {
       y: -30,
       opacity: 0,
-      scale: 0.95
+      scale: 0.95,
+      transition: {
+        duration: 0.8,
+        ease: "easeInOut"
+      }
+    }
+  };
+
+  // LED-specific animation variants with longer durations for retro feel
+  const ledChainVariants = {
+    enter: {
+      y: 50,
+      opacity: 0
+    },
+    center: {
+      y: 0,
+      opacity: 1
+    },
+    exit: {
+      y: -25,
+      opacity: 0,
+      transition: {
+        duration: 1.0,
+        ease: "easeOut"
+      }
     }
   };
 
   // Check for reduced motion preference
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // LED Theme - Flip-dot display
+  // LED Theme - Flip-dot display with enhanced animations
   if (isLedTheme) {
     return (
       <div className={getGridClasses()}>
@@ -262,7 +286,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
                   <div></div>
                 </div>
               ) : (
-                <AnimatePresence mode="popLayout">
+                <AnimatePresence mode="wait">
                   {filterDeparturesByDirection(stationData.departures, {
                     id: stationData.stationId,
                     name: stationData.stationName,
@@ -275,6 +299,8 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
                       departure={departure}
                       formatTime={formatDepartureTime}
                       prefersReducedMotion={prefersReducedMotion}
+                      index={index}
+                      variants={ledChainVariants}
                     />
                   ))}
                 </AnimatePresence>
@@ -286,7 +312,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
     );
   }
 
-  // Default theme layout - with animations for all standard themes
+  // Default theme layout - with enhanced chain reaction animations
   return (
     <div className={getGridClasses()}>
       {departureData?.map((stationData) => (
@@ -324,7 +350,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
               </div>
             ) : (
               <div className={`${isFullscreen ? 'fullscreen-departures' : 'max-h-96 overflow-y-auto'}`}>
-                <AnimatePresence mode="popLayout">
+                <AnimatePresence mode="wait">
                   {filterDeparturesByDirection(stationData.departures, {
                     id: stationData.stationId,
                     name: stationData.stationName,
@@ -354,14 +380,19 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
                     return (
                       <motion.div
                         key={`${departure.name}-${departure.stop.departure}-${index}`}
-                        variants={prefersReducedMotion ? {} : slideVariants}
+                        layoutId={`departure-${departure.name}-${departure.stop.departure}`}
+                        variants={prefersReducedMotion ? {} : chainAnimationVariants}
                         initial="enter"
                         animate="center"
                         exit="exit"
                         layout={!prefersReducedMotion}
                         transition={{
-                          duration: 0.3,
-                          ease: "easeOut"
+                          duration: 0.5,
+                          ease: "easeOut",
+                          delay: index * 0.08, // Staggered chain reaction
+                          layout: {
+                            duration: 0.4
+                          }
                         }}
                         className="zvv-departure-row grid grid-cols-12 gap-2 px-6 py-4 hover:bg-muted transition-colors departure-item"
                       >

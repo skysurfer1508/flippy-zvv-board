@@ -6,6 +6,8 @@ interface FlipDotRowProps {
   departure: Departure;
   formatTime: (departure: Departure) => string;
   prefersReducedMotion?: boolean;
+  index?: number;
+  variants?: any;
 }
 
 function getDisplayLineNumber(departure: Departure): string {
@@ -41,7 +43,13 @@ function getDisplayLineNumber(departure: Departure): string {
   return name || '?';
 }
 
-export function FlipDotRow({ departure, formatTime, prefersReducedMotion = false }: FlipDotRowProps) {
+export function FlipDotRow({ 
+  departure, 
+  formatTime, 
+  prefersReducedMotion = false, 
+  index = 0, 
+  variants 
+}: FlipDotRowProps) {
   const lineNumber = getDisplayLineNumber(departure);
   const formattedTime = formatTime(departure);
   
@@ -61,10 +69,10 @@ export function FlipDotRow({ departure, formatTime, prefersReducedMotion = false
     displayLineNumber: lineNumber
   });
 
-  // LED-specific animation variants with retro feel
-  const ledSlideVariants = {
+  // Use provided variants or fallback to default LED variants
+  const animationVariants = variants || {
     enter: {
-      y: 40,
+      y: 50,
       opacity: 0
     },
     center: {
@@ -72,22 +80,31 @@ export function FlipDotRow({ departure, formatTime, prefersReducedMotion = false
       opacity: 1
     },
     exit: {
-      y: -20,
-      opacity: 0
+      y: -25,
+      opacity: 0,
+      transition: {
+        duration: 1.0,
+        ease: "easeOut"
+      }
     }
   };
   
   return (
     <motion.div 
       className="flip-dot-row"
-      variants={prefersReducedMotion ? {} : ledSlideVariants}
+      layoutId={`flip-dot-${departure.name}-${departure.stop.departure}`}
+      variants={prefersReducedMotion ? {} : animationVariants}
       initial="enter"
       animate="center"
       exit="exit"
       layout={!prefersReducedMotion}
       transition={{
-        duration: 0.4,
-        ease: "easeOut"
+        duration: 0.6,
+        ease: "easeOut",
+        delay: index * 0.12, // Longer staggered delay for LED theme
+        layout: {
+          duration: 0.5
+        }
       }}
       role="listitem"
       aria-label={`Linie ${lineNumber} nach ${departure.to}, Abfahrt in ${formattedTime}${hasDelay ? `, Verspätung ${delayNumber} Minuten` : ''}`}
