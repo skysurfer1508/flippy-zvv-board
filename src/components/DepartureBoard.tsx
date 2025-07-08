@@ -1,11 +1,14 @@
 
 import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { Loader, Clock, AlertCircle } from "lucide-react";
 import { ZvvApi } from "@/services/zvvApi";
-import { StationConfig, Departure } from "@/types/zvv";
+import { StationConfig, Departure, SupportedLanguage } from "@/types/zvv";
+import { useTranslations } from "@/utils/translations";
 
 interface DepartureBoardProps {
   stations: StationConfig[];
+  language: SupportedLanguage;
 }
 
 interface StationBoardData {
@@ -16,7 +19,10 @@ interface StationBoardData {
   departures: Departure[];
 }
 
-export function DepartureBoard({ stations }: DepartureBoardProps) {
+export function DepartureBoard({ stations, language }: DepartureBoardProps) {
+  const { t } = useTranslations(language);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+
   const { data: departureData, isLoading, error, refetch } = useQuery({
     queryKey: ['departures', stations.map(s => s.id)],
     queryFn: async (): Promise<StationBoardData[]> => {
@@ -34,8 +40,11 @@ export function DepartureBoard({ stations }: DepartureBoardProps) {
       );
       return results;
     },
-    refetchInterval: 30000,
-    enabled: stations.length > 0
+    refetchInterval: 20000, // Updated to 20 seconds as requested
+    enabled: stations.length > 0,
+    onSuccess: () => {
+      setLastUpdated(new Date());
+    }
   });
 
   const formatDepartureTime = (departure: Departure) => {
@@ -45,10 +54,10 @@ export function DepartureBoard({ stations }: DepartureBoardProps) {
     const now = new Date();
     const diffMinutes = Math.round((departureTime.getTime() - now.getTime()) / (1000 * 60));
     
-    if (diffMinutes <= 0) return "Jetzt";
+    if (diffMinutes <= 0) return t.now;
     if (diffMinutes < 60) return `${diffMinutes}'`;
     
-    return departureTime.toLocaleTimeString('de-CH', { 
+    return departureTime.toLocaleTimeString(language === 'en' ? 'en-US' : 'de-CH', { 
       hour: '2-digit', 
       minute: '2-digit' 
     });
@@ -68,12 +77,20 @@ export function DepartureBoard({ stations }: DepartureBoardProps) {
     return '#6b7280';
   };
 
+  const formatLastUpdated = () => {
+    return lastUpdated.toLocaleTimeString(language === 'en' ? 'en-US' : 'de-CH', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12 bg-background">
         <div className="text-center space-y-4">
           <Loader className="h-8 w-8 animate-spin mx-auto text-primary" />
-          <p className="text-foreground font-mono">Lade Abfahrtszeiten...</p>
+          <p className="text-foreground font-mono">{t.loadingDepartures}</p>
         </div>
       </div>
     );
@@ -85,12 +102,12 @@ export function DepartureBoard({ stations }: DepartureBoardProps) {
         <div className="p-6">
           <div className="text-center space-y-4">
             <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
-            <p className="text-destructive font-mono">Fehler beim Laden der Abfahrtszeiten</p>
+            <p className="text-destructive font-mono">{t.errorLoadingDepartures}</p>
             <button 
               onClick={() => refetch()}
               className="text-primary hover:text-primary/80 underline font-mono"
             >
-              Nochmals versuchen
+              {t.tryAgain}
             </button>
           </div>
         </div>
@@ -107,9 +124,14 @@ export function DepartureBoard({ stations }: DepartureBoardProps) {
             <h2 className="text-2xl font-bold font-mono">
               {stationData.customName || stationData.stationName}
             </h2>
-            <div className="flex items-center text-sm font-mono zvv-live-indicator">
-              <Clock className="h-4 w-4 mr-2" />
-              LIVE
+            <div className="flex flex-col items-end">
+              <div className="flex items-center text-sm font-mono zvv-live-indicator">
+                <Clock className="h-4 w-4 mr-2" />
+                LIVE
+              </div>
+              <div className="text-xs font-mono opacity-80 mt-1">
+                {formatLastUpdated()}
+              </div>
             </div>
           </div>
 
@@ -119,14 +141,14 @@ export function DepartureBoard({ stations }: DepartureBoardProps) {
             <div className="grid grid-cols-12 gap-2 px-6 py-3 bg-muted border-b border-border font-mono text-sm font-bold uppercase tracking-wider">
               <div className="col-span-2">Linie</div>
               <div className="col-span-6">Richtung</div>
-              <div className="col-span-2">Gl.</div>
+              <div className="col-span-2">{t.platform}</div>
               <div className="col-span-2 text-right">Abfahrt</div>
             </div>
 
             {/* Departure Rows */}
             {stationData.departures.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground font-mono">
-                Keine Abfahrten verfügbar
+                {t.noDataAvailable}
               </div>
             ) : (
               <div className="max-h-96 overflow-y-auto">

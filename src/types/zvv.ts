@@ -84,6 +84,8 @@ export interface StationConfig {
   lineColors?: Record<string, string>;
 }
 
+export type SupportedLanguage = 'de' | 'en' | 'fr' | 'it' | 'gsw';
+
 export interface AppState {
   stationCount: number;
   stations: StationConfig[];
@@ -93,4 +95,5 @@ export interface AppState {
     train: string;
   };
   phase: 'count-selection' | 'station-selection' | 'customization' | 'monitoring';
+  language: SupportedLanguage;
 }

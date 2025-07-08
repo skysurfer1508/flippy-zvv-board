@@ -4,10 +4,12 @@ import { StationCountSelector } from "./StationCountSelector";
 import { StationSelection } from "./StationSelection";
 import { StationCustomization } from "./StationCustomization";
 import { DepartureBoard } from "./DepartureBoard";
-import { AppState, StationConfig } from "@/types/zvv";
+import { SettingsMenu } from "./SettingsMenu";
+import { AppState, StationConfig, SupportedLanguage } from "@/types/zvv";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import { useTranslations } from "@/utils/translations";
 
 const INITIAL_STATE: AppState = {
   stationCount: 2,
@@ -17,12 +19,14 @@ const INITIAL_STATE: AppState = {
     bus: '#ff6b6b', 
     train: '#ffd700'
   },
-  phase: 'count-selection'
+  phase: 'count-selection',
+  language: 'de'
 };
 
 export function ZvvApp() {
   const [appState, setAppState] = useState<AppState>(INITIAL_STATE);
   const [isLoading, setIsLoading] = useState(true);
+  const { t, formatStationSubtitle } = useTranslations(appState.language);
 
   // Load state from sessionStorage on mount - only once
   useEffect(() => {
@@ -34,6 +38,11 @@ export function ZvvApp() {
         if (savedState) {
           const parsed = JSON.parse(savedState);
           console.log('ZvvApp: Parsed saved state:', parsed);
+          
+          // Ensure language field exists
+          if (!parsed.language) {
+            parsed.language = 'de';
+          }
           
           // Validate that all required stations are properly configured
           const hasValidStations = parsed.stations?.length === parsed.stationCount;
@@ -143,6 +152,19 @@ export function ZvvApp() {
     }));
   };
 
+  const handleLanguageChange = (language: SupportedLanguage) => {
+    console.log('ZvvApp: Language changed to:', language);
+    setAppState(prev => ({
+      ...prev,
+      language
+    }));
+  };
+
+  const handleReconfigure = () => {
+    console.log('ZvvApp: Reconfigure button clicked');
+    setAppState(prev => ({ ...prev, phase: 'count-selection' }));
+  };
+
   const canProceed = appState.stations.length === appState.stationCount && 
                     appState.stations.every(station => station.id && station.name);
 
@@ -155,11 +177,6 @@ export function ZvvApp() {
     } else if (appState.phase === 'monitoring') {
       setAppState(prev => ({ ...prev, phase: 'customization' }));
     }
-  };
-
-  const handleReconfigure = () => {
-    console.log('ZvvApp: Reconfigure button clicked');
-    setAppState(prev => ({ ...prev, phase: 'count-selection' }));
   };
 
   // Show loading state briefly to prevent flash
@@ -178,8 +195,8 @@ export function ZvvApp() {
     <div className="min-h-screen bg-background p-4">
       <div className="container mx-auto max-w-6xl">
         <header className="text-center mb-8">
-          <h1 className="text-5xl font-bold mb-4 text-primary font-mono tracking-wider">ZVV ABFAHRTSZEITEN</h1>
-          <p className="text-muted-foreground font-mono text-lg uppercase tracking-wide">Live-Anzeige für mehrere Stationen</p>
+          <h1 className="text-5xl font-bold mb-4 text-primary font-mono tracking-wider">{t.appTitle}</h1>
+          <p className="text-muted-foreground font-mono text-lg uppercase tracking-wide">{t.appSubtitle}</p>
         </header>
 
         <main>
@@ -212,7 +229,7 @@ export function ZvvApp() {
                   }}
                 >
                   <ChevronLeft className="h-5 w-5 mr-2 inline" />
-                  ZURÜCK ZUR STATIONSANZAHL
+                  {t.backToStationCount}
                 </button>
               </div>
             </div>
@@ -238,7 +255,7 @@ export function ZvvApp() {
                   }}
                 >
                   <ChevronLeft className="h-5 w-5 mr-2 inline" />
-                  ZURÜCK ZUR STATIONSAUSWAHL
+                  {t.backToStationSelection}
                 </button>
               </div>
             </div>
@@ -246,29 +263,21 @@ export function ZvvApp() {
 
           {appState.phase === 'monitoring' && (
             <div className="space-y-8">
-              <DepartureBoard stations={appState.stations} />
-              <div className="text-center">
-                <button
-                  onClick={handleReconfigure}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 border-2 border-primary shadow-lg font-bold px-8 py-4 text-lg font-mono rounded-lg transition-all duration-200 hover:scale-105"
-                  style={{
-                    WebkitAppearance: 'none',
-                    MozAppearance: 'none',
-                    background: 'hsl(var(--primary))',
-                    color: 'hsl(var(--primary-foreground))',
-                    borderColor: 'hsl(var(--primary))'
-                  }}
-                >
-                  <ChevronLeft className="h-5 w-5 mr-2 inline" />
-                  STATIONEN NEU KONFIGURIEREN
-                </button>
-              </div>
+              <DepartureBoard stations={appState.stations} language={appState.language} />
+              
+              {/* Settings Menu instead of the reconfigure button */}
+              <SettingsMenu 
+                language={appState.language}
+                onLanguageChange={handleLanguageChange}
+                onReconfigureStations={handleReconfigure}
+                onEditColors={() => setAppState(prev => ({ ...prev, phase: 'customization' }))}
+              />
             </div>
           )}
         </main>
 
         <footer className="text-center mt-12 text-sm text-muted-foreground font-mono">
-          <p>DATEN VON TRANSPORT.OPENDATA.CH</p>
+          <p>{t.dataFrom}</p>
         </footer>
       </div>
     </div>
