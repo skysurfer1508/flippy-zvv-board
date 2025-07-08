@@ -27,9 +27,9 @@ export function useDynamicEntries({
     const viewportHeight = window.visualViewport?.height || window.innerHeight;
     const fontSizeFactor = fontSize / 100;
     
-    // Buffer to prevent cutting off lines (larger on mobile)
+    // Reduced buffer for more entries
     const isMobile = window.innerWidth < 768;
-    const buffer = isMobile ? 60 : 40;
+    const buffer = isMobile ? 20 : 15;
     
     let headerHeight: number;
     let rowHeight: number;
@@ -37,15 +37,15 @@ export function useDynamicEntries({
 
     if (isLedTheme) {
       // LED theme measurements - more precise calculations
-      headerHeight = Math.ceil(60 * fontSizeFactor); // flip-dot-header
-      rowHeight = Math.ceil(50 * fontSizeFactor); // flip-dot-row min-height
-      additionalSpace = Math.ceil(20 * fontSizeFactor); // borders and padding
+      headerHeight = Math.ceil(50 * fontSizeFactor); // flip-dot-header
+      rowHeight = Math.ceil(40 * fontSizeFactor); // flip-dot-row min-height
+      additionalSpace = Math.ceil(15 * fontSizeFactor); // borders and padding
     } else {
       // Standard theme measurements
-      headerHeight = Math.ceil(120 * fontSizeFactor); // zvv-header
-      const tableHeaderHeight = Math.ceil(50 * fontSizeFactor);
-      rowHeight = Math.ceil(70 * fontSizeFactor); // departure-row
-      additionalSpace = headerHeight + tableHeaderHeight;
+      headerHeight = Math.ceil(100 * fontSizeFactor); // zvv-header
+      const tableHeaderHeight = Math.ceil(45 * fontSizeFactor);
+      rowHeight = Math.ceil(60 * fontSizeFactor); // departure-row
+      additionalSpace = headerHeight + tableHeaderHeight + Math.ceil(10 * fontSizeFactor);
       headerHeight = 0; // Already included in additionalSpace
     }
 
@@ -53,15 +53,16 @@ export function useDynamicEntries({
     const availableHeight = viewportHeight - additionalSpace - buffer;
     const calculatedEntries = Math.floor(availableHeight / rowHeight);
 
-    // Set reasonable bounds
+    // Set reasonable bounds - increased maximums
     const minEntries = isLedTheme ? 6 : 8;
-    const maxEntriesLimit = isLedTheme ? 25 : 30;
+    const maxEntriesLimit = isLedTheme ? 50 : 60;
     
     const finalEntries = Math.max(minEntries, Math.min(calculatedEntries, maxEntriesLimit));
     
     console.log('Dynamic entries calculation:', {
       viewportHeight,
       fontSizeFactor,
+      fontSize,
       headerHeight,
       rowHeight,
       additionalSpace,
@@ -69,7 +70,8 @@ export function useDynamicEntries({
       availableHeight,
       calculatedEntries,
       finalEntries,
-      theme: isLedTheme ? 'LED' : 'Standard'
+      theme: isLedTheme ? 'LED' : 'Standard',
+      isMobile
     });
 
     setMaxEntries(finalEntries);
@@ -79,7 +81,7 @@ export function useDynamicEntries({
     if (resizeTimeoutRef.current) {
       clearTimeout(resizeTimeoutRef.current);
     }
-    resizeTimeoutRef.current = setTimeout(calculateMaxEntries, 100);
+    resizeTimeoutRef.current = setTimeout(calculateMaxEntries, 50);
   }, [calculateMaxEntries]);
 
   useEffect(() => {
@@ -99,7 +101,7 @@ export function useDynamicEntries({
     }
 
     // Recalculate after a short delay to ensure DOM is settled
-    const timeoutId = setTimeout(calculateMaxEntries, 200);
+    const timeoutId = setTimeout(calculateMaxEntries, 100);
 
     return () => {
       window.removeEventListener('resize', debouncedCalculate);

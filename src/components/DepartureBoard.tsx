@@ -41,6 +41,7 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
   // Set global font size CSS variable and manage fullscreen body class
   useEffect(() => {
     document.documentElement.style.setProperty('--dynamic-font-size', `${fontSize}%`);
+    console.log('Font size set to:', fontSize + '%');
     
     // Add or remove fullscreen body class
     if (isFullscreen) {
@@ -153,7 +154,7 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
     return (
       <div className="space-y-8">
         {departureData?.map((stationData) => (
-          <div key={stationData.stationId} className={`flip-dot-display dynamic-font-size ${isFullscreen ? 'fullscreen-flip-dot' : ''}`}>
+          <div key={stationData.stationId} className={`flip-dot-display ${isFullscreen ? 'fullscreen-flip-dot' : ''}`}>
             <div className="flip-dot-header">
               <div className="text-center">
                 {stationData.customName || stationData.stationName}
@@ -192,7 +193,7 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
   return (
     <div className="space-y-8">
       {departureData?.map((stationData) => (
-        <div key={stationData.stationId} className={`zvv-board rounded-lg overflow-hidden border border-border dynamic-font-size ${isFullscreen ? 'fullscreen-board' : ''}`}>
+        <div key={stationData.stationId} className={`zvv-board rounded-lg overflow-hidden border border-border ${isFullscreen ? 'fullscreen-board' : ''}`}>
           {/* Station Header */}
           <div className="zvv-header px-6 py-4 flex items-center justify-between">
             <h2 className="text-2xl font-bold font-mono">
@@ -229,6 +230,9 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
                 {stationData.departures.slice(0, maxEntries).map((departure, index) => {
                   const lineNumber = departure.number || departure.name;
                   const lineColor = getLineColor(departure.category, lineNumber, stationData.lineColors);
+                  
+                  // Parse delay as number and only show if > 0
+                  const delay = departure.stop.delay ? parseInt(departure.stop.delay.toString(), 10) : 0;
                   
                   return (
                     <div
@@ -269,9 +273,9 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
                         <div className="font-mono font-bold text-lg text-primary">
                           {formatDepartureTime(departure)}
                         </div>
-                        {departure.stop.delay && departure.stop.delay > 0 && (
+                        {delay > 0 && (
                           <div className="font-mono text-xs text-destructive">
-                            +{departure.stop.delay}'
+                            +{delay}'
                           </div>
                         )}
                       </div>

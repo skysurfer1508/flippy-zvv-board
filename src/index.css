@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -230,48 +229,57 @@ All colors MUST be HSL.
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
-  /* ZVV Board specific styles */
+  /* ZVV Board specific styles with dynamic font sizing */
   .zvv-board {
     background: hsl(var(--zvv-black));
     color: hsl(var(--zvv-yellow));
     font-family: 'Courier New', monospace;
+    font-size: calc(1rem * var(--dynamic-font-size) / 100);
   }
 
   .zvv-header {
     background: hsl(var(--zvv-yellow));
     color: hsl(var(--zvv-black));
+    font-size: calc(1.5rem * var(--dynamic-font-size) / 100);
   }
 
-  .zvv-line-number {
-    background: hsl(var(--zvv-yellow));
-    color: hsl(var(--zvv-black));
-    font-weight: bold;
+  .zvv-header h2 {
+    font-size: calc(2rem * var(--dynamic-font-size) / 100);
   }
 
   .zvv-departure-row {
     border-bottom: 1px solid hsl(var(--border));
+    font-size: calc(1rem * var(--dynamic-font-size) / 100);
   }
 
   .zvv-departure-row:hover {
     background: hsl(var(--muted));
   }
 
+  .zvv-departure-row .font-mono {
+    font-size: calc(1rem * var(--dynamic-font-size) / 100);
+  }
+
+  .zvv-departure-row .text-lg {
+    font-size: calc(1.125rem * var(--dynamic-font-size) / 100);
+  }
+
+  .zvv-departure-row .text-xs {
+    font-size: calc(0.75rem * var(--dynamic-font-size) / 100);
+  }
+
+  .zvv-departure-row .text-sm {
+    font-size: calc(0.875rem * var(--dynamic-font-size) / 100);
+  }
+
   .zvv-live-indicator {
     animation: blink 2s infinite;
+    font-size: calc(0.875rem * var(--dynamic-font-size) / 100);
   }
 
   @keyframes blink {
     0%, 50% { opacity: 1; }
     51%, 100% { opacity: 0.7; }
-  }
-
-  /* Dynamic font sizing utility */
-  .dynamic-font-size {
-    font-size: calc(1rem * var(--dynamic-font-size) / 100);
-  }
-
-  .dynamic-font-size * {
-    font-size: inherit !important;
   }
 
   /* Smooth transitions for departure items */
@@ -293,8 +301,8 @@ All colors MUST be HSL.
 
   /* Enhanced fullscreen specific styles with safe areas */
   .fullscreen-board {
-    height: calc(100vh - 60px);
-    height: calc(100dvh - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    height: calc(100vh - 30px);
+    height: calc(100dvh - 30px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
   }
@@ -312,17 +320,17 @@ All colors MUST be HSL.
     overflow: hidden;
   }
 
-  /* Flip-dot display styles for LED theme - enhanced mobile support */
+  /* Flip-dot display styles for LED theme - enhanced font size support */
   .theme-led .flip-dot-display {
     font-family: 'DotGothic16', 'VT323', monospace;
-    font-size: calc((1.2vw + 0.8vh + 10px) * var(--dynamic-font-size) / 100);
+    font-size: calc(1rem * var(--dynamic-font-size) / 100);
     letter-spacing: 0.08em;
     background: hsl(var(--flip-dot-background));
     color: hsl(var(--flip-dot-yellow));
     max-width: 100%;
     width: 100%;
-    height: calc(100vh - 120px);
-    height: calc(100dvh - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    height: calc(100vh - 60px);
+    height: calc(100dvh - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     margin: 0 auto;
     border: calc(4px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-frame));
     border-radius: 0;
@@ -337,7 +345,7 @@ All colors MUST be HSL.
     border: none;
     padding: calc(10px * var(--dynamic-font-size) / 100) calc(16px * var(--dynamic-font-size) / 100);
     font-family: 'DotGothic16', 'VT323', monospace;
-    font-size: calc((1.5vw + 1vh + 12px) * var(--dynamic-font-size) / 100);
+    font-size: calc(1.2rem * var(--dynamic-font-size) / 100);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     text-align: center;
@@ -349,17 +357,17 @@ All colors MUST be HSL.
     display: grid;
     grid-template-columns: minmax(80px, 120px) 1fr minmax(120px, 180px);
     gap: calc(16px * var(--dynamic-font-size) / 100);
-    padding: calc(6px * var(--dynamic-font-size) / 100) calc(16px * var(--dynamic-font-size) / 100);
-    line-height: 1.1;
+    padding: calc(8px * var(--dynamic-font-size) / 100) calc(16px * var(--dynamic-font-size) / 100);
+    line-height: 1.2;
     border: none;
     background: hsl(var(--flip-dot-background));
     color: hsl(var(--flip-dot-yellow));
     font-family: 'DotGothic16', 'VT323', monospace;
-    font-size: calc((1.2vw + 0.8vh + 10px) * var(--dynamic-font-size) / 100);
+    font-size: calc(1rem * var(--dynamic-font-size) / 100);
     letter-spacing: 0.08em;
     animation: slideInUp 0.5s ease-out;
     border-bottom: calc(1px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-frame));
-    min-height: calc(50px * var(--dynamic-font-size) / 100);
+    min-height: calc(40px * var(--dynamic-font-size) / 100);
     align-items: center;
     transition: all 0.3s ease-in-out;
   }
@@ -369,12 +377,12 @@ All colors MUST be HSL.
   }
 
   .theme-led .flip-dot-line {
-    font-size: calc((1.4vw + 1vh + 12px) * var(--dynamic-font-size) / 100);
+    font-size: calc(1rem * var(--dynamic-font-size) / 100);
     font-weight: bold;
     text-align: center;
     justify-self: center;
     align-self: center;
-    padding: calc(3px * var(--dynamic-font-size) / 100) calc(6px * var(--dynamic-font-size) / 100);
+    padding: calc(4px * var(--dynamic-font-size) / 100) calc(8px * var(--dynamic-font-size) / 100);
     border: calc(2px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-yellow));
     border-radius: calc(3px * var(--dynamic-font-size) / 100);
     white-space: nowrap;
@@ -389,16 +397,16 @@ All colors MUST be HSL.
     text-align: left;
     align-self: center;
     padding-left: calc(8px * var(--dynamic-font-size) / 100);
-    font-size: calc((1.3vw + 0.9vh + 10px) * var(--dynamic-font-size) / 100);
+    font-size: calc(1rem * var(--dynamic-font-size) / 100);
   }
 
   .theme-led .flip-dot-time {
     text-align: center;
     align-self: center;
     font-variant-numeric: tabular-nums;
-    font-size: calc((1.4vw + 1vh + 12px) * var(--dynamic-font-size) / 100);
+    font-size: calc(1rem * var(--dynamic-font-size) / 100);
     font-weight: bold;
-    padding: calc(3px * var(--dynamic-font-size) / 100) calc(6px * var(--dynamic-font-size) / 100);
+    padding: calc(4px * var(--dynamic-font-size) / 100) calc(8px * var(--dynamic-font-size) / 100);
     border: calc(2px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-yellow));
     border-radius: calc(3px * var(--dynamic-font-size) / 100);
     justify-self: center;
@@ -406,7 +414,7 @@ All colors MUST be HSL.
   }
 
   .theme-led .flip-dot-delay {
-    font-size: calc((0.9vw + 0.6vh + 7px) * var(--dynamic-font-size) / 100);
+    font-size: calc(0.75rem * var(--dynamic-font-size) / 100);
     color: hsl(0 100% 60%);
     font-weight: bold;
     margin-top: calc(2px * var(--dynamic-font-size) / 100);
@@ -445,22 +453,22 @@ All colors MUST be HSL.
   /* Enhanced responsive breakpoints for better mobile scaling */
   @media (max-width: 1200px) {
     .theme-led .flip-dot-display {
-      height: calc(90vh - 100px);
-      height: calc(90dvh - 100px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+      height: calc(90vh - 50px);
+      height: calc(90dvh - 50px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
     
     .theme-led .flip-dot-row {
       grid-template-columns: minmax(70px, 100px) 1fr minmax(100px, 140px);
       gap: calc(12px * var(--dynamic-font-size) / 100);
-      padding: calc(5px * var(--dynamic-font-size) / 100) calc(12px * var(--dynamic-font-size) / 100);
-      min-height: calc(45px * var(--dynamic-font-size) / 100);
+      padding: calc(6px * var(--dynamic-font-size) / 100) calc(12px * var(--dynamic-font-size) / 100);
+      min-height: calc(35px * var(--dynamic-font-size) / 100);
     }
   }
 
   @media (max-width: 768px) {
     .theme-led .flip-dot-display {
-      height: calc(85vh - 80px);
-      height: calc(85dvh - 80px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+      height: calc(85vh - 40px);
+      height: calc(85dvh - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
       border: calc(3px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-frame));
     }
     
@@ -468,7 +476,7 @@ All colors MUST be HSL.
       grid-template-columns: minmax(60px, 80px) 1fr minmax(80px, 100px);
       gap: calc(8px * var(--dynamic-font-size) / 100);
       padding: calc(4px * var(--dynamic-font-size) / 100) calc(8px * var(--dynamic-font-size) / 100);
-      min-height: calc(40px * var(--dynamic-font-size) / 100);
+      min-height: calc(32px * var(--dynamic-font-size) / 100);
     }
     
     .theme-led .flip-dot-header {
@@ -476,20 +484,20 @@ All colors MUST be HSL.
     }
 
     .fullscreen-board {
-      height: calc(100vh - 40px);
-      height: calc(100dvh - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+      height: calc(100vh - 20px);
+      height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
   }
 
   @media (max-width: 480px) {
     .theme-led .flip-dot-display {
-      height: calc(80vh - 60px);
-      height: calc(80dvh - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+      height: calc(80vh - 30px);
+      height: calc(80dvh - 30px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
 
     .fullscreen-board {
-      height: calc(100vh - 30px);
-      height: calc(100dvh - 30px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+      height: calc(100vh - 15px);
+      height: calc(100dvh - 15px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
   }
 
