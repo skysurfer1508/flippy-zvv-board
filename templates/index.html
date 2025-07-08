@@ -15,10 +15,13 @@
             <!-- Station Count Selection Phase -->
             <div id="station-count-selection" class="station-count-selection">
                 <h2>Wie viele Stationen möchten Sie anzeigen?</h2>
-                <div class="slider-container">
-                    <label for="station-count-slider">Anzahl Stationen: <span id="station-count-display">2</span></label>
-                    <input type="range" id="station-count-slider" min="1" max="10" value="2" class="station-slider">
-                    <button id="confirm-station-count" class="start-btn">Bestätigen</button>
+                <div class="station-count-buttons">
+                    <button class="station-count-btn" data-count="1">1</button>
+                    <button class="station-count-btn" data-count="2">2</button>
+                    <button class="station-count-btn" data-count="3">3</button>
+                    <button class="station-count-btn" data-count="4">4</button>
+                    <button class="station-count-btn" data-count="5">5</button>
+                    <button class="station-count-btn" data-count="6">6</button>
                 </div>
             </div>
 
@@ -86,6 +89,13 @@
                 <button id="color-modal-cancel" class="change-stations-btn">Abbrechen</button>
             </div>
         </div>
+    </div>
+
+    <!-- Language Selector -->
+    <button id="language-selector" class="language-selector-btn">🌐 DE</button>
+    <div id="language-dropdown" class="language-dropdown hidden">
+        <div class="language-option" data-lang="de">🇩🇪 Deutsch</div>
+        <div class="language-option" data-lang="en">🇬🇧 English</div>
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>

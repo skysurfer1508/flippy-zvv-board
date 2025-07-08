@@ -1,3 +1,4 @@
+
 /* ZVV Dual Flip-Dot Display Styling */
 * {
     margin: 0;
@@ -43,60 +44,39 @@ h1 {
     font-size: 1.8rem;
 }
 
-.slider-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
+.station-count-buttons {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 15px;
     margin-bottom: 30px;
+    max-width: 500px;
+    margin: 0 auto 30px auto;
 }
 
-.slider-container label {
-    font-size: 1.2rem;
-    font-weight: bold;
+.station-count-btn {
+    background: #333;
     color: #ffd700;
-}
-
-.station-slider {
-    width: 300px;
-    height: 8px;
-    background: #333;
-    border-radius: 4px;
-    outline: none;
-    -webkit-appearance: none;
-    appearance: none;
-}
-
-.station-slider::-webkit-slider-thumb {
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    background: #ffd700;
-    border-radius: 50%;
+    border: 2px solid #ffd700;
+    padding: 20px;
+    font-size: 1.5rem;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    border-radius: 8px;
     cursor: pointer;
-    border: 2px solid #1a1a1a;
     transition: all 0.3s ease;
+    min-height: 60px;
 }
 
-.station-slider::-webkit-slider-thumb:hover {
-    background: #ffed4e;
-    transform: scale(1.1);
-}
-
-.station-slider::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
+.station-count-btn:hover {
     background: #ffd700;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid #1a1a1a;
-    transition: all 0.3s ease;
+    color: #1a1a1a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
 }
 
-.station-slider::-moz-range-track {
-    height: 8px;
-    background: #333;
-    border-radius: 4px;
+.station-count-btn.selected {
+    background: #ffd700;
+    color: #1a1a1a;
 }
 
 /* Station Selection Phase */
@@ -536,6 +516,10 @@ footer {
     .station-header h2 {
         font-size: 1.2rem;
     }
+    
+    .station-count-buttons {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 @media (max-width: 480px) {
@@ -548,6 +532,10 @@ footer {
     .header-platform,
     .platform {
         display: none;
+    }
+    
+    .station-count-buttons {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
