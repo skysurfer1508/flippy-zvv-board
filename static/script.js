@@ -1,421 +1,589 @@
-// Dual Station ZVV Departure Board JavaScript with LocalStorage and Individual Line Customization
 
-class DualStationBoard {
+// ZVV Multi-Station Departure Board
+class ZVVDepartureBoard {
     constructor() {
-        this.selectedStations = {
-            station1: null,
-            station2: null
-        };
-        this.customNames = {
-            station1: '',
-            station2: ''
-        };
-        this.customColors = {
+        this.stations = [];
+        this.selectedStationCount = 1;
+        this.customStationNames = {};
+        this.lineColors = {
             tram: '#4ecdc4',
             bus: '#ff6b6b',
             train: '#ffd700'
         };
-        this.individualLineColors = {}; // Store individual line colors
+        this.customLineColors = JSON.parse(localStorage.getItem('customLineColors') || '{}');
+        this.currentLanguage = localStorage.getItem('language') || 'de';
         this.updateIntervals = [];
+        this.translations = {
+            de: {
+                title: 'ZVV Doppel-Abfahrtszeiten',
+                stationCount: 'Anzahl Stationen auswählen:',
+                station: 'Station',
+                startMonitoring: 'Abfahrtszeiten anzeigen',
+                customizeStations: 'Stationen anpassen',
+                displayName: 'Anzeigename für Station',
+                lineColors: 'Linien-Farben anpassen',
+                tramColor: 'Tram-Farbe:',
+                busColor: 'Bus-Farbe:',
+                trainColor: 'Zug-Farbe:',
+                startDisplay: 'Anzeige starten',
+                loading: 'Lade Abfahrtszeiten...',
+                dataSource: 'Daten von transport.opendata.ch | Aktualisierung alle 25 Sekunden',
+                changeStations: 'Stationen ändern',
+                changeLineColor: 'Linienfarbe ändern',
+                apply: 'Anwenden',
+                cancel: 'Abbrechen',
+                line: 'Linie',
+                destination: 'Ziel',
+                platform: 'Gleis',
+                departure: 'Abfahrt',
+                enterStation: 'Station eingeben...',
+                noData: 'Keine Abfahrten verfügbar',
+                delay: 'Verspätung'
+            },
+            en: {
+                title: 'ZVV Dual Departure Times',
+                stationCount: 'Select number of stations:',
+                station: 'Station',
+                startMonitoring: 'Show departure times',
+                customizeStations: 'Customize stations',
+                displayName: 'display name for station',
+                lineColors: 'Customize line colors',
+                tramColor: 'Tram color:',
+                busColor: 'Bus color:',
+                trainColor: 'Train color:',
+                startDisplay: 'Start display',
+                loading: 'Loading departure times...',
+                dataSource: 'Data from transport.opendata.ch | Updated every 25 seconds',
+                changeStations: 'Change stations',
+                changeLineColor: 'Change line color',
+                apply: 'Apply',
+                cancel: 'Cancel',
+                line: 'Line',
+                destination: 'Destination',
+                platform: 'Platform',
+                departure: 'Departure',
+                enterStation: 'Enter station...',
+                noData: 'No departures available',
+                delay: 'Delay'
+            }
+        };
+        
         this.init();
     }
 
     init() {
-        this.loadFromStorage();
         this.setupEventListeners();
-        this.setupAutoComplete();
-        this.applyCustomColors();
-        
-        // Auto-start if we have saved data - go directly to monitoring
-        if (this.selectedStations.station1 && this.selectedStations.station2) {
-            this.startMonitoring();
-        }
+        this.generateStationInputs();
+        this.updateLanguage();
     }
 
     setupEventListeners() {
-        // Station selection
-        document.getElementById('start-monitoring').addEventListener('click', () => {
-            this.showCustomizationPhase();
+        // Station count selection
+        document.querySelectorAll('.station-count-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.station-count-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                this.selectedStationCount = parseInt(e.target.dataset.count);
+                this.generateStationInputs();
+                this.generateCustomizationInputs();
+            });
         });
 
-        // Apply customization
+        // Start monitoring button
+        document.getElementById('start-monitoring').addEventListener('click', () => {
+            if (this.validateStations()) {
+                this.showCustomization();
+            }
+        });
+
+        // Apply customization button
         document.getElementById('apply-customization').addEventListener('click', () => {
             this.applyCustomization();
+            this.startMonitoring();
         });
 
         // Change stations button
         document.getElementById('change-stations').addEventListener('click', () => {
-            this.resetToSelection();
+            this.resetToStationSelection();
         });
 
-        // Input validation
-        const inputs = ['station1-input', 'station2-input'];
-        inputs.forEach(inputId => {
-            document.getElementById(inputId).addEventListener('input', () => {
-                this.validateInputs();
+        // Language selection
+        document.getElementById('language-btn').addEventListener('click', () => {
+            const menu = document.getElementById('language-menu');
+            menu.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('.language-option').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.currentLanguage = e.target.dataset.lang;
+                localStorage.setItem('language', this.currentLanguage);
+                this.updateLanguage();
+                document.getElementById('language-menu').classList.add('hidden');
             });
         });
 
-        // Color inputs
-        ['tram-color', 'bus-color', 'train-color'].forEach(colorId => {
-            document.getElementById(colorId).addEventListener('change', (e) => {
-                const type = colorId.replace('-color', '');
-                this.customColors[type] = e.target.value;
-                this.saveToStorage();
-                this.applyCustomColors();
-            });
+        // Close language menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.language-selector')) {
+                document.getElementById('language-menu').classList.add('hidden');
+            }
+        });
+
+        // Line color modal
+        document.querySelector('.modal-close').addEventListener('click', () => {
+            document.getElementById('line-color-modal').classList.add('hidden');
+        });
+
+        document.getElementById('cancel-line-color').addEventListener('click', () => {
+            document.getElementById('line-color-modal').classList.add('hidden');
+        });
+
+        document.getElementById('apply-line-color').addEventListener('click', () => {
+            this.applyLineColor();
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('line-color-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                e.currentTarget.classList.add('hidden');
+            }
         });
     }
 
-    loadFromStorage() {
-        const saved = localStorage.getItem('zvv-board-config');
-        if (saved) {
-            try {
-                const config = JSON.parse(saved);
-                this.selectedStations = config.selectedStations || { station1: null, station2: null };
-                this.customNames = config.customNames || { station1: '', station2: '' };
-                this.customColors = config.customColors || { tram: '#4ecdc4', bus: '#ff6b6b', train: '#ffd700' };
-                this.individualLineColors = config.individualLineColors || {};
-                
-                // Restore input values
-                if (this.selectedStations.station1) {
-                    document.getElementById('station1-input').value = this.selectedStations.station1.name;
-                }
-                if (this.selectedStations.station2) {
-                    document.getElementById('station2-input').value = this.selectedStations.station2.name;
-                }
-                
-                // Set color inputs
-                document.getElementById('tram-color').value = this.customColors.tram;
-                document.getElementById('bus-color').value = this.customColors.bus;
-                document.getElementById('train-color').value = this.customColors.train;
-                
-                // Set custom name inputs
-                document.getElementById('custom-name1').value = this.customNames.station1;
-                document.getElementById('custom-name2').value = this.customNames.station2;
-                
-                console.log('Loaded configuration from storage');
-            } catch (error) {
-                console.error('Error loading from storage:', error);
-            }
+    generateStationInputs() {
+        const container = document.getElementById('station-inputs');
+        container.innerHTML = '';
+
+        for (let i = 1; i <= this.selectedStationCount; i++) {
+            const inputGroup = document.createElement('div');
+            inputGroup.className = 'station-input-group';
+            inputGroup.innerHTML = `
+                <label for="station${i}-input">${this.t('station')} ${i}</label>
+                <div class="search-container">
+                    <input type="text" id="station${i}-input" placeholder="${this.t('enterStation')}" autocomplete="off">
+                    <div id="suggestions${i}" class="suggestions"></div>
+                </div>
+            `;
+            container.appendChild(inputGroup);
+
+            // Add event listeners for this input
+            this.setupStationInputListeners(i);
+        }
+
+        this.updateStartButton();
+    }
+
+    generateCustomizationInputs() {
+        const container = document.getElementById('customization-inputs');
+        container.innerHTML = '';
+
+        for (let i = 1; i <= this.selectedStationCount; i++) {
+            const inputGroup = document.createElement('div');
+            inputGroup.className = 'custom-input-group';
+            inputGroup.innerHTML = `
+                <label for="custom-name${i}">${this.t('displayName')} ${i}:</label>
+                <input type="text" id="custom-name${i}" placeholder="Custom Name...">
+            `;
+            container.appendChild(inputGroup);
         }
     }
 
-    saveToStorage() {
-        const config = {
-            selectedStations: this.selectedStations,
-            customNames: this.customNames,
-            customColors: this.customColors,
-            individualLineColors: this.individualLineColors
-        };
-        localStorage.setItem('zvv-board-config', JSON.stringify(config));
-        console.log('Configuration saved to storage');
-    }
+    setupStationInputListeners(stationIndex) {
+        const input = document.getElementById(`station${stationIndex}-input`);
+        const suggestionsDiv = document.getElementById(`suggestions${stationIndex}`);
+        let currentSuggestions = [];
+        let selectedIndex = -1;
 
-    setupAutoComplete() {
-        this.setupAutoCompleteForInput('station1-input', 'suggestions1', 'station1');
-        this.setupAutoCompleteForInput('station2-input', 'suggestions2', 'station2');
-    }
-
-    setupAutoCompleteForInput(inputId, suggestionsId, stationKey) {
-        const input = document.getElementById(inputId);
-        const suggestions = document.getElementById(suggestionsId);
-        let currentTimeout;
-
-        input.addEventListener('input', (e) => {
+        input.addEventListener('input', async (e) => {
             const query = e.target.value.trim();
             
             if (query.length < 2) {
-                suggestions.style.display = 'none';
-                this.selectedStations[stationKey] = null;
-                this.validateInputs();
-                this.saveToStorage();
+                suggestionsDiv.style.display = 'none';
+                this.updateStartButton();
                 return;
             }
 
-            clearTimeout(currentTimeout);
-            currentTimeout = setTimeout(() => {
-                this.fetchStations(query, suggestions, input, stationKey);
-            }, 300);
+            try {
+                const response = await fetch(`http://transport.opendata.ch/v1/locations?query=${encodeURIComponent(query)}&type=station`);
+                const data = await response.json();
+                
+                currentSuggestions = data.stations || [];
+                this.displaySuggestions(currentSuggestions, suggestionsDiv, input, stationIndex);
+                
+            } catch (error) {
+                console.error('Error fetching stations:', error);
+                suggestionsDiv.style.display = 'none';
+            }
+
+            this.updateStartButton();
         });
 
-        // Hide suggestions when clicking outside
+        input.addEventListener('keydown', (e) => {
+            const visibleSuggestions = suggestionsDiv.querySelectorAll('.suggestion-item');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, visibleSuggestions.length - 1);
+                this.updateSelectedSuggestion(visibleSuggestions, selectedIndex);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, -1);
+                this.updateSelectedSuggestion(visibleSuggestions, selectedIndex);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedIndex >= 0 && visibleSuggestions[selectedIndex]) {
+                    visibleSuggestions[selectedIndex].click();
+                }
+            } else if (e.key === 'Escape') {
+                suggestionsDiv.style.display = 'none';
+                selectedIndex = -1;
+            }
+        });
+
         document.addEventListener('click', (e) => {
-            if (!input.contains(e.target) && !suggestions.contains(e.target)) {
-                suggestions.style.display = 'none';
+            if (!e.target.closest(`#station${stationIndex}-input`) && !e.target.closest(`#suggestions${stationIndex}`)) {
+                suggestionsDiv.style.display = 'none';
+                selectedIndex = -1;
             }
         });
     }
 
-    async fetchStations(query, suggestions, input, stationKey) {
-        try {
-            const response = await fetch(`/api/locations?query=${encodeURIComponent(query)}`);
-            const stations = await response.json();
-
-            if (stations.length === 0) {
-                suggestions.style.display = 'none';
-                return;
-            }
-
-            suggestions.innerHTML = '';
-            stations.forEach(station => {
-                const item = document.createElement('div');
-                item.className = 'suggestion-item';
-                item.textContent = station.name;
-                item.addEventListener('click', () => {
-                    input.value = station.name;
-                    this.selectedStations[stationKey] = station;
-                    suggestions.style.display = 'none';
-                    this.validateInputs();
-                    this.saveToStorage();
-                });
-                suggestions.appendChild(item);
-            });
-
-            suggestions.style.display = 'block';
-        } catch (error) {
-            console.error('Error fetching stations:', error);
-            suggestions.style.display = 'none';
+    displaySuggestions(suggestions, suggestionsDiv, input, stationIndex) {
+        if (suggestions.length === 0) {
+            suggestionsDiv.style.display = 'none';
+            return;
         }
+
+        suggestionsDiv.innerHTML = '';
+        suggestions.forEach((station, index) => {
+            const suggestionItem = document.createElement('div');
+            suggestionItem.className = 'suggestion-item';
+            suggestionItem.textContent = station.name;
+            suggestionItem.addEventListener('click', () => {
+                input.value = station.name;
+                input.dataset.stationId = station.id;
+                suggestionsDiv.style.display = 'none';
+                this.updateStartButton();
+            });
+            suggestionsDiv.appendChild(suggestionItem);
+        });
+
+        suggestionsDiv.style.display = 'block';
     }
 
-    validateInputs() {
+    updateSelectedSuggestion(suggestions, selectedIndex) {
+        suggestions.forEach((item, index) => {
+            item.classList.toggle('selected', index === selectedIndex);
+        });
+    }
+
+    validateStations() {
+        for (let i = 1; i <= this.selectedStationCount; i++) {
+            const input = document.getElementById(`station${i}-input`);
+            if (!input.value.trim() || !input.dataset.stationId) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    updateStartButton() {
         const startBtn = document.getElementById('start-monitoring');
-        const isValid = this.selectedStations.station1 && this.selectedStations.station2;
-        startBtn.disabled = !isValid;
+        startBtn.disabled = !this.validateStations();
     }
 
-    showCustomizationPhase() {
-        // Hide selection phase
+    showCustomization() {
         document.getElementById('station-selection').classList.add('hidden');
-        
-        // Show customization phase
         document.getElementById('station-customization').classList.remove('hidden');
         
-        // Pre-fill custom names with station names if empty
-        if (!this.customNames.station1) {
-            document.getElementById('custom-name1').value = this.selectedStations.station1.name;
+        // Pre-fill custom names with station names
+        for (let i = 1; i <= this.selectedStationCount; i++) {
+            const stationInput = document.getElementById(`station${i}-input`);
+            const customInput = document.getElementById(`custom-name${i}`);
+            if (customInput) {
+                customInput.value = stationInput.value;
+            }
         }
-        if (!this.customNames.station2) {
-            document.getElementById('custom-name2').value = this.selectedStations.station2.name;
-        }
-        
-        this.saveToStorage();
     }
 
     applyCustomization() {
-        // Get custom names
-        this.customNames.station1 = document.getElementById('custom-name1').value || this.selectedStations.station1.name;
-        this.customNames.station2 = document.getElementById('custom-name2').value || this.selectedStations.station2.name;
-        
-        this.saveToStorage();
-        this.startMonitoring();
+        // Store custom station names
+        this.customStationNames = {};
+        for (let i = 1; i <= this.selectedStationCount; i++) {
+            const customInput = document.getElementById(`custom-name${i}`);
+            if (customInput && customInput.value.trim()) {
+                this.customStationNames[i] = customInput.value.trim();
+            }
+        }
+
+        // Store line colors
+        this.lineColors.tram = document.getElementById('tram-color').value;
+        this.lineColors.bus = document.getElementById('bus-color').value;
+        this.lineColors.train = document.getElementById('train-color').value;
     }
 
     startMonitoring() {
-        // Hide selection and customization phases
-        document.getElementById('station-selection').classList.add('hidden');
+        // Collect station data
+        this.stations = [];
+        for (let i = 1; i <= this.selectedStationCount; i++) {
+            const input = document.getElementById(`station${i}-input`);
+            this.stations.push({
+                id: input.dataset.stationId,
+                name: input.value,
+                customName: this.customStationNames[i] || input.value
+            });
+        }
+
+        // Hide customization and show boards
         document.getElementById('station-customization').classList.add('hidden');
-        
-        // Show dual boards
-        document.getElementById('dual-boards').classList.remove('hidden');
+        document.getElementById('multi-boards').classList.remove('hidden');
         document.getElementById('change-stations').classList.remove('hidden');
 
-        // Set custom station names
-        document.getElementById('station1-name').textContent = this.customNames.station1 || this.selectedStations.station1.name;
-        document.getElementById('station2-name').textContent = this.customNames.station2 || this.selectedStations.station2.name;
+        this.setupBoards();
+        this.startUpdating();
+    }
 
-        // Start fetching data for both stations
-        this.fetchDeparturesForStation(this.selectedStations.station1.id, 'departures1', 'station1-updated');
-        this.fetchDeparturesForStation(this.selectedStations.station2.id, 'departures2', 'station2-updated');
+    setupBoards() {
+        const boardsContainer = document.getElementById('multi-boards');
+        boardsContainer.className = `multi-boards stations-${this.selectedStationCount}`;
+        boardsContainer.innerHTML = '';
 
+        this.stations.forEach((station, index) => {
+            const boardHtml = `
+                <div class="board-container">
+                    <div class="station-header">
+                        <h2 id="station${index + 1}-name">${station.customName}</h2>
+                        <div class="last-updated" id="station${index + 1}-updated">${this.t('loading')}</div>
+                    </div>
+                    <div class="departure-board">
+                        <div class="board-header">
+                            <div class="header-line">${this.t('line')}</div>
+                            <div class="header-destination">${this.t('destination')}</div>
+                            <div class="header-platform">${this.t('platform')}</div>
+                            <div class="header-time">${this.t('departure')}</div>
+                        </div>
+                        <div id="departures${index + 1}" class="departures-list">
+                            <div class="no-data">${this.t('loading')}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            boardsContainer.innerHTML += boardHtml;
+        });
+    }
+
+    startUpdating() {
         // Clear existing intervals
         this.updateIntervals.forEach(interval => clearInterval(interval));
         this.updateIntervals = [];
 
-        // Set up intervals for auto-refresh
-        this.updateIntervals.push(
-            setInterval(() => {
-                this.fetchDeparturesForStation(this.selectedStations.station1.id, 'departures1', 'station1-updated');
-            }, 25000)
-        );
-
-        this.updateIntervals.push(
-            setInterval(() => {
-                this.fetchDeparturesForStation(this.selectedStations.station2.id, 'departures2', 'station2-updated');
-            }, 25000)
-        );
+        // Update each station
+        this.stations.forEach((station, index) => {
+            this.updateDepartures(station, index + 1);
+            
+            // Set up periodic updates
+            const interval = setInterval(() => {
+                this.updateDepartures(station, index + 1);
+            }, 25000);
+            
+            this.updateIntervals.push(interval);
+        });
     }
 
-    async fetchDeparturesForStation(stationId, containerId, updatedId) {
+    async updateDepartures(station, boardNumber) {
         try {
-            const response = await fetch(`/api/board?station=${stationId}`);
+            const response = await fetch(`http://transport.opendata.ch/v1/stationboard?station=${encodeURIComponent(station.name)}&limit=10`);
             const data = await response.json();
 
-            if (data.error) {
-                this.showError(containerId, data.error);
-                return;
+            if (data.stationboard && data.stationboard.length > 0) {
+                this.displayDepartures(data.stationboard, boardNumber);
+                this.updateLastUpdated(boardNumber);
+            } else {
+                this.displayNoDepartures(boardNumber);
             }
-
-            this.displayDepartures(data.departures, containerId);
-            this.updateTimestamp(updatedId, data.updated);
-
         } catch (error) {
-            console.error('Error fetching departures:', error);
-            this.showError(containerId, 'Fehler beim Laden der Daten');
+            console.error(`Error fetching departures for ${station.name}:`, error);
+            this.displayError(boardNumber);
         }
     }
 
-    displayDepartures(departures, containerId) {
-        const container = document.getElementById(containerId);
+    displayDepartures(departures, boardNumber) {
+        const departuresContainer = document.getElementById(`departures${boardNumber}`);
         
-        if (!departures || departures.length === 0) {
-            container.innerHTML = '<div class="no-data">Keine Abfahrten verfügbar</div>';
+        if (departures.length === 0) {
+            departuresContainer.innerHTML = `<div class="no-data">${this.t('noData')}</div>`;
             return;
         }
 
-        const rows = departures.map(dep => {
-            const departureTime = new Date(dep.departure);
+        departuresContainer.innerHTML = '';
+        
+        departures.forEach(departure => {
+            const departureTime = new Date(departure.stop.departure);
             const now = new Date();
-            const diffMinutes = Math.max(0, Math.floor((departureTime - now) / 60000));
+            const minutesUntil = Math.ceil((departureTime - now) / 60000);
             
-            let timeDisplay = diffMinutes === 0 ? 'Jetzt' : `${diffMinutes}'`;
-            let delayDisplay = '';
+            const delay = departure.stop.delay || 0;
+            const delayMinutes = Math.round(delay / 60);
             
-            if (dep.delay > 0) {
-                delayDisplay = `<span class="delay">+${dep.delay}'</span>`;
-            }
-
-            const lineClass = this.getLineClass(dep.category);
-            const lineColor = this.getLineColor(dep.line, dep.category);
-
-            return `
-                <div class="departure-row">
-                    <div class="line-number ${lineClass}" 
-                         style="background-color: ${lineColor}; cursor: pointer;" 
-                         onclick="board.changeLineColor('${dep.line}', '${dep.category}')"
-                         title="Klicken um Farbe zu ändern">${dep.line}</div>
-                    <div class="destination">${dep.destination}</div>
-                    <div class="platform">${dep.platform || '-'}</div>
-                    <div class="departure-time">
-                        ${timeDisplay}
-                        ${delayDisplay}
-                    </div>
+            const timeDisplay = minutesUntil <= 0 ? 'Jetzt' : `${minutesUntil}'`;
+            const delayDisplay = delayMinutes > 0 ? `+${delayMinutes}'` : '';
+            
+            const lineType = this.getLineType(departure.category);
+            const lineColor = this.getLineColor(departure.number, lineType);
+            
+            const row = document.createElement('div');
+            row.className = 'departure-row';
+            row.innerHTML = `
+                <div class="line-number ${lineType}" 
+                     style="background-color: ${lineColor}; color: ${this.getContrastColor(lineColor)}"
+                     data-line="${departure.number}" 
+                     data-type="${lineType}"
+                     onclick="zvvBoard.showLineColorModal('${departure.number}', '${lineType}', '${lineColor}')">
+                    ${departure.number}
+                </div>
+                <div class="destination">${departure.to}</div>
+                <div class="platform">${departure.stop.platform || '-'}</div>
+                <div class="departure-time">
+                    ${timeDisplay}
+                    ${delayDisplay ? `<span class="delay">${delayDisplay}</span>` : ''}
                 </div>
             `;
-        }).join('');
-
-        container.innerHTML = rows;
+            
+            departuresContainer.appendChild(row);
+        });
     }
 
-    getLineColor(lineNumber, category) {
-        // Check if there's an individual color set for this line
-        if (this.individualLineColors[lineNumber]) {
-            return this.individualLineColors[lineNumber];
-        }
-        
-        // Otherwise use category default color
-        return this.getCustomColor(category);
+    displayNoDepartures(boardNumber) {
+        const departuresContainer = document.getElementById(`departures${boardNumber}`);
+        departuresContainer.innerHTML = `<div class="no-data">${this.t('noData')}</div>`;
     }
 
-    changeLineColor(lineNumber, category) {
-        // Create a color input dynamically
-        const colorInput = document.createElement('input');
-        colorInput.type = 'color';
-        colorInput.value = this.individualLineColors[lineNumber] || this.getCustomColor(category);
-        
-        colorInput.onchange = (e) => {
-            this.individualLineColors[lineNumber] = e.target.value;
-            this.saveToStorage();
-            // Refresh the display
-            this.fetchDeparturesForStation(this.selectedStations.station1.id, 'departures1', 'station1-updated');
-            this.fetchDeparturesForStation(this.selectedStations.station2.id, 'departures2', 'station2-updated');
-        };
-        
-        colorInput.click();
+    displayError(boardNumber) {
+        const departuresContainer = document.getElementById(`departures${boardNumber}`);
+        departuresContainer.innerHTML = '<div class="no-data">Fehler beim Laden</div>';
     }
 
-    getLineClass(category) {
-        if (!category) return '';
+    updateLastUpdated(boardNumber) {
+        const updatedElement = document.getElementById(`station${boardNumber}-updated`);
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('de-CH', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        updatedElement.textContent = `Stand: ${timeString}`;
+    }
+
+    getLineType(category) {
+        if (!category) return 'train';
         
         const cat = category.toLowerCase();
-        if (cat.includes('bus') || cat.includes('b')) return 'bus';
         if (cat.includes('tram') || cat.includes('t')) return 'tram';
-        if (cat.includes('train') || cat.includes('ic') || cat.includes('ir') || cat.includes('re') || cat.includes('s')) return 'train';
-        return '';
+        if (cat.includes('bus') || cat.includes('b')) return 'bus';
+        return 'train';
     }
 
-    getCustomColor(category) {
-        if (!category) return this.customColors.train;
-        
-        const cat = category.toLowerCase();
-        if (cat.includes('bus') || cat.includes('b')) return this.customColors.bus;
-        if (cat.includes('tram') || cat.includes('t')) return this.customColors.tram;
-        if (cat.includes('train') || cat.includes('ic') || cat.includes('ir') || cat.includes('re') || cat.includes('s')) return this.customColors.train;
-        return this.customColors.train;
-    }
-
-    applyCustomColors() {
-        // Create dynamic CSS for custom colors
-        let style = document.getElementById('dynamic-colors');
-        if (!style) {
-            style = document.createElement('style');
-            style.id = 'dynamic-colors';
-            document.head.appendChild(style);
+    getLineColor(lineNumber, lineType) {
+        // Check for custom colors first
+        const customKey = `${lineType}-${lineNumber}`;
+        if (this.customLineColors[customKey]) {
+            return this.customLineColors[customKey];
         }
         
-        style.textContent = `
-            .line-number.tram { background-color: ${this.customColors.tram} !important; }
-            .line-number.bus { background-color: ${this.customColors.bus} !important; }
-            .line-number.train { background-color: ${this.customColors.train} !important; }
-        `;
+        // Return default colors
+        return this.lineColors[lineType] || this.lineColors.train;
     }
 
-    updateTimestamp(updatedId, timestamp) {
-        const element = document.getElementById(updatedId);
-        if (element && timestamp) {
-            const date = new Date(timestamp);
-            element.textContent = `Aktualisiert: ${date.toLocaleTimeString('de-CH')}`;
-        }
+    getContrastColor(backgroundColor) {
+        // Convert hex to RGB
+        const hex = backgroundColor.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        
+        // Calculate luminance
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        
+        return luminance > 0.5 ? '#000000' : '#ffffff';
     }
 
-    showError(containerId, message) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = `<div class="no-data" style="color: #ff4444;">${message}</div>`;
+    showLineColorModal(lineNumber, lineType, currentColor) {
+        const modal = document.getElementById('line-color-modal');
+        const title = document.getElementById('modal-title');
+        const info = document.getElementById('modal-line-info');
+        const colorPicker = document.getElementById('line-color-picker');
+        
+        title.textContent = this.t('changeLineColor');
+        info.textContent = `${this.t('line')} ${lineNumber} (${lineType.charAt(0).toUpperCase() + lineType.slice(1)})`;
+        colorPicker.value = currentColor;
+        
+        // Store current line info
+        modal.dataset.lineNumber = lineNumber;
+        modal.dataset.lineType = lineType;
+        
+        modal.classList.remove('hidden');
     }
 
-    resetToSelection() {
+    applyLineColor() {
+        const modal = document.getElementById('line-color-modal');
+        const lineNumber = modal.dataset.lineNumber;
+        const lineType = modal.dataset.lineType;
+        const newColor = document.getElementById('line-color-picker').value;
+        
+        // Store custom color
+        const customKey = `${lineType}-${lineNumber}`;
+        this.customLineColors[customKey] = newColor;
+        localStorage.setItem('customLineColors', JSON.stringify(this.customLineColors));
+        
+        // Update all visible line elements
+        document.querySelectorAll(`[data-line="${lineNumber}"][data-type="${lineType}"]`).forEach(element => {
+            element.style.backgroundColor = newColor;
+            element.style.color = this.getContrastColor(newColor);
+        });
+        
+        modal.classList.add('hidden');
+    }
+
+    resetToStationSelection() {
         // Clear intervals
         this.updateIntervals.forEach(interval => clearInterval(interval));
         this.updateIntervals = [];
-
-        // Clear stored data
-        localStorage.removeItem('zvv-board-config');
-        this.selectedStations = { station1: null, station2: null };
-        this.customNames = { station1: '', station2: '' };
-        this.individualLineColors = {};
-
-        // Clear inputs
-        document.getElementById('station1-input').value = '';
-        document.getElementById('station2-input').value = '';
-        document.getElementById('custom-name1').value = '';
-        document.getElementById('custom-name2').value = '';
-
-        // Hide boards and customization, show selection
-        document.getElementById('dual-boards').classList.add('hidden');
+        
+        // Reset UI
+        document.getElementById('multi-boards').classList.add('hidden');
         document.getElementById('station-customization').classList.add('hidden');
         document.getElementById('change-stations').classList.add('hidden');
         document.getElementById('station-selection').classList.remove('hidden');
         
-        // Reset validation
-        this.validateInputs();
+        // Clear station data
+        this.stations = [];
+        this.customStationNames = {};
+    }
+
+    updateLanguage() {
+        document.documentElement.lang = this.currentLanguage;
+        
+        // Update all elements with data-i18n attributes
+        document.querySelectorAll('[data-i18n]').forEach(element => {
+            const key = element.getAttribute('data-i18n');
+            element.textContent = this.t(key);
+        });
+
+        // Update placeholders
+        document.querySelectorAll('input[placeholder]').forEach(input => {
+            if (input.id.includes('station') && input.id.includes('-input')) {
+                input.placeholder = this.t('enterStation');
+            }
+        });
+    }
+
+    t(key) {
+        return this.translations[this.currentLanguage]?.[key] || key;
     }
 }
 
-// Global reference for onclick handlers
-let board;
-
-// Initialize the application when DOM is loaded
+// Initialize the application
+let zvvBoard;
 document.addEventListener('DOMContentLoaded', () => {
-    board = new DualStationBoard();
+    zvvBoard = new ZVVDepartureBoard();
 });
