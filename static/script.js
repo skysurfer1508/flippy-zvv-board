@@ -1,40 +1,35 @@
-// Enhanced Dual Station ZVV Departure Board JavaScript with Station Count Selection
-
-class DualStationBoard {
+class ZVVBoard {
     constructor() {
-        this.stationCount = 2; // Default to 2 stations
-        this.selectedStations = {};
+        this.stations = [];
+        this.stationCount = 2;
+        this.selectedStations = [];
         this.customNames = {};
-        this.customColors = {
-            tram: '#4ecdc4',
-            bus: '#ff6b6b',
-            train: '#ffd700'
+        this.lineColors = {
+            'tram': '#4ecdc4',
+            'bus': '#ff6b6b',
+            'train': '#ffd700'
         };
-        this.individualLineColors = {}; // Store individual line colors
-        this.updateIntervals = [];
-        this.currentLineForColor = null;
-        this.init();
+        this.currentColorPickerLine = null;
+        this.refreshInterval = null;
+
+        this.initializeApp();
     }
 
-    init() {
-        this.loadFromStorage();
+    initializeApp() {
+        this.loadStations();
         this.setupEventListeners();
-        
-        // Check if we should auto-start based on saved data
-        if (this.hasAllStationsSelected()) {
-            this.startMonitoring();
-        } else if (this.stationCount > 0) {
-            this.showStationSelection();
-        }
+        this.showStationCountSelection();
     }
 
-    hasAllStationsSelected() {
-        for (let i = 1; i <= this.stationCount; i++) {
-            if (!this.selectedStations[`station${i}`]) {
-                return false;
-            }
-        }
-        return true;
+    showStationCountSelection() {
+        // Hide all other phases
+        document.getElementById('station-selection').classList.add('hidden');
+        document.getElementById('station-customization').classList.add('hidden');
+        document.getElementById('dual-boards').classList.add('hidden');
+        document.getElementById('change-stations').classList.add('hidden');
+        
+        // Show station count selection
+        document.getElementById('station-count-selection').classList.remove('hidden');
     }
 
     setupEventListeners() {
@@ -46,10 +41,10 @@ class DualStationBoard {
             slider.addEventListener('input', (e) => {
                 const count = parseInt(e.target.value);
                 display.textContent = count;
-                this.stationCount = count; // Update count immediately for display
+                this.stationCount = count;
             });
             
-            // Set initial value
+            // Set initial values
             slider.value = this.stationCount;
             display.textContent = this.stationCount;
         }
@@ -63,554 +58,508 @@ class DualStationBoard {
         }
 
         // Apply customization
-        document.getElementById('apply-customization').addEventListener('click', () => {
-            this.applyCustomization();
-        });
+        const applyBtn = document.getElementById('apply-customization');
+        if (applyBtn) {
+            applyBtn.addEventListener('click', () => {
+                this.applyCustomization();
+            });
+        }
 
         // Change stations button
-        document.getElementById('change-stations').addEventListener('click', () => {
-            this.resetToSelection();
-        });
-
-        // Color inputs
-        ['tram-color', 'bus-color', 'train-color'].forEach(colorId => {
-            document.getElementById(colorId).addEventListener('change', (e) => {
-                const type = colorId.replace('-color', '');
-                this.customColors[type] = e.target.value;
-                this.saveToStorage();
-                this.applyCustomColors();
+        const changeBtn = document.getElementById('change-stations');
+        if (changeBtn) {
+            changeBtn.addEventListener('click', () => {
+                this.showStationCountSelection();
+                if (this.refreshInterval) {
+                    clearInterval(this.refreshInterval);
+                }
             });
-        });
+        }
 
-        // Color picker modal
-        document.getElementById('color-modal-apply').addEventListener('click', () => {
-            this.applyLineColor();
-        });
-
-        document.getElementById('color-modal-cancel').addEventListener('click', () => {
-            this.closeColorModal();
-        });
-
-        // Close modal on background click
-        document.getElementById('color-picker-modal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('color-picker-modal')) {
-                this.closeColorModal();
-            }
-        });
+        // Color picker modal handlers
+        this.setupColorPickerModal();
     }
 
     selectStationCount(count) {
         this.stationCount = count;
+        this.selectedStations = new Array(count).fill(null);
         
-        // Clear existing station data if count changed
-        this.selectedStations = {};
-        this.customNames = {};
-        
-        this.saveToStorage();
-        this.showStationSelection();
-    }
-
-    showStationSelection() {
-        // Hide count selection
+        // Hide station count selection and show station selection
         document.getElementById('station-count-selection').classList.add('hidden');
-        
-        // Show station selection
         document.getElementById('station-selection').classList.remove('hidden');
         
-        // Generate input fields based on station count
+        // Generate dynamic input fields
         this.generateStationInputs();
-        this.setupAutoComplete();
     }
 
     generateStationInputs() {
         const container = document.querySelector('.dynamic-input-container');
-        container.innerHTML = '';
+        container.innerHTML = ''; // Clear existing inputs
         
-        // Adjust grid columns based on count
-        if (this.stationCount <= 2) {
-            container.style.gridTemplateColumns = `repeat(${this.stationCount}, 1fr)`;
-        } else {
-            container.style.gridTemplateColumns = 'repeat(2, 1fr)';
-        }
-        
-        for (let i = 1; i <= this.stationCount; i++) {
+        // Create input fields based on selected count
+        for (let i = 0; i < this.stationCount; i++) {
             const inputGroup = document.createElement('div');
             inputGroup.className = 'station-input-group';
-            inputGroup.innerHTML = `
-                <label for="station${i}-input">Station ${i}</label>
-                <div class="search-container">
-                    <input type="text" id="station${i}-input" placeholder="Station ${i} eingeben..." autocomplete="off">
-                    <div id="suggestions${i}" class="suggestions"></div>
-                </div>
-            `;
+            
+            const label = document.createElement('label');
+            label.setAttribute('for', `station${i + 1}-input`);
+            label.textContent = `Station ${i + 1}`;
+            
+            const searchContainer = document.createElement('div');
+            searchContainer.className = 'search-container';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = `station${i + 1}-input`;
+            input.placeholder = `Station ${i + 1} eingeben...`;
+            input.autocomplete = 'off';
+            
+            const suggestions = document.createElement('div');
+            suggestions.id = `suggestions${i + 1}`;
+            suggestions.className = 'suggestions';
+            
+            searchContainer.appendChild(input);
+            searchContainer.appendChild(suggestions);
+            inputGroup.appendChild(label);
+            inputGroup.appendChild(searchContainer);
             container.appendChild(inputGroup);
         }
         
-        // Ensure there's only one start button
+        // Add start button (only one)
         let startButton = document.getElementById('start-monitoring');
-        if (!startButton) {
-            startButton = document.createElement('button');
-            startButton.id = 'start-monitoring';
-            startButton.className = 'start-btn';
-            startButton.disabled = true;
-            startButton.textContent = 'Abfahrtszeiten anzeigen';
-            
-            // Add to station selection container
-            const stationSelection = document.getElementById('station-selection');
-            stationSelection.appendChild(startButton);
-            
-            // Add event listener
-            startButton.addEventListener('click', () => {
-                this.showCustomizationPhase();
-            });
+        if (startButton) {
+            startButton.remove(); // Remove existing button if any
         }
+        
+        startButton = document.createElement('button');
+        startButton.id = 'start-monitoring';
+        startButton.className = 'start-btn';
         startButton.disabled = true;
+        startButton.textContent = 'Abfahrtszeiten anzeigen';
+        
+        // Add to station selection container
+        const stationSelection = document.getElementById('station-selection');
+        stationSelection.appendChild(startButton);
+        
+        // Add event listener
+        startButton.addEventListener('click', () => {
+            this.showCustomizationPhase();
+        });
+        
+        // Setup autocomplete for all inputs
+        this.setupAutoComplete();
     }
 
     setupAutoComplete() {
         for (let i = 1; i <= this.stationCount; i++) {
-            this.setupAutoCompleteForInput(`station${i}-input`, `suggestions${i}`, `station${i}`);
-        }
-    }
-
-    setupAutoCompleteForInput(inputId, suggestionsId, stationKey) {
-        const input = document.getElementById(inputId);
-        const suggestions = document.getElementById(suggestionsId);
-        if (!input || !suggestions) return;
-        
-        let currentTimeout;
-
-        // Restore saved value
-        if (this.selectedStations[stationKey]) {
-            input.value = this.selectedStations[stationKey].name;
-        }
-
-        input.addEventListener('input', (e) => {
-            const query = e.target.value.trim();
+            const input = document.getElementById(`station${i}-input`);
+            const suggestions = document.getElementById(`suggestions${i}`);
             
-            if (query.length < 2) {
-                suggestions.style.display = 'none';
-                this.selectedStations[stationKey] = null;
-                this.validateInputs();
-                this.saveToStorage();
-                return;
-            }
-
-            clearTimeout(currentTimeout);
-            currentTimeout = setTimeout(() => {
-                this.fetchStations(query, suggestions, input, stationKey);
-            }, 300);
-        });
-
-        // Hide suggestions when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!input.contains(e.target) && !suggestions.contains(e.target)) {
-                suggestions.style.display = 'none';
-            }
-        });
-    }
-
-    async fetchStations(query, suggestions, input, stationKey) {
-        try {
-            const response = await fetch(`/api/locations?query=${encodeURIComponent(query)}`);
-            const stations = await response.json();
-
-            if (stations.length === 0) {
-                suggestions.style.display = 'none';
-                return;
-            }
-
-            suggestions.innerHTML = '';
-            stations.forEach(station => {
-                const item = document.createElement('div');
-                item.className = 'suggestion-item';
-                item.textContent = station.name;
-                item.addEventListener('click', () => {
-                    input.value = station.name;
-                    this.selectedStations[stationKey] = station;
-                    suggestions.style.display = 'none';
-                    this.validateInputs();
-                    this.saveToStorage();
+            if (input && suggestions) {
+                let currentSelection = -1;
+                
+                input.addEventListener('input', (e) => {
+                    const query = e.target.value.trim();
+                    if (query.length < 2) {
+                        suggestions.style.display = 'none';
+                        return;
+                    }
+                    
+                    const results = this.searchStations(query);
+                    this.displaySuggestions(results, suggestions, input, i - 1);
+                    currentSelection = -1;
                 });
-                suggestions.appendChild(item);
-            });
 
-            suggestions.style.display = 'block';
-        } catch (error) {
-            console.error('Error fetching stations:', error);
-            suggestions.style.display = 'none';
+                input.addEventListener('keydown', (e) => {
+                    const items = suggestions.querySelectorAll('.suggestion-item');
+                    
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        currentSelection = Math.min(currentSelection + 1, items.length - 1);
+                        this.updateSelection(items, currentSelection);
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        currentSelection = Math.max(currentSelection - 1, -1);
+                        this.updateSelection(items, currentSelection);
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (currentSelection >= 0 && items[currentSelection]) {
+                            items[currentSelection].click();
+                        }
+                    } else if (e.key === 'Escape') {
+                        suggestions.style.display = 'none';
+                        currentSelection = -1;
+                    }
+                });
+
+                input.addEventListener('blur', (e) => {
+                    setTimeout(() => {
+                        suggestions.style.display = 'none';
+                    }, 150);
+                });
+            }
         }
     }
 
-    validateInputs() {
-        const startBtn = document.getElementById('start-monitoring');
-        if (!startBtn) return;
+    async loadStations() {
+        try {
+            const response = await fetch('https://transport.opendata.ch/v1/locations?type=station');
+            const data = await response.json();
+            this.stations = data.stations || [];
+        } catch (error) {
+            console.error('Error loading stations:', error);
+            this.stations = [];
+        }
+    }
+
+    searchStations(query) {
+        const normalizedQuery = query.toLowerCase();
+        return this.stations
+            .filter(station => 
+                station.name.toLowerCase().includes(normalizedQuery)
+            )
+            .slice(0, 10);
+    }
+
+    displaySuggestions(stations, container, input, stationIndex) {
+        container.innerHTML = '';
         
-        const isValid = this.hasAllStationsSelected();
-        startBtn.disabled = !isValid;
+        if (stations.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+
+        stations.forEach(station => {
+            const item = document.createElement('div');
+            item.className = 'suggestion-item';
+            item.textContent = station.name;
+            item.addEventListener('click', () => {
+                this.selectStation(station, input, container, stationIndex);
+            });
+            container.appendChild(item);
+        });
+
+        container.style.display = 'block';
+    }
+
+    updateSelection(items, selectedIndex) {
+        items.forEach((item, index) => {
+            item.classList.toggle('selected', index === selectedIndex);
+        });
+    }
+
+    selectStation(station, input, container, stationIndex) {
+        input.value = station.name;
+        container.style.display = 'none';
+        this.selectedStations[stationIndex] = station;
+        this.checkAllStationsSelected();
+    }
+
+    checkAllStationsSelected() {
+        const allSelected = this.selectedStations.every(station => station !== null);
+        const startButton = document.getElementById('start-monitoring');
+        if (startButton) {
+            startButton.disabled = !allSelected;
+        }
     }
 
     showCustomizationPhase() {
-        // Hide selection phase
         document.getElementById('station-selection').classList.add('hidden');
-        
-        // Show customization phase
         document.getElementById('station-customization').classList.remove('hidden');
-        
-        // Generate customization inputs
         this.generateCustomizationInputs();
-        this.saveToStorage();
     }
 
     generateCustomizationInputs() {
         const container = document.querySelector('.customization-container');
         container.innerHTML = '';
-        
-        // Adjust grid based on station count
-        if (this.stationCount <= 2) {
-            container.style.gridTemplateColumns = `repeat(${this.stationCount}, 1fr)`;
-        } else {
-            container.style.gridTemplateColumns = 'repeat(2, 1fr)';
-        }
-        
-        for (let i = 1; i <= this.stationCount; i++) {
+
+        for (let i = 0; i < this.stationCount; i++) {
             const inputGroup = document.createElement('div');
             inputGroup.className = 'custom-input-group';
-            inputGroup.innerHTML = `
-                <label for="custom-name${i}">Anzeigename für Station ${i}:</label>
-                <input type="text" id="custom-name${i}" placeholder="Custom Name..." value="${this.customNames[`station${i}`] || this.selectedStations[`station${i}`]?.name || ''}">
-            `;
+            
+            const label = document.createElement('label');
+            label.setAttribute('for', `custom-name${i + 1}`);
+            label.textContent = `Anzeigename für Station ${i + 1}:`;
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = `custom-name${i + 1}`;
+            input.placeholder = this.selectedStations[i]?.name || 'Custom Name...';
+            input.value = this.customNames[i] || this.selectedStations[i]?.name || '';
+            
+            inputGroup.appendChild(label);
+            inputGroup.appendChild(input);
             container.appendChild(inputGroup);
         }
     }
 
     applyCustomization() {
-        // Get custom names
-        for (let i = 1; i <= this.stationCount; i++) {
-            const input = document.getElementById(`custom-name${i}`);
-            if (input) {
-                this.customNames[`station${i}`] = input.value || this.selectedStations[`station${i}`].name;
+        // Save custom names
+        for (let i = 0; i < this.stationCount; i++) {
+            const input = document.getElementById(`custom-name${i + 1}`);
+            if (input && input.value.trim()) {
+                this.customNames[i] = input.value.trim();
+            } else {
+                this.customNames[i] = this.selectedStations[i]?.name || `Station ${i + 1}`;
             }
         }
-        
-        this.saveToStorage();
+
+        // Save color preferences
+        this.lineColors.tram = document.getElementById('tram-color').value;
+        this.lineColors.bus = document.getElementById('bus-color').value;
+        this.lineColors.train = document.getElementById('train-color').value;
+
         this.startMonitoring();
     }
 
     startMonitoring() {
-        // Hide selection and customization phases
-        document.getElementById('station-count-selection').classList.add('hidden');
-        document.getElementById('station-selection').classList.add('hidden');
         document.getElementById('station-customization').classList.add('hidden');
-        
-        // Show dual boards
         document.getElementById('dual-boards').classList.remove('hidden');
         document.getElementById('change-stations').classList.remove('hidden');
 
-        // Generate board layout
-        this.generateBoards();
-        this.applyCustomColors();
-
-        // Start fetching data for all stations
-        this.startDataFetching();
+        this.createStationBoards();
+        this.fetchAllDepartures();
+        
+        // Refresh every 25 seconds
+        this.refreshInterval = setInterval(() => {
+            this.fetchAllDepartures();
+        }, 25000);
     }
 
-    generateBoards() {
+    createStationBoards() {
         const dualBoards = document.getElementById('dual-boards');
         dualBoards.innerHTML = '';
-        
+
+        for (let i = 0; i < this.stationCount; i++) {
+            const boardContainer = document.createElement('div');
+            boardContainer.className = 'board-container';
+            
+            const stationHeader = document.createElement('div');
+            stationHeader.className = 'station-header';
+            
+            const stationName = document.createElement('h2');
+            stationName.id = `station${i + 1}-name`;
+            stationName.textContent = this.customNames[i] || this.selectedStations[i]?.name || `Station ${i + 1}`;
+            
+            const lastUpdated = document.createElement('div');
+            lastUpdated.className = 'last-updated';
+            lastUpdated.id = `station${i + 1}-updated`;
+            lastUpdated.textContent = 'Lädt...';
+            
+            stationHeader.appendChild(stationName);
+            stationHeader.appendChild(lastUpdated);
+            
+            const departureBoard = document.createElement('div');
+            departureBoard.className = 'departure-board';
+            
+            const boardHeader = document.createElement('div');
+            boardHeader.className = 'board-header';
+            boardHeader.innerHTML = `
+                <div class="header-line">Linie</div>
+                <div class="header-destination">Ziel</div>
+                <div class="header-platform">Gleis</div>
+                <div class="header-time">Abfahrt</div>
+            `;
+            
+            const departuresList = document.createElement('div');
+            departuresList.id = `departures${i + 1}`;
+            departuresList.className = 'departures-list';
+            departuresList.innerHTML = '<div class="no-data">Lade Abfahrtszeiten...</div>';
+            
+            departureBoard.appendChild(boardHeader);
+            departureBoard.appendChild(departuresList);
+            boardContainer.appendChild(stationHeader);
+            boardContainer.appendChild(departureBoard);
+            dualBoards.appendChild(boardContainer);
+        }
+
         // Adjust grid layout based on station count
         if (this.stationCount === 1) {
             dualBoards.style.gridTemplateColumns = '1fr';
         } else if (this.stationCount === 2) {
             dualBoards.style.gridTemplateColumns = '1fr 1fr';
-        } else if (this.stationCount === 3) {
-            dualBoards.style.gridTemplateColumns = '1fr 1fr 1fr';
-        } else {
+        } else if (this.stationCount <= 4) {
             dualBoards.style.gridTemplateColumns = 'repeat(2, 1fr)';
-        }
-        
-        for (let i = 1; i <= this.stationCount; i++) {
-            const boardContainer = document.createElement('div');
-            boardContainer.className = 'board-container';
-            boardContainer.innerHTML = `
-                <div class="station-header">
-                    <h2 id="station${i}-name">${this.customNames[`station${i}`] || this.selectedStations[`station${i}`].name}</h2>
-                    <div class="last-updated" id="station${i}-updated">Lädt...</div>
-                </div>
-                <div class="departure-board">
-                    <div class="board-header">
-                        <div class="header-line">Linie</div>
-                        <div class="header-destination">Ziel</div>
-                        <div class="header-platform">Gleis</div>
-                        <div class="header-time">Abfahrt</div>
-                    </div>
-                    <div id="departures${i}" class="departures-list">
-                        <div class="no-data">Lade Abfahrtszeiten...</div>
-                    </div>
-                </div>
-            `;
-            dualBoards.appendChild(boardContainer);
+        } else {
+            dualBoards.style.gridTemplateColumns = 'repeat(3, 1fr)';
         }
     }
 
-    startDataFetching() {
-        // Clear existing intervals
-        this.updateIntervals.forEach(interval => clearInterval(interval));
-        this.updateIntervals = [];
-
-        // Fetch data immediately for all stations
-        for (let i = 1; i <= this.stationCount; i++) {
-            if (this.selectedStations[`station${i}`]) {
-                this.fetchDeparturesForStation(
-                    this.selectedStations[`station${i}`].id, 
-                    `departures${i}`, 
-                    `station${i}-updated`
-                );
-                
-                // Set up interval for auto-refresh
-                this.updateIntervals.push(
-                    setInterval(() => {
-                        this.fetchDeparturesForStation(
-                            this.selectedStations[`station${i}`].id, 
-                            `departures${i}`, 
-                            `station${i}-updated`
-                        );
-                    }, 25000)
-                );
+    async fetchAllDepartures() {
+        for (let i = 0; i < this.stationCount; i++) {
+            if (this.selectedStations[i]) {
+                await this.fetchDepartures(this.selectedStations[i], i + 1);
             }
         }
     }
 
-    async fetchDeparturesForStation(stationId, containerId, updatedId) {
+    async fetchDepartures(station, boardNumber) {
         try {
-            const response = await fetch(`/api/board?station=${stationId}`);
+            const response = await fetch(`https://transport.opendata.ch/v1/stationboard?station=${encodeURIComponent(station.name)}&limit=15`);
             const data = await response.json();
-
-            if (data.error) {
-                this.showError(containerId, data.error);
-                return;
+            
+            if (data.stationboard) {
+                this.updateDepartureBoard(data.stationboard, boardNumber);
+                
+                const updatedElement = document.getElementById(`station${boardNumber}-updated`);
+                if (updatedElement) {
+                    updatedElement.textContent = `Letzte Aktualisierung: ${new Date().toLocaleTimeString('de-CH')}`;
+                }
             }
-
-            this.displayDepartures(data.departures, containerId);
-            this.updateTimestamp(updatedId, data.updated);
-
         } catch (error) {
-            console.error('Error fetching departures:', error);
-            this.showError(containerId, 'Fehler beim Laden der Daten');
+            console.error(`Error fetching departures for station ${boardNumber}:`, error);
+            const departuresContainer = document.getElementById(`departures${boardNumber}`);
+            if (departuresContainer) {
+                departuresContainer.innerHTML = '<div class="no-data">Fehler beim Laden der Daten</div>';
+            }
         }
     }
 
-    displayDepartures(departures, containerId) {
-        const container = document.getElementById(containerId);
-        
+    updateDepartureBoard(departures, boardNumber) {
+        const container = document.getElementById(`departures${boardNumber}`);
+        if (!container) return;
+
         if (!departures || departures.length === 0) {
             container.innerHTML = '<div class="no-data">Keine Abfahrten verfügbar</div>';
             return;
         }
 
-        const rows = departures.map(dep => {
-            const departureTime = new Date(dep.departure);
-            const now = new Date();
-            const diffMinutes = Math.max(0, Math.floor((departureTime - now) / 60000));
+        container.innerHTML = '';
+
+        departures.slice(0, 12).forEach(departure => {
+            const row = document.createElement('div');
+            row.className = 'departure-row';
+
+            const lineNumber = document.createElement('div');
+            lineNumber.className = `line-number ${this.getLineType(departure.category || departure.name)}`;
+            lineNumber.textContent = departure.number || departure.name || '?';
+            lineNumber.style.backgroundColor = this.getLineColor(departure.number || departure.name);
+            lineNumber.style.cursor = 'pointer';
+            lineNumber.addEventListener('click', () => {
+                this.showColorPicker(departure.number || departure.name);
+            });
+
+            const destination = document.createElement('div');
+            destination.className = 'destination';
+            destination.textContent = departure.to || 'Unbekannt';
+
+            const platform = document.createElement('div');
+            platform.className = 'platform';
+            platform.textContent = departure.stop?.platform || '-';
+
+            const departureTime = document.createElement('div');
+            departureTime.className = 'departure-time';
             
-            let timeDisplay = diffMinutes === 0 ? 'Jetzt' : `${diffMinutes}'`;
-            let delayDisplay = '';
-            
-            if (dep.delay > 0) {
-                delayDisplay = `<span class="delay">+${dep.delay}'</span>`;
-            }
+            const { time, delay } = this.formatTime(departure.stop?.departure || departure.stop?.departureTimestamp);
+            departureTime.innerHTML = delay ? `${time} <span class="delay">+${delay}</span>` : time;
 
-            const lineClass = this.getLineClass(dep.category);
-            const lineColor = this.getLineColor(dep.line, dep.category);
-
-            return `
-                <div class="departure-row">
-                    <div class="line-number ${lineClass}" 
-                         style="background-color: ${lineColor}; cursor: pointer;" 
-                         onclick="board.openColorPicker('${dep.line}', '${dep.category}')"
-                         title="Klicken um Farbe zu ändern">${dep.line}</div>
-                    <div class="destination">${dep.destination}</div>
-                    <div class="platform">${dep.platform || '-'}</div>
-                    <div class="departure-time">
-                        ${timeDisplay}
-                        ${delayDisplay}
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        container.innerHTML = rows;
+            row.appendChild(lineNumber);
+            row.appendChild(destination);
+            row.appendChild(platform);
+            row.appendChild(departureTime);
+            container.appendChild(row);
+        });
     }
 
-    openColorPicker(lineNumber, category) {
-        this.currentLineForColor = lineNumber;
+    formatTime(timestamp) {
+        if (!timestamp) return { time: '--:--', delay: null };
+        
+        const date = new Date(timestamp * 1000);
+        const now = new Date();
+        const diffMinutes = Math.round((date.getTime() - now.getTime()) / (1000 * 60));
+        
+        if (diffMinutes <= 0) {
+            return { time: 'Jetzt', delay: null };
+        } else if (diffMinutes < 60) {
+            return { time: `${diffMinutes}'`, delay: null };
+        } else {
+            return { 
+                time: date.toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }), 
+                delay: null 
+            };
+        }
+    }
+
+    getLineType(category) {
+        if (!category) return 'bus';
+        const cat = category.toLowerCase();
+        if (cat.includes('tram') || cat.includes('t')) return 'tram';
+        if (cat.includes('bus') || cat.includes('b')) return 'bus';
+        if (cat.includes('s') || cat.includes('ic') || cat.includes('ir')) return 'train';
+        return 'bus';
+    }
+
+    getLineColor(lineNumber) {
+        const savedColor = localStorage.getItem(`line-color-${lineNumber}`);
+        if (savedColor) return savedColor;
+        
+        // Default colors based on line type
+        if (lineNumber && lineNumber.toString().match(/^[0-9]+$/)) {
+            const num = parseInt(lineNumber);
+            if (num >= 1 && num <= 17) return this.lineColors.tram;
+            if (num >= 20 && num <= 35) return this.lineColors.bus;
+        }
+        return this.lineColors.bus;
+    }
+
+    setupColorPickerModal() {
+        const modal = document.getElementById('color-picker-modal');
+        const applyBtn = document.getElementById('color-modal-apply');
+        const cancelBtn = document.getElementById('color-modal-cancel');
+        const colorInput = document.getElementById('color-modal-input');
+
+        if (applyBtn) {
+            applyBtn.addEventListener('click', () => {
+                if (this.currentColorPickerLine && colorInput.value) {
+                    this.applyLineColor(this.currentColorPickerLine, colorInput.value);
+                    modal.classList.add('hidden');
+                }
+            });
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+        }
+
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
+    }
+
+    showColorPicker(lineNumber) {
+        this.currentColorPickerLine = lineNumber;
         const modal = document.getElementById('color-picker-modal');
         const lineSpan = document.getElementById('color-modal-line');
         const colorInput = document.getElementById('color-modal-input');
-        
-        lineSpan.textContent = lineNumber;
-        colorInput.value = this.individualLineColors[lineNumber] || this.getCustomColor(category);
+
+        if (lineSpan) lineSpan.textContent = lineNumber;
+        if (colorInput) {
+            const currentColor = this.getLineColor(lineNumber);
+            colorInput.value = currentColor;
+        }
         
         modal.classList.remove('hidden');
     }
 
-    applyLineColor() {
-        const colorInput = document.getElementById('color-modal-input');
+    applyLineColor(lineNumber, color) {
+        localStorage.setItem(`line-color-${lineNumber}`, color);
         
-        if (this.currentLineForColor) {
-            this.individualLineColors[this.currentLineForColor] = colorInput.value;
-            this.saveToStorage();
-            this.applyCustomColors(); // Apply colors immediately
-            
-            // Refresh all displays
-            for (let i = 1; i <= this.stationCount; i++) {
-                if (this.selectedStations[`station${i}`]) {
-                    this.fetchDeparturesForStation(
-                        this.selectedStations[`station${i}`].id, 
-                        `departures${i}`, 
-                        `station${i}-updated`
-                    );
-                }
+        // Update all visible line numbers with this color
+        document.querySelectorAll('.line-number').forEach(element => {
+            if (element.textContent === lineNumber) {
+                element.style.backgroundColor = color;
             }
-        }
-        
-        this.closeColorModal();
-    }
-
-    closeColorModal() {
-        document.getElementById('color-picker-modal').classList.add('hidden');
-        this.currentLineForColor = null;
-    }
-
-    getLineColor(lineNumber, category) {
-        // Check if there's an individual color set for this line
-        if (this.individualLineColors[lineNumber]) {
-            return this.individualLineColors[lineNumber];
-        }
-        
-        // Otherwise use category default color
-        return this.getCustomColor(category);
-    }
-
-    getLineClass(category) {
-        if (!category) return '';
-        
-        const cat = category.toLowerCase();
-        if (cat.includes('bus') || cat.includes('b')) return 'bus';
-        if (cat.includes('tram') || cat.includes('t')) return 'tram';
-        if (cat.includes('train') || cat.includes('ic') || cat.includes('ir') || cat.includes('re') || cat.includes('s')) return 'train';
-        return '';
-    }
-
-    getCustomColor(category) {
-        if (!category) return this.customColors.train;
-        
-        const cat = category.toLowerCase();
-        if (cat.includes('bus') || cat.includes('b')) return this.customColors.bus;
-        if (cat.includes('tram') || cat.includes('t')) return this.customColors.tram;
-        if (cat.includes('train') || cat.includes('ic') || cat.includes('ir') || cat.includes('re') || cat.includes('s')) return this.customColors.train;
-        return this.customColors.train;
-    }
-
-    applyCustomColors() {
-        // Create dynamic CSS for custom colors
-        let style = document.getElementById('dynamic-colors');
-        if (!style) {
-            style = document.createElement('style');
-            style.id = 'dynamic-colors';
-            document.head.appendChild(style);
-        }
-        
-        style.textContent = `
-            .line-number.tram { background-color: ${this.customColors.tram} !important; }
-            .line-number.bus { background-color: ${this.customColors.bus} !important; }
-            .line-number.train { background-color: ${this.customColors.train} !important; }
-        `;
-    }
-
-    updateTimestamp(updatedId, timestamp) {
-        const element = document.getElementById(updatedId);
-        if (element && timestamp) {
-            const date = new Date(timestamp);
-            element.textContent = `Aktualisiert: ${date.toLocaleTimeString('de-CH')}`;
-        }
-    }
-
-    showError(containerId, message) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = `<div class="no-data" style="color: #ff4444;">${message}</div>`;
-    }
-
-    loadFromStorage() {
-        const saved = localStorage.getItem('zvv-board-config');
-        if (saved) {
-            try {
-                const config = JSON.parse(saved);
-                this.stationCount = config.stationCount || 2;
-                this.selectedStations = config.selectedStations || {};
-                this.customNames = config.customNames || {};
-                this.customColors = config.customColors || { tram: '#4ecdc4', bus: '#ff6b6b', train: '#ffd700' };
-                this.individualLineColors = config.individualLineColors || {};
-                
-                // Set color inputs if they exist
-                const tramColor = document.getElementById('tram-color');
-                const busColor = document.getElementById('bus-color');
-                const trainColor = document.getElementById('train-color');
-                
-                if (tramColor) tramColor.value = this.customColors.tram;
-                if (busColor) busColor.value = this.customColors.bus;
-                if (trainColor) trainColor.value = this.customColors.train;
-                
-                console.log('Loaded configuration from storage');
-            } catch (error) {
-                console.error('Error loading from storage:', error);
-            }
-        }
-    }
-
-    saveToStorage() {
-        const config = {
-            stationCount: this.stationCount,
-            selectedStations: this.selectedStations,
-            customNames: this.customNames,
-            customColors: this.customColors,
-            individualLineColors: this.individualLineColors
-        };
-        localStorage.setItem('zvv-board-config', JSON.stringify(config));
-        console.log('Configuration saved to storage');
-    }
-
-    resetToSelection() {
-        // Clear intervals
-        this.updateIntervals.forEach(interval => clearInterval(interval));
-        this.updateIntervals = [];
-
-        // Clear stored data
-        localStorage.removeItem('zvv-board-config');
-        this.stationCount = 2;
-        this.selectedStations = {};
-        this.customNames = {};
-        this.individualLineColors = {};
-
-        // Show count selection, hide others
-        document.getElementById('station-count-selection').classList.remove('hidden');
-        document.getElementById('station-selection').classList.add('hidden');
-        document.getElementById('station-customization').classList.add('hidden');
-        document.getElementById('dual-boards').classList.add('hidden');
-        document.getElementById('change-stations').classList.add('hidden');
-        
-        // Reset count button selection
-        document.querySelectorAll('.count-btn').forEach(btn => {
-            btn.classList.remove('selected');
         });
     }
 }
 
-// Global reference for onclick handlers
-let board;
-
-// Initialize the application when DOM is loaded
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    board = new DualStationBoard();
+    new ZVVBoard();
 });
