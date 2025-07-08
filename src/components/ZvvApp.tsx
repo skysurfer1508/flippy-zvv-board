@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { StationCountSelector } from "./StationCountSelector";
 import { StationSelection } from "./StationSelection";
@@ -301,6 +300,7 @@ export function ZvvApp() {
                 onStationChange={handleStationChange}
                 onNext={handleToCustomization}
                 canProceed={canProceed}
+                country={appState.country}
               />
               <div className="text-center">
                 <button
@@ -327,6 +327,7 @@ export function ZvvApp() {
                 stations={appState.stations}
                 onStationUpdate={handleStationUpdate}
                 onNext={handleToMonitoring}
+                country={appState.country}
               />
               <div className="text-center">
                 <button
@@ -354,6 +355,7 @@ export function ZvvApp() {
                 language={appState.language}
                 theme={appState.theme}
                 isFullscreen={appState.isFullscreen}
+                country={appState.country}
               />
               
               <SettingsMenu 
@@ -373,7 +375,7 @@ export function ZvvApp() {
 
         {!appState.isFullscreen && (
           <footer className="text-center mt-12 text-sm text-muted-foreground font-mono">
-            <p>{t.dataFrom}</p>
+            <p>{appState.country === 'canada' ? t.dataFromCanada : t.dataFrom}</p>
           </footer>
         )}
       </div>

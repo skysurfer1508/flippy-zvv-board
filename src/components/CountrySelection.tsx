@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +30,13 @@ export function CountrySelection({ selectedCountry, language, onCountrySelect }:
       flag: '🇨🇭',
       supported: true,
       description: t.countrySwitzerlandDesc || 'Vollständig unterstützt mit ZVV API'
+    },
+    {
+      id: 'canada',
+      name: t.countryCanadaName || 'Canada (Kelowna)',
+      flag: '🇨🇦',
+      supported: true,
+      description: t.countryCanadaDesc || 'BC Transit with live data'
     },
     {
       id: 'germany',
@@ -140,7 +146,7 @@ export function CountrySelection({ selectedCountry, language, onCountrySelect }:
         ))}
       </div>
 
-      {selectedCountry === 'switzerland' && (
+      {(selectedCountry === 'switzerland' || selectedCountry === 'canada') && (
         <div className="text-center">
           <Button
             onClick={() => onCountrySelect(selectedCountry)}
