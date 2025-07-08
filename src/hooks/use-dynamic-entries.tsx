@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface DynamicEntriesOptions {
@@ -17,7 +16,9 @@ export function useDynamicEntries({
 
   const calculateMaxEntries = useCallback(() => {
     if (!isFullscreen) {
-      setMaxEntries(isLedTheme ? 8 : 10);
+      const baseEntries = isLedTheme ? 8 : 10;
+      // For LED theme, subtract 1 to show the end of the list
+      setMaxEntries(isLedTheme ? baseEntries - 1 : baseEntries);
       return;
     }
 
@@ -54,7 +55,12 @@ export function useDynamicEntries({
     const minEntries = isLedTheme ? 6 : 8;
     const maxEntriesLimit = isLedTheme ? 50 : 60;
     
-    const finalEntries = Math.max(minEntries, Math.min(calculatedEntries, maxEntriesLimit));
+    let finalEntries = Math.max(minEntries, Math.min(calculatedEntries, maxEntriesLimit));
+    
+    // For LED theme, subtract 1 to leave space at the bottom to show list end
+    if (isLedTheme) {
+      finalEntries = Math.max(minEntries - 1, finalEntries - 1);
+    }
     
     console.log('Dynamic entries calculation:', {
       viewportHeight,
@@ -66,7 +72,8 @@ export function useDynamicEntries({
       calculatedEntries,
       finalEntries,
       theme: isLedTheme ? 'LED' : 'Standard',
-      isMobile
+      isMobile,
+      ledAdjustment: isLedTheme ? 'Reduced by 1 for list end visibility' : 'No adjustment'
     });
 
     setMaxEntries(finalEntries);
