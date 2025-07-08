@@ -1,7 +1,5 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Loader, Clock, AlertCircle } from "lucide-react";
 import { ZvvApi } from "@/services/zvvApi";
 import { StationConfig, Departure } from "@/types/zvv";
@@ -32,7 +30,7 @@ export function DepartureBoard({ stations }: DepartureBoardProps) {
       );
       return results;
     },
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
     enabled: stations.length > 0
   });
 
@@ -54,18 +52,18 @@ export function DepartureBoard({ stations }: DepartureBoardProps) {
 
   const getLineColor = (category: string) => {
     const cat = category.toLowerCase();
-    if (cat.includes('tram') || cat.includes('str')) return 'bg-blue-500';
-    if (cat.includes('bus')) return 'bg-red-500';
-    if (cat.includes('train') || cat.includes('s')) return 'bg-green-500';
-    return 'bg-gray-500';
+    if (cat.includes('tram') || cat.includes('str')) return 'bg-blue-600';
+    if (cat.includes('bus')) return 'bg-red-600';
+    if (cat.includes('train') || cat.includes('s')) return 'bg-green-600';
+    return 'bg-gray-600';
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-12 bg-background">
         <div className="text-center space-y-4">
           <Loader className="h-8 w-8 animate-spin mx-auto text-primary" />
-          <p className="text-muted-foreground">Lade Abfahrtszeiten...</p>
+          <p className="text-foreground font-mono">Lade Abfahrtszeiten...</p>
         </div>
       </div>
     );
@@ -73,82 +71,101 @@ export function DepartureBoard({ stations }: DepartureBoardProps) {
 
   if (error) {
     return (
-      <Card className="border-destructive">
-        <CardContent className="pt-6">
+      <div className="bg-background border border-destructive rounded-lg">
+        <div className="p-6">
           <div className="text-center space-y-4">
             <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
-            <p className="text-destructive">Fehler beim Laden der Abfahrtszeiten</p>
+            <p className="text-destructive font-mono">Fehler beim Laden der Abfahrtszeiten</p>
             <button 
               onClick={() => refetch()}
-              className="text-primary hover:text-primary/80 underline"
+              className="text-primary hover:text-primary/80 underline font-mono"
             >
               Nochmals versuchen
             </button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {departureData?.map((stationData) => (
-        <Card key={stationData.stationId} className="overflow-hidden">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center justify-between">
-              <span>{stationData.stationName}</span>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Clock className="h-4 w-4 mr-1" />
-                Live
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
+        <div key={stationData.stationId} className="zvv-board rounded-lg overflow-hidden border border-border">
+          {/* Station Header */}
+          <div className="zvv-header px-6 py-4 flex items-center justify-between">
+            <h2 className="text-2xl font-bold font-mono">{stationData.stationName}</h2>
+            <div className="flex items-center text-sm font-mono zvv-live-indicator">
+              <Clock className="h-4 w-4 mr-2" />
+              LIVE
+            </div>
+          </div>
+
+          {/* Departure Table */}
+          <div className="bg-background">
+            {/* Table Header */}
+            <div className="grid grid-cols-12 gap-2 px-6 py-3 bg-muted border-b border-border font-mono text-sm font-bold uppercase tracking-wider">
+              <div className="col-span-2">Linie</div>
+              <div className="col-span-6">Richtung</div>
+              <div className="col-span-2">Gl.</div>
+              <div className="col-span-2 text-right">Abfahrt</div>
+            </div>
+
+            {/* Departure Rows */}
             {stationData.departures.length === 0 ? (
-              <p className="text-center text-muted-foreground py-4">
+              <div className="text-center py-8 text-muted-foreground font-mono">
                 Keine Abfahrten verfügbar
-              </p>
+              </div>
             ) : (
-              <div className="space-y-2">
-                {stationData.departures.slice(0, 8).map((departure, index) => (
+              <div className="max-h-96 overflow-y-auto">
+                {stationData.departures.slice(0, 10).map((departure, index) => (
                   <div
                     key={`${departure.name}-${departure.stop.departure}-${index}`}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                    className="zvv-departure-row grid grid-cols-12 gap-2 px-6 py-4 hover:bg-muted transition-colors"
                   >
-                    <div className="flex items-center space-x-3">
-                      <Badge 
-                        className={`${getLineColor(departure.category)} text-white font-bold min-w-[3rem] justify-center`}
-                      >
+                    {/* Line Number */}
+                    <div className="col-span-2 flex items-center">
+                      <span className={`zvv-line-number px-3 py-1 rounded text-xs font-bold min-w-[3rem] text-center ${getLineColor(departure.category)}`}>
                         {departure.number || departure.name}
-                      </Badge>
-                      <div>
-                        <p className="font-medium">{departure.to}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {departure.category}
-                        </p>
+                      </span>
+                    </div>
+
+                    {/* Destination */}
+                    <div className="col-span-6 flex flex-col justify-center">
+                      <div className="font-mono font-bold text-foreground truncate">
+                        {departure.to}
+                      </div>
+                      <div className="font-mono text-xs text-muted-foreground uppercase">
+                        {departure.category}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-mono font-bold text-lg">
-                        {formatDepartureTime(departure)}
-                      </p>
-                      {departure.stop.delay && departure.stop.delay > 0 && (
-                        <p className="text-xs text-destructive">
-                          +{departure.stop.delay}'
-                        </p>
-                      )}
+
+                    {/* Platform */}
+                    <div className="col-span-2 flex items-center justify-center">
                       {departure.stop.platform && (
-                        <p className="text-xs text-muted-foreground">
-                          Gleis {departure.stop.platform}
-                        </p>
+                        <span className="font-mono font-bold text-primary">
+                          {departure.stop.platform}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Departure Time */}
+                    <div className="col-span-2 flex flex-col items-end justify-center">
+                      <div className="font-mono font-bold text-lg text-primary">
+                        {formatDepartureTime(departure)}
+                      </div>
+                      {departure.stop.delay && departure.stop.delay > 0 && (
+                        <div className="font-mono text-xs text-destructive">
+                          +{departure.stop.delay}'
+                        </div>
                       )}
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ))}
     </div>
   );

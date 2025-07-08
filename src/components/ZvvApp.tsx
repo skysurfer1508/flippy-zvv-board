@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { StationCountSelector } from "./StationCountSelector";
 import { StationSelection } from "./StationSelection";
@@ -140,7 +139,7 @@ export function ZvvApp() {
       <div className="min-h-screen bg-background p-4 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Lade Anwendung...</p>
+          <p className="text-foreground font-mono">Lade Anwendung...</p>
         </div>
       </div>
     );
@@ -148,10 +147,10 @@ export function ZvvApp() {
 
   return (
     <div className="min-h-screen bg-background p-4">
-      <div className="container mx-auto max-w-4xl">
+      <div className="container mx-auto max-w-6xl">
         <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">ZVV Abfahrtszeiten</h1>
-          <p className="text-muted-foreground">Live-Anzeige für mehrere Stationen</p>
+          <h1 className="text-5xl font-bold mb-4 text-primary font-mono tracking-wider">ZVV ABFAHRTSZEITEN</h1>
+          <p className="text-muted-foreground font-mono text-lg uppercase tracking-wide">Live-Anzeige für mehrere Stationen</p>
         </header>
 
         <main>
@@ -163,7 +162,7 @@ export function ZvvApp() {
           )}
 
           {appState.phase === 'station-selection' && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               <StationSelection
                 stationCount={appState.stationCount}
                 stations={appState.stations}
@@ -172,10 +171,9 @@ export function ZvvApp() {
                 canProceed={canProceed}
               />
               <div className="text-center">
-                <Button
-                  variant="default"
+                <button
                   onClick={handleBack}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 border-2 border-primary shadow-lg font-semibold px-8 py-3 text-base"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 border-2 border-primary shadow-lg font-bold px-8 py-4 text-lg font-mono rounded-lg transition-all duration-200 hover:scale-105"
                   style={{
                     WebkitAppearance: 'none',
                     MozAppearance: 'none',
@@ -184,21 +182,20 @@ export function ZvvApp() {
                     borderColor: 'hsl(var(--primary))'
                   }}
                 >
-                  <ChevronLeft className="h-5 w-5 mr-2" />
-                  Zurück zur Stationsanzahl
-                </Button>
+                  <ChevronLeft className="h-5 w-5 mr-2 inline" />
+                  ZURÜCK ZUR STATIONSANZAHL
+                </button>
               </div>
             </div>
           )}
 
           {appState.phase === 'monitoring' && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               <DepartureBoard stations={appState.stations} />
               <div className="text-center">
-                <Button
-                  variant="default"
+                <button
                   onClick={handleReconfigure}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 border-2 border-primary shadow-lg font-semibold px-8 py-3 text-base"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 border-2 border-primary shadow-lg font-bold px-8 py-4 text-lg font-mono rounded-lg transition-all duration-200 hover:scale-105"
                   style={{
                     WebkitAppearance: 'none',
                     MozAppearance: 'none',
@@ -207,16 +204,16 @@ export function ZvvApp() {
                     borderColor: 'hsl(var(--primary))'
                   }}
                 >
-                  <ChevronLeft className="h-5 w-5 mr-2" />
-                  Stationen neu konfigurieren
-                </Button>
+                  <ChevronLeft className="h-5 w-5 mr-2 inline" />
+                  STATIONEN NEU KONFIGURIEREN
+                </button>
               </div>
             </div>
           )}
         </main>
 
-        <footer className="text-center mt-12 text-sm text-muted-foreground">
-          <p>Daten von transport.opendata.ch</p>
+        <footer className="text-center mt-12 text-sm text-muted-foreground font-mono">
+          <p>DATEN VON TRANSPORT.OPENDATA.CH</p>
         </footer>
       </div>
     </div>
