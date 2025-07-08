@@ -2,8 +2,11 @@
 import { useState, useEffect } from "react";
 import { StationCountSelector } from "./StationCountSelector";
 import { StationSelection } from "./StationSelection";
+import { DepartureBoard } from "./DepartureBoard";
 import { AppState, StationConfig } from "@/types/zvv";
 import { toast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 
 const INITIAL_STATE: AppState = {
   stationCount: 2,
@@ -25,7 +28,16 @@ export function ZvvApp() {
     if (savedState) {
       try {
         const parsed = JSON.parse(savedState);
-        setAppState(parsed);
+        // Validate that all required stations are configured
+        const allStationsConfigured = parsed.stations?.length === parsed.stationCount && 
+                                    parsed.stations.every((station: StationConfig) => station.id && station.name);
+        
+        if (allStationsConfigured && parsed.phase !== 'count-selection') {
+          // Auto-load to monitoring phase if stations are configured
+          setAppState(prev => ({ ...parsed, phase: 'monitoring' }));
+        } else {
+          setAppState(parsed);
+        }
       } catch (error) {
         console.error('Error loading saved state:', error);
         toast({
@@ -67,7 +79,7 @@ export function ZvvApp() {
   const handleNext = () => {
     setAppState(prev => ({
       ...prev,
-      phase: 'customization'
+      phase: 'monitoring'
     }));
   };
 
@@ -77,9 +89,13 @@ export function ZvvApp() {
   const handleBack = () => {
     if (appState.phase === 'station-selection') {
       setAppState(prev => ({ ...prev, phase: 'count-selection' }));
-    } else if (appState.phase === 'customization') {
+    } else if (appState.phase === 'monitoring') {
       setAppState(prev => ({ ...prev, phase: 'station-selection' }));
     }
+  };
+
+  const handleReconfigure = () => {
+    setAppState(prev => ({ ...prev, phase: 'count-selection' }));
   };
 
   return (
@@ -99,7 +115,7 @@ export function ZvvApp() {
           )}
 
           {appState.phase === 'station-selection' && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <StationSelection
                 stationCount={appState.stationCount}
                 stations={appState.stations}
@@ -107,28 +123,32 @@ export function ZvvApp() {
                 onNext={handleNext}
                 canProceed={canProceed}
               />
-              {appState.stationCount > 0 && (
-                <div className="text-center">
-                  <button
-                    onClick={handleBack}
-                    className="text-sm text-muted-foreground hover:text-foreground underline"
-                  >
-                    ← Zurück zur Stationsanzahl
-                  </button>
-                </div>
-              )}
+              <div className="text-center">
+                <Button
+                  variant="ghost"
+                  onClick={handleBack}
+                  className="text-primary hover:text-primary/80"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-2" />
+                  Zurück zur Stationsanzahl
+                </Button>
+              </div>
             </div>
           )}
 
-          {appState.phase === 'customization' && (
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold mb-4">Anpassung folgt...</h2>
-              <button
-                onClick={handleBack}
-                className="text-sm text-muted-foreground hover:text-foreground underline"
-              >
-                ← Zurück zur Stationsauswahl
-              </button>
+          {appState.phase === 'monitoring' && (
+            <div className="space-y-6">
+              <DepartureBoard stations={appState.stations} />
+              <div className="text-center">
+                <Button
+                  variant="outline"
+                  onClick={handleReconfigure}
+                  className="text-primary border-primary hover:bg-primary hover:text-primary-foreground"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-2" />
+                  Stationen neu konfigurieren
+                </Button>
+              </div>
             </div>
           )}
         </main>
