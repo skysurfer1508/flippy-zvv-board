@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZVV Doppel-Abfahrtszeiten</title>
+    <title>ZVV Abfahrtszeiten</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -25,39 +25,15 @@
             <!-- Station Selection Phase -->
             <div id="station-selection" class="station-selection hidden">
                 <div class="dynamic-input-container">
-                    <div class="station-input-group">
-                        <label for="station1-input">Station 1 (Links)</label>
-                        <div class="search-container">
-                            <input type="text" id="station1-input" placeholder="Erste Station eingeben..." autocomplete="off">
-                            <div id="suggestions1" class="suggestions"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="station-input-group">
-                        <label for="station2-input">Station 2 (Rechts)</label>
-                        <div class="search-container">
-                            <input type="text" id="station2-input" placeholder="Zweite Station eingeben..." autocomplete="off">
-                            <div id="suggestions2" class="suggestions"></div>
-                        </div>
-                    </div>
+                    <!-- Station inputs will be generated dynamically -->
                 </div>
-                
-                
             </div>
 
             <!-- Station Customization Phase -->
             <div id="station-customization" class="station-customization hidden">
                 <h2>Stationen anpassen</h2>
                 <div class="customization-container">
-                    <div class="custom-input-group">
-                        <label for="custom-name1">Anzeigename für Station 1:</label>
-                        <input type="text" id="custom-name1" placeholder="Custom Name...">
-                    </div>
-                    
-                    <div class="custom-input-group">
-                        <label for="custom-name2">Anzeigename für Station 2:</label>
-                        <input type="text" id="custom-name2" placeholder="Custom Name...">
-                    </div>
+                    <!-- Custom inputs will be generated dynamically -->
                 </div>
 
                 <div class="color-customization">
@@ -83,45 +59,9 @@
         </header>
 
         <main>
-            <!-- Dual Board Display -->
-            <div id="dual-boards" class="dual-boards hidden">
-                <!-- Left Station Board -->
-                <div class="board-container">
-                    <div class="station-header">
-                        <h2 id="station1-name">Station 1</h2>
-                        <div class="last-updated" id="station1-updated">Lädt...</div>
-                    </div>
-                    <div class="departure-board">
-                        <div class="board-header">
-                            <div class="header-line">Linie</div>
-                            <div class="header-destination">Ziel</div>
-                            <div class="header-platform">Gleis</div>
-                            <div class="header-time">Abfahrt</div>
-                        </div>
-                        <div id="departures1" class="departures-list">
-                            <div class="no-data">Lade Abfahrtszeiten...</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Station Board -->
-                <div class="board-container">
-                    <div class="station-header">
-                        <h2 id="station2-name">Station 2</h2>
-                        <div class="last-updated" id="station2-updated">Lädt...</div>
-                    </div>
-                    <div class="departure-board">
-                        <div class="board-header">
-                            <div class="header-line">Linie</div>
-                            <div class="header-destination">Ziel</div>
-                            <div class="header-platform">Gleis</div>
-                            <div class="header-time">Abfahrt</div>
-                        </div>
-                        <div id="departures2" class="departures-list">
-                            <div class="no-data">Lade Abfahrtszeiten...</div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Dynamic boards will be generated here -->
+            <div id="dynamic-boards" class="dynamic-boards hidden">
+                <!-- Boards will be generated based on station count -->
             </div>
 
             <div id="loading" class="loading hidden">

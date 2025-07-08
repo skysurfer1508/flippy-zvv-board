@@ -624,3 +624,125 @@ footer {
     margin: 0;
     padding: 10px 20px;
 }
+
+/* Language Selector */
+.language-selector-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #333;
+    color: #ffd700;
+    border: 2px solid #ffd700;
+    padding: 10px 15px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 100;
+    font-size: 0.9rem;
+}
+
+.language-selector-btn:hover {
+    background: #ffd700;
+    color: #1a1a1a;
+}
+
+.language-dropdown {
+    position: fixed;
+    bottom: 70px;
+    right: 20px;
+    background: #333;
+    border: 2px solid #ffd700;
+    border-radius: 6px;
+    overflow: hidden;
+    z-index: 101;
+    min-width: 120px;
+}
+
+.language-option {
+    padding: 10px 15px;
+    color: #ffd700;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.language-option:hover {
+    background: #ffd700;
+    color: #1a1a1a;
+}
+
+.language-option:not(:last-child) {
+    border-bottom: 1px solid #555;
+}
+
+/* Dynamic Boards */
+.dynamic-boards {
+    display: grid;
+    gap: 30px;
+    margin: 20px 0;
+}
+
+.dynamic-boards.stations-1 {
+    grid-template-columns: 1fr;
+}
+
+.dynamic-boards.stations-2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+.dynamic-boards.stations-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.dynamic-boards.stations-4 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.dynamic-boards.stations-5,
+.dynamic-boards.stations-6 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.dynamic-boards.stations-7,
+.dynamic-boards.stations-8 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.dynamic-boards.stations-9,
+.dynamic-boards.stations-10 {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+@media (max-width: 1200px) {
+    .dynamic-boards.stations-3,
+    .dynamic-boards.stations-4,
+    .dynamic-boards.stations-5,
+    .dynamic-boards.stations-6,
+    .dynamic-boards.stations-7,
+    .dynamic-boards.stations-8,
+    .dynamic-boards.stations-9,
+    .dynamic-boards.stations-10 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .dynamic-boards {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .language-selector-btn {
+        bottom: 15px;
+        right: 15px;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .language-dropdown {
+        bottom: 60px;
+        right: 15px;
+    }
+}

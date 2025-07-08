@@ -1,3 +1,314 @@
+// Language translations
+const translations = {
+    de: {
+        title: "ZVV Abfahrtszeiten",
+        stationCountQuestion: "Wie viele Stationen möchten Sie anzeigen?",
+        stationCountLabel: "Anzahl Stationen:",
+        confirmButton: "Bestätigen", 
+        startButton: "Anzeige starten",
+        stationLabel: "Station",
+        leftLabel: "(Links)",
+        rightLabel: "(Rechts)",
+        customizeTitle: "Stationen anpassen",
+        customNameLabel: "Anzeigename für Station",
+        colorCustomization: "Linien-Farben anpassen",
+        tramColor: "Tram-Farbe:",
+        busColor: "Bus-Farbe:",
+        trainColor: "Zug-Farbe:",
+        line: "Linie",
+        destination: "Ziel", 
+        platform: "Gleis",
+        departure: "Abfahrt",
+        loading: "Lade Abfahrtszeiten...",
+        noData: "Lade Abfahrtszeiten...",
+        lastUpdated: "Lädt...",
+        changeStations: "Stationen ändern",
+        footerText: "Daten von transport.opendata.ch | Aktualisierung alle 25 Sekunden",
+        colorModalTitle: "Farbe für Linie",
+        colorModalSelect: "auswählen",
+        apply: "Übernehmen",
+        cancel: "Abbrechen",
+        languageSelection: "Sprache"
+    },
+    en: {
+        title: "ZVV Departure Times",
+        stationCountQuestion: "How many stations would you like to display?",
+        stationCountLabel: "Number of stations:",
+        confirmButton: "Confirm",
+        startButton: "Start Display",
+        stationLabel: "Station",
+        leftLabel: "(Left)",
+        rightLabel: "(Right)", 
+        customizeTitle: "Customize Stations",
+        customNameLabel: "Display name for Station",
+        colorCustomization: "Customize Line Colors",
+        tramColor: "Tram Color:",
+        busColor: "Bus Color:",
+        trainColor: "Train Color:",
+        line: "Line",
+        destination: "Destination",
+        platform: "Platform", 
+        departure: "Departure",
+        loading: "Loading departure times...",
+        noData: "Loading departure times...",
+        lastUpdated: "Loading...",
+        changeStations: "Change Stations",
+        footerText: "Data from transport.opendata.ch | Updated every 25 seconds",
+        colorModalTitle: "Select color for line",
+        colorModalSelect: "",
+        apply: "Apply",
+        cancel: "Cancel",
+        languageSelection: "Language"
+    }
+};
+
+let currentLanguage = 'de';
+let currentStationCount = 2;
+let selectedStations = [];
+let customStationNames = {};
+let customLineColors = {
+    tram: '#4ecdc4',
+    bus: '#ff6b6b', 
+    train: '#ffd700'
+};
+let updateInterval;
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+    initializeLanguageSelector();
+    initializeStationCountSlider();
+    updateLanguage();
+});
+
+function initializeLanguageSelector() {
+    // Create language selector button
+    const languageButton = document.createElement('button');
+    languageButton.id = 'language-selector';
+    languageButton.className = 'language-selector-btn';
+    languageButton.innerHTML = '🌐 ' + translations[currentLanguage].languageSelection;
+    
+    // Create language dropdown
+    const languageDropdown = document.createElement('div');
+    languageDropdown.id = 'language-dropdown';
+    languageDropdown.className = 'language-dropdown hidden';
+    languageDropdown.innerHTML = `
+        <div class="language-option" data-lang="de">🇩🇪 Deutsch</div>
+        <div class="language-option" data-lang="en">🇬🇧 English</div>
+    `;
+    
+    // Add to footer
+    const footer = document.querySelector('footer');
+    footer.appendChild(languageButton);
+    footer.appendChild(languageDropdown);
+    
+    // Event listeners
+    languageButton.addEventListener('click', function() {
+        languageDropdown.classList.toggle('hidden');
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!languageButton.contains(e.target) && !languageDropdown.contains(e.target)) {
+            languageDropdown.classList.add('hidden');
+        }
+    });
+    
+    languageDropdown.addEventListener('click', function(e) {
+        const option = e.target.closest('.language-option');
+        if (option) {
+            currentLanguage = option.dataset.lang;
+            updateLanguage();
+            languageDropdown.classList.add('hidden');
+        }
+    });
+}
+
+function initializeStationCountSlider() {
+    const slider = document.getElementById('station-count-slider');
+    const display = document.getElementById('station-count-display');
+    const confirmBtn = document.getElementById('confirm-station-count');
+    
+    // Set initial values
+    slider.value = currentStationCount;
+    display.textContent = currentStationCount;
+    
+    // Update display when slider changes
+    slider.addEventListener('input', function() {
+        currentStationCount = parseInt(this.value);
+        display.textContent = currentStationCount;
+    });
+    
+    // Confirm button functionality
+    confirmBtn.addEventListener('click', function() {
+        generateStationInputs();
+        showStationSelection();
+    });
+}
+
+function generateStationInputs() {
+    const container = document.querySelector('.dynamic-input-container');
+    container.innerHTML = '';
+    
+    // Generate input fields based on station count
+    for (let i = 1; i <= currentStationCount; i++) {
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'station-input-group';
+        inputGroup.innerHTML = `
+            <label for="station${i}-input">${translations[currentLanguage].stationLabel} ${i}</label>
+            <div class="search-container">
+                <input type="text" id="station${i}-input" placeholder="${translations[currentLanguage].stationLabel} ${i}..." autocomplete="off">
+                <div id="suggestions${i}" class="suggestions"></div>
+            </div>
+        `;
+        container.appendChild(inputGroup);
+    }
+    
+    // Add start button
+    const startButton = document.createElement('button');
+    startButton.id = 'start-display';
+    startButton.className = 'start-btn';
+    startButton.textContent = translations[currentLanguage].startButton;
+    startButton.addEventListener('click', startDisplay);
+    
+    const stationSelection = document.getElementById('station-selection');
+    stationSelection.appendChild(startButton);
+    
+    // Initialize autocomplete for all inputs
+    for (let i = 1; i <= currentStationCount; i++) {
+        initializeAutocomplete(i);
+    }
+}
+
+function showStationSelection() {
+    document.getElementById('station-count-selection').classList.add('hidden');
+    document.getElementById('station-selection').classList.remove('hidden');
+}
+
+function initializeAutocomplete(stationIndex) {
+    const input = document.getElementById(`station${stationIndex}-input`);
+    const suggestions = document.getElementById(`suggestions${stationIndex}`);
+    
+    input.addEventListener('input', function() {
+        const query = this.value.trim();
+        if (query.length < 2) {
+            suggestions.style.display = 'none';
+            return;
+        }
+        
+        fetch(`http://transport.opendata.ch/v1/locations?query=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                suggestions.innerHTML = '';
+                if (data.stations && data.stations.length > 0) {
+                    data.stations.slice(0, 5).forEach(station => {
+                        const item = document.createElement('div');
+                        item.className = 'suggestion-item';
+                        item.textContent = station.name;
+                        item.addEventListener('click', function() {
+                            input.value = station.name;
+                            input.dataset.stationId = station.id;
+                            suggestions.style.display = 'none';
+                        });
+                        suggestions.appendChild(item);
+                    });
+                    suggestions.style.display = 'block';
+                } else {
+                    suggestions.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching stations:', error);
+                suggestions.style.display = 'none';
+            });
+    });
+}
+
+function startDisplay() {
+    // Collect all selected stations
+    selectedStations = [];
+    let allStationsSelected = true;
+    
+    for (let i = 1; i <= currentStationCount; i++) {
+        const input = document.getElementById(`station${i}-input`);
+        if (input.value.trim() && input.dataset.stationId) {
+            selectedStations.push({
+                name: input.value.trim(),
+                id: input.dataset.stationId
+            });
+        } else {
+            allStationsSelected = false;
+            break;
+        }
+    }
+    
+    if (!allStationsSelected) {
+        alert('Bitte wählen Sie alle Stationen aus.');
+        return;
+    }
+    
+    // Show customization phase
+    showCustomization();
+}
+
+function showCustomization() {
+    document.getElementById('station-selection').classList.add('hidden');
+    document.getElementById('station-customization').classList.remove('hidden');
+    
+    // Generate customization inputs
+    const container = document.querySelector('.customization-container');
+    container.innerHTML = '';
+    
+    selectedStations.forEach((station, index) => {
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'custom-input-group';
+        inputGroup.innerHTML = `
+            <label for="custom-name${index + 1}">${translations[currentLanguage].customNameLabel} ${index + 1}:</label>
+            <input type="text" id="custom-name${index + 1}" placeholder="${station.name}" value="${station.name}">
+        `;
+        container.appendChild(inputGroup);
+    });
+    
+    // Update apply button
+    const applyBtn = document.getElementById('apply-customization');
+    applyBtn.textContent = translations[currentLanguage].startButton;
+}
+
+function updateLanguage() {
+    const t = translations[currentLanguage];
+    
+    // Update title
+    document.querySelector('h1').textContent = t.title;
+    
+    // Update station count selection
+    document.querySelector('#station-count-selection h2').textContent = t.stationCountQuestion;
+    document.querySelector('label[for="station-count-slider"]').innerHTML = 
+        `${t.stationCountLabel} <span id="station-count-display">${currentStationCount}</span>`;
+    document.getElementById('confirm-station-count').textContent = t.confirmButton;
+    
+    // Update customization section
+    document.querySelector('#station-customization h2').textContent = t.customizeTitle;
+    document.querySelector('.color-customization h3').textContent = t.colorCustomization;
+    
+    // Update color labels
+    document.querySelector('label[for="tram-color"]').textContent = t.tramColor;
+    document.querySelector('label[for="bus-color"]').textContent = t.busColor;
+    document.querySelector('label[for="train-color"]').textContent = t.trainColor;
+    
+    // Update footer
+    document.querySelector('footer p').textContent = t.footerText;
+    
+    // Update language selector
+    const langBtn = document.getElementById('language-selector');
+    if (langBtn) {
+        langBtn.innerHTML = '🌐 ' + t.languageSelection;
+    }
+    
+    // Update change stations button if visible
+    const changeBtn = document.getElementById('change-stations');
+    if (changeBtn && !changeBtn.classList.contains('hidden')) {
+        changeBtn.textContent = t.changeStations;
+    }
+}
+
 class ZVVBoard {
     constructor() {
         this.stations = [];
