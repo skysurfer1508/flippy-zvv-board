@@ -5,6 +5,26 @@ export interface Translations {
   appTitle: string;
   appSubtitle: string;
   
+  // Country Selection
+  selectCountry: string;
+  selectCountrySubtitle: string;
+  countrySwitzerlandName: string;
+  countrySwitzerlandDesc: string;
+  countryGermanyName: string;
+  countryGermanyDesc: string;
+  countryAustriaName: string;
+  countryAustriaDesc: string;
+  countryFranceName: string;
+  countryFranceDesc: string;
+  countryItalyName: string;
+  countryItalyDesc: string;
+  selected: string;
+  selectCountryButton: string;
+  comingSoon: string;
+  continue: string;
+  changeCountry: string;
+  backToCountrySelection: string;
+  
   // Station Count
   stationCountTitle: string;
   stationCountSubtitle: string;
@@ -68,6 +88,26 @@ const de: Translations = {
   // Headers
   appTitle: "ZVV ABFAHRTSZEITEN",
   appSubtitle: "Live-Anzeige für mehrere Stationen",
+  
+  // Country Selection
+  selectCountry: "LAND AUSWÄHLEN",
+  selectCountrySubtitle: "Wählen Sie Ihr Land für die Fahrplan-Anzeige",
+  countrySwitzerlandName: "Schweiz",
+  countrySwitzerlandDesc: "Vollständig unterstützt mit ZVV API",
+  countryGermanyName: "Deutschland",
+  countryGermanyDesc: "Kommt bald",
+  countryAustriaName: "Österreich",
+  countryAustriaDesc: "Kommt bald",
+  countryFranceName: "Frankreich",
+  countryFranceDesc: "Kommt bald",
+  countryItalyName: "Italien",
+  countryItalyDesc: "Kommt bald",
+  selected: "Ausgewählt",
+  selectCountryButton: "Auswählen",
+  comingSoon: "Kommt bald",
+  continue: "WEITER",
+  changeCountry: "Land ändern",
+  backToCountrySelection: "Zurück zur Länderauswahl",
   
   // Station Count
   stationCountTitle: "STATIONSANZAHL WÄHLEN",
@@ -133,6 +173,26 @@ const en: Translations = {
   appTitle: "ZVV DEPARTURE TIMES",
   appSubtitle: "Live display for multiple stations",
   
+  // Country Selection
+  selectCountry: "SELECT COUNTRY",
+  selectCountrySubtitle: "Choose your country for the timetable display",
+  countrySwitzerlandName: "Switzerland",
+  countrySwitzerlandDesc: "Fully supported with ZVV API",
+  countryGermanyName: "Germany",
+  countryGermanyDesc: "Coming soon",
+  countryAustriaName: "Austria",
+  countryAustriaDesc: "Coming soon",
+  countryFranceName: "France",
+  countryFranceDesc: "Coming soon",
+  countryItalyName: "Italy",
+  countryItalyDesc: "Coming soon",
+  selected: "Selected",
+  selectCountryButton: "Select",
+  comingSoon: "Coming soon",
+  continue: "CONTINUE",
+  changeCountry: "Change country",
+  backToCountrySelection: "Back to country selection",
+  
   // Station Count
   stationCountTitle: "SELECT NUMBER OF STATIONS",
   stationCountSubtitle: "How many stations would you like to display?",
@@ -196,6 +256,26 @@ const fr: Translations = {
   // Headers
   appTitle: "HORAIRES DE DÉPART ZVV",
   appSubtitle: "Affichage en direct pour plusieurs stations",
+  
+  // Country Selection
+  selectCountry: "CHOISIR LE PAYS",
+  selectCountrySubtitle: "Choisissez votre pays pour l'affichage des horaires",
+  countrySwitzerlandName: "Suisse",
+  countrySwitzerlandDesc: "Entièrement prise en charge avec l'API ZVV",
+  countryGermanyName: "Allemagne",
+  countryGermanyDesc: "Prochainement",
+  countryAustriaName: "Autriche",
+  countryAustriaDesc: "Prochainement",
+  countryFranceName: "France",
+  countryFranceDesc: "Prochainement",
+  countryItalyName: "Italie",
+  countryItalyDesc: "Prochainement",
+  selected: "Sélectionné",
+  selectCountryButton: "Sélectionner",
+  comingSoon: "Prochainement",
+  continue: "CONTINUER",
+  changeCountry: "Changer de pays",
+  backToCountrySelection: "Retour à la sélection du pays",
   
   // Station Count
   stationCountTitle: "CHOISIR LE NOMBRE DE STATIONS",
@@ -261,6 +341,26 @@ const it: Translations = {
   appTitle: "ORARI DI PARTENZA ZVV",
   appSubtitle: "Visualizzazione in tempo reale per più stazioni",
   
+  // Country Selection
+  selectCountry: "SELEZIONA PAESE",
+  selectCountrySubtitle: "Scegli il tuo paese per la visualizzazione degli orari",
+  countrySwitzerlandName: "Svizzera",
+  countrySwitzerlandDesc: "Completamente supportata con API ZVV",
+  countryGermanyName: "Germania",
+  countryGermanyDesc: "Prossimamente",
+  countryAustriaName: "Austria",
+  countryAustriaDesc: "Prossimamente",
+  countryFranceName: "Francia",
+  countryFranceDesc: "Prossimamente",
+  countryItalyName: "Italia",
+  countryItalyDesc: "Prossimamente",
+  selected: "Selezionato",
+  selectCountryButton: "Seleziona",
+  comingSoon: "Prossimamente",
+  continue: "CONTINUA",
+  changeCountry: "Cambia paese",
+  backToCountrySelection: "Torna alla selezione del paese",
+  
   // Station Count
   stationCountTitle: "SELEZIONA NUMERO DI STAZIONI",
   stationCountSubtitle: "Quante stazioni vorresti visualizzare?",
@@ -324,6 +424,26 @@ const gsw: Translations = {
   // Headers
   appTitle: "ZVV ABFAHRTSZYTE",
   appSubtitle: "Live-Aazäig für mehreri Statione",
+  
+  // Country Selection
+  selectCountry: "LAND USWÄHLE",
+  selectCountrySubtitle: "Wähl dis Land für d'Fahrplan-Aazäig",
+  countrySwitzerlandName: "Schwiiz",
+  countrySwitzerlandDesc: "Vollständig unterstützt mit ZVV API",
+  countryGermanyName: "Dütschland",
+  countryGermanyDesc: "Chunnt bald",
+  countryAustriaName: "Öschterriich",
+  countryAustriaDesc: "Chunnt bald",
+  countryFranceName: "Frankrych",
+  countryFranceDesc: "Chunnt bald",
+  countryItalyName: "Italie",
+  countryItalyDesc: "Chunnt bald",
+  selected: "Usgwählt",
+  selectCountryButton: "Uswähle",
+  comingSoon: "Chunnt bald",
+  continue: "WYTER",
+  changeCountry: "Land ändere",
+  backToCountrySelection: "Zrugg zur Länderuswal",
   
   // Station Count
   stationCountTitle: "STATIONSAZAHL USWÄHLE",
