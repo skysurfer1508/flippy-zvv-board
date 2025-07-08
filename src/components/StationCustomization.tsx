@@ -134,6 +134,7 @@ export function StationCustomization({
   };
 
   const handleDirectionChange = (lineNumber: string, directions: string[]) => {
+    console.log(`Direction change for line ${lineNumber}:`, directions);
     const currentDirections = currentStation.lineDirections || {};
     const updatedDirections = {
       ...currentDirections,
@@ -146,27 +147,38 @@ export function StationCustomization({
   };
 
   const handleSelectAllDirections = (lineNumber: string) => {
+    console.log(`Selecting ALL directions for line ${lineNumber}`);
     handleDirectionChange(lineNumber, []);
   };
 
-  const handleDeselectAllDirections = (lineNumber: string, allDirections: string[]) => {
-    handleDirectionChange(lineNumber, allDirections);
+  const handleDeselectAllDirections = (lineNumber: string) => {
+    const allDirections = availableDirections[currentStation.id]?.[lineNumber] || [];
+    console.log(`Deselecting ALL directions for line ${lineNumber}:`, allDirections);
+    handleDirectionChange(lineNumber, [...allDirections]);
   };
 
   const isDirectionSelected = (lineNumber: string, direction: string): boolean => {
     const selectedDirections = currentStation.lineDirections?.[lineNumber] || [];
-    return selectedDirections.length === 0 || selectedDirections.includes(direction);
+    const isSelected = selectedDirections.length === 0 || !selectedDirections.includes(direction);
+    console.log(`Direction ${direction} for line ${lineNumber} selected:`, isSelected, 'selectedDirections:', selectedDirections);
+    return isSelected;
   };
 
   const getDirectionStatus = (lineNumber: string, totalDirections: number): { text: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' } => {
     const selectedDirections = currentStation.lineDirections?.[lineNumber] || [];
     
+    console.log(`Status for line ${lineNumber}:`, { selectedDirections, totalDirections });
+    
     if (selectedDirections.length === 0) {
+      // Empty array means show all directions
       return { text: 'Alle Richtungen', variant: 'default' };
     } else if (selectedDirections.length === totalDirections) {
+      // All directions are in the "exclude" list, so none are shown
       return { text: 'Keine Richtungen', variant: 'destructive' };
     } else {
-      return { text: `${totalDirections - selectedDirections.length} von ${totalDirections}`, variant: 'secondary' };
+      // Some directions are excluded, so show count of visible ones
+      const visibleCount = totalDirections - selectedDirections.length;
+      return { text: `${visibleCount} von ${totalDirections}`, variant: 'secondary' };
     }
   };
 
@@ -337,7 +349,7 @@ export function StationCustomization({
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleDeselectAllDirections(line.number, lineDirections)}
+                            onClick={() => handleDeselectAllDirections(line.number)}
                             className="h-7 px-2 text-xs font-mono"
                           >
                             <X className="h-3 w-3 mr-1" />
@@ -362,23 +374,24 @@ export function StationCustomization({
                                 type="checkbox"
                                 checked={isSelected}
                                 onChange={(e) => {
-                                  let newDirections: string[];
-                                  if (selectedDirections.length === 0) {
-                                    // Currently showing all, start with all except unchecked
-                                    newDirections = e.target.checked ? [] : lineDirections.filter(d => d !== direction);
+                                  const currentExcluded = selectedDirections.length === 0 ? [] : [...selectedDirections];
+                                  let newExcluded: string[];
+                                  
+                                  if (e.target.checked) {
+                                    // User wants to select this direction (remove from excluded list)
+                                    newExcluded = currentExcluded.filter(d => d !== direction);
                                   } else {
-                                    // Some are selected
-                                    if (e.target.checked) {
-                                      newDirections = [...selectedDirections, direction];
-                                      // If all are selected, clear the filter (show all)
-                                      if (newDirections.length === lineDirections.length) {
-                                        newDirections = [];
-                                      }
-                                    } else {
-                                      newDirections = selectedDirections.filter(d => d !== direction);
-                                    }
+                                    // User wants to deselect this direction (add to excluded list)
+                                    newExcluded = [...currentExcluded, direction];
                                   }
-                                  handleDirectionChange(line.number, newDirections);
+                                  
+                                  console.log(`Checkbox change for ${direction}:`, {
+                                    checked: e.target.checked,
+                                    currentExcluded,
+                                    newExcluded
+                                  });
+                                  
+                                  handleDirectionChange(line.number, newExcluded);
                                 }}
                                 className={`rounded border-2 ${
                                   isSelected 
