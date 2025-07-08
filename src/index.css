@@ -357,6 +357,14 @@ All colors MUST be HSL.
     white-space: nowrap;
   }
 
+  .theme-led .flip-dot-delay {
+    font-size: calc((0.9vw + 0.6vh + 7px) * var(--dynamic-font-size) / 100);
+    color: hsl(0 100% 60%);
+    font-weight: bold;
+    margin-top: calc(2px * var(--dynamic-font-size) / 100);
+    animation: blink 2s infinite;
+  }
+
   .theme-led .zvv-board {
     background: hsl(var(--flip-dot-background));
     color: hsl(var(--flip-dot-yellow));

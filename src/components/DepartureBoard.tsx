@@ -29,10 +29,10 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
   // Check if LED theme is active
   const isLedTheme = theme === 'led';
 
-  // Generate dynamic styles for font sizing
-  const fontSizeStyle = {
-    '--dynamic-font-size': `${fontSize}%`,
-  } as React.CSSProperties;
+  // Set global font size CSS variable
+  useEffect(() => {
+    document.documentElement.style.setProperty('--dynamic-font-size', `${fontSize}%`);
+  }, [fontSize]);
 
   const { data: departureData, isLoading, error, refetch } = useQuery({
     queryKey: ['departures', stations.map(s => s.id)],
@@ -130,10 +130,7 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
   // LED Theme - Flip-dot display
   if (isLedTheme) {
     return (
-      <div 
-        className="space-y-8" 
-        style={fontSizeStyle}
-      >
+      <div className="space-y-8">
         {departureData?.map((stationData) => (
           <div key={stationData.stationId} className="flip-dot-display dynamic-font-size">
             <div className="flip-dot-header">
@@ -172,10 +169,7 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
 
   // Default theme layout
   return (
-    <div 
-      className="space-y-8" 
-      style={fontSizeStyle}
-    >
+    <div className="space-y-8">
       {departureData?.map((stationData) => (
         <div key={stationData.stationId} className="zvv-board rounded-lg overflow-hidden border border-border dynamic-font-size">
           {/* Station Header */}
