@@ -90,10 +90,6 @@ export function DepartureBoard({ stations, language, theme }: DepartureBoardProp
     });
   };
 
-  const isWheelchairAccessible = (departure: Departure) => {
-    return Math.random() < 0.3;
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12 bg-background">
@@ -140,6 +136,7 @@ export function DepartureBoard({ stations, language, theme }: DepartureBoardProp
               role="list" 
               aria-live="polite"
               aria-label={`Abfahrten von ${stationData.customName || stationData.stationName}`}
+              className="flex-1 overflow-hidden"
             >
               {stationData.departures.length === 0 ? (
                 <div className="flip-dot-row">
@@ -148,12 +145,11 @@ export function DepartureBoard({ stations, language, theme }: DepartureBoardProp
                   <div></div>
                 </div>
               ) : (
-                stationData.departures.slice(0, 10).map((departure, index) => (
+                stationData.departures.slice(0, 8).map((departure, index) => (
                   <FlipDotRow
                     key={`${departure.name}-${departure.stop.departure}-${index}`}
                     departure={departure}
                     formatTime={formatDepartureTime}
-                    isWheelchairAccessible={isWheelchairAccessible(departure)}
                   />
                 ))
               )}

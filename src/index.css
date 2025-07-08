@@ -254,43 +254,52 @@ All colors MUST be HSL.
     51%, 100% { opacity: 0.7; }
   }
 
-  /* Flip-dot display styles for LED theme */
+  /* Flip-dot display styles for LED theme - optimized for horizontal displays */
   .theme-led .flip-dot-display {
     font-family: 'DotGothic16', 'VT323', monospace;
-    font-size: calc(2vw + 8px);
+    font-size: calc(1.5vw + 12px);
     letter-spacing: 0.1em;
     background: hsl(var(--flip-dot-background));
     color: hsl(var(--flip-dot-yellow));
-    max-width: 640px;
+    max-width: 100%;
+    width: 100%;
     margin: 0 auto;
-    border: 4px solid hsl(var(--flip-dot-frame));
+    border: 6px solid hsl(var(--flip-dot-frame));
     border-radius: 0;
+    aspect-ratio: 16/9;
+    display: flex;
+    flex-direction: column;
   }
 
   .theme-led .flip-dot-header {
     background: hsl(var(--flip-dot-background));
     color: hsl(var(--flip-dot-yellow));
     border: none;
-    padding: 8px 12px;
+    padding: 12px 20px;
     font-family: 'DotGothic16', 'VT323', monospace;
-    font-size: calc(2vw + 10px);
-    letter-spacing: 0.1em;
+    font-size: calc(1.8vw + 14px);
+    letter-spacing: 0.15em;
     text-transform: uppercase;
+    text-align: center;
+    border-bottom: 2px solid hsl(var(--flip-dot-frame));
+    flex-shrink: 0;
   }
 
   .theme-led .flip-dot-row {
     display: grid;
-    grid-template-columns: 1fr 8fr 3fr;
-    gap: 8px;
-    padding: 4px 12px;
-    line-height: 1.1;
+    grid-template-columns: 120px 1fr 180px;
+    gap: 20px;
+    padding: 8px 20px;
+    line-height: 1.2;
     border: none;
     background: hsl(var(--flip-dot-background));
     color: hsl(var(--flip-dot-yellow));
     font-family: 'DotGothic16', 'VT323', monospace;
-    font-size: calc(2vw + 8px);
+    font-size: calc(1.5vw + 12px);
     letter-spacing: 0.1em;
     animation: fadeIn 0.3s ease-in;
+    border-bottom: 1px solid hsl(var(--flip-dot-frame));
+    min-height: 60px;
   }
 
   .theme-led .flip-dot-row:hover {
@@ -298,11 +307,15 @@ All colors MUST be HSL.
   }
 
   .theme-led .flip-dot-line {
-    font-size: calc(2vw + 16px);
+    font-size: calc(1.8vw + 16px);
     font-weight: bold;
     text-align: center;
     justify-self: center;
     align-self: center;
+    padding: 4px 8px;
+    border: 2px solid hsl(var(--flip-dot-yellow));
+    border-radius: 4px;
+    min-width: 80px;
   }
 
   .theme-led .flip-dot-destination {
@@ -311,29 +324,27 @@ All colors MUST be HSL.
     white-space: nowrap;
     text-align: left;
     align-self: center;
+    padding-left: 10px;
+    font-size: calc(1.6vw + 12px);
   }
 
   .theme-led .flip-dot-time {
-    text-align: right;
+    text-align: center;
     align-self: center;
     font-variant-numeric: tabular-nums;
-  }
-
-  .theme-led .flip-dot-wheelchair {
-    position: relative;
-    font-size: calc(2vw + 8px);
-  }
-
-  .theme-led .flip-dot-wheelchair::before {
-    content: "♿";
-    font-size: calc(2vw + 8px);
-    filter: contrast(1.5);
+    font-size: calc(1.8vw + 14px);
+    font-weight: bold;
+    padding: 4px 8px;
+    border: 2px solid hsl(var(--flip-dot-yellow));
+    border-radius: 4px;
+    justify-self: center;
+    min-width: 120px;
   }
 
   .theme-led .zvv-board {
     background: hsl(var(--flip-dot-background));
     color: hsl(var(--flip-dot-yellow));
-    border: 4px solid hsl(var(--flip-dot-frame));
+    border: 6px solid hsl(var(--flip-dot-frame));
     border-radius: 0;
     box-shadow: none;
   }
@@ -414,5 +425,62 @@ All colors MUST be HSL.
     animation: fadeIn 0.2s ease-in-out;
     -webkit-animation: fadeIn 0.2s ease-in-out;
     -moz-animation: fadeIn 0.2s ease-in-out;
+  }
+
+  /* Responsive adjustments for horizontal displays */
+  @media (max-width: 1200px) {
+    .theme-led .flip-dot-display {
+      aspect-ratio: 4/3;
+    }
+    
+    .theme-led .flip-dot-row {
+      grid-template-columns: 100px 1fr 140px;
+      gap: 15px;
+      padding: 6px 15px;
+      min-height: 50px;
+    }
+    
+    .theme-led .flip-dot-line {
+      min-width: 70px;
+      font-size: calc(1.4vw + 12px);
+    }
+    
+    .theme-led .flip-dot-time {
+      min-width: 100px;
+      font-size: calc(1.4vw + 10px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .theme-led .flip-dot-display {
+      aspect-ratio: 3/2;
+      border: 4px solid hsl(var(--flip-dot-frame));
+    }
+    
+    .theme-led .flip-dot-row {
+      grid-template-columns: 80px 1fr 100px;
+      gap: 10px;
+      padding: 5px 10px;
+      min-height: 40px;
+    }
+    
+    .theme-led .flip-dot-header {
+      padding: 8px 15px;
+      font-size: calc(2vw + 10px);
+    }
+    
+    .theme-led .flip-dot-line {
+      min-width: 60px;
+      font-size: calc(2vw + 8px);
+    }
+    
+    .theme-led .flip-dot-destination {
+      font-size: calc(2vw + 6px);
+    }
+    
+    .theme-led .flip-dot-time {
+      min-width: 80px;
+      font-size: calc(2vw + 8px);
+    }
   }
 }

@@ -4,10 +4,9 @@ import { Departure } from "@/types/zvv";
 interface FlipDotRowProps {
   departure: Departure;
   formatTime: (departure: Departure) => string;
-  isWheelchairAccessible?: boolean;
 }
 
-export function FlipDotRow({ departure, formatTime, isWheelchairAccessible = false }: FlipDotRowProps) {
+export function FlipDotRow({ departure, formatTime }: FlipDotRowProps) {
   const lineNumber = departure.number || departure.name;
   const formattedTime = formatTime(departure);
   
@@ -15,7 +14,7 @@ export function FlipDotRow({ departure, formatTime, isWheelchairAccessible = fal
     <div 
       className="flip-dot-row"
       role="listitem"
-      aria-label={`Linie ${lineNumber} nach ${departure.to}, ${isWheelchairAccessible ? 'Rollstuhlgerechte Fahrt' : `Abfahrt in ${formattedTime}`}`}
+      aria-label={`Linie ${lineNumber} nach ${departure.to}, Abfahrt in ${formattedTime}`}
     >
       <div className="flip-dot-line">
         {lineNumber}
@@ -24,13 +23,9 @@ export function FlipDotRow({ departure, formatTime, isWheelchairAccessible = fal
         {departure.to}
       </div>
       <div className="flip-dot-time">
-        {isWheelchairAccessible ? (
-          <span className="flip-dot-wheelchair" aria-label="Rollstuhlgerechte Fahrt"></span>
-        ) : (
-          <span aria-label={`Abfahrt in ${formattedTime}`}>
-            {formattedTime === "N/A" ? "N/A" : formattedTime.includes("'") ? formattedTime.replace("'", "′") : formattedTime}
-          </span>
-        )}
+        <span aria-label={`Abfahrt in ${formattedTime}`}>
+          {formattedTime === "N/A" ? "N/A" : formattedTime.includes("'") ? formattedTime.replace("'", "′") : formattedTime}
+        </span>
       </div>
     </div>
   );
