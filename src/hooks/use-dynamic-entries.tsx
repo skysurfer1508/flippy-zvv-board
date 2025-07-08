@@ -4,14 +4,12 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 interface DynamicEntriesOptions {
   isFullscreen: boolean;
   isLedTheme: boolean;
-  fontSize: number;
   containerRef?: React.RefObject<HTMLElement>;
 }
 
 export function useDynamicEntries({
   isFullscreen,
   isLedTheme,
-  fontSize,
   containerRef
 }: DynamicEntriesOptions) {
   const [maxEntries, setMaxEntries] = useState(isLedTheme ? 8 : 10);
@@ -25,7 +23,6 @@ export function useDynamicEntries({
 
     // Use dynamic viewport height when available, fallback to window.innerHeight
     const viewportHeight = window.visualViewport?.height || window.innerHeight;
-    const fontSizeFactor = fontSize / 100;
     
     // Reduced buffer for more entries
     const isMobile = window.innerWidth < 768;
@@ -36,16 +33,16 @@ export function useDynamicEntries({
     let additionalSpace = 0;
 
     if (isLedTheme) {
-      // LED theme measurements - more precise calculations
-      headerHeight = Math.ceil(50 * fontSizeFactor); // flip-dot-header
-      rowHeight = Math.ceil(40 * fontSizeFactor); // flip-dot-row min-height
-      additionalSpace = Math.ceil(15 * fontSizeFactor); // borders and padding
+      // LED theme measurements - fixed values
+      headerHeight = 50; // flip-dot-header
+      rowHeight = 40; // flip-dot-row min-height
+      additionalSpace = 15; // borders and padding
     } else {
-      // Standard theme measurements
-      headerHeight = Math.ceil(100 * fontSizeFactor); // zvv-header
-      const tableHeaderHeight = Math.ceil(45 * fontSizeFactor);
-      rowHeight = Math.ceil(60 * fontSizeFactor); // departure-row
-      additionalSpace = headerHeight + tableHeaderHeight + Math.ceil(10 * fontSizeFactor);
+      // Standard theme measurements - fixed values
+      headerHeight = 100; // zvv-header
+      const tableHeaderHeight = 45;
+      rowHeight = 60; // departure-row
+      additionalSpace = headerHeight + tableHeaderHeight + 10;
       headerHeight = 0; // Already included in additionalSpace
     }
 
@@ -61,8 +58,6 @@ export function useDynamicEntries({
     
     console.log('Dynamic entries calculation:', {
       viewportHeight,
-      fontSizeFactor,
-      fontSize,
       headerHeight,
       rowHeight,
       additionalSpace,
@@ -75,7 +70,7 @@ export function useDynamicEntries({
     });
 
     setMaxEntries(finalEntries);
-  }, [isFullscreen, isLedTheme, fontSize]);
+  }, [isFullscreen, isLedTheme]);
 
   const debouncedCalculate = useCallback(() => {
     if (resizeTimeoutRef.current) {
