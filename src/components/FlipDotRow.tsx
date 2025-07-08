@@ -100,10 +100,6 @@ export function FlipDotRow({
         delay: index * 0.12,
         layout: {
           duration: 0.5
-        },
-        exit: {
-          duration: 1.0,
-          ease: "easeOut"
         }
       }}
       role="listitem"

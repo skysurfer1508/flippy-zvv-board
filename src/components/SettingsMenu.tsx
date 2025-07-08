@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Settings, Maximize, Minimize } from "lucide-react";
+import { Settings, Maximize, Minimize, Globe } from "lucide-react";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +34,7 @@ interface SettingsMenuProps {
   onFullscreenToggle: () => void;
   onReconfigureStations: () => void;
   onEditColors: () => void;
+  onChangeCountry: () => void;
 }
 
 export function SettingsMenu({
@@ -44,7 +45,8 @@ export function SettingsMenu({
   onThemeChange,
   onFullscreenToggle,
   onReconfigureStations,
-  onEditColors
+  onEditColors,
+  onChangeCountry
 }: SettingsMenuProps) {
   const { t } = useTranslations(language);
   const [open, setOpen] = useState(false);
@@ -164,6 +166,19 @@ export function SettingsMenu({
       >
         {t.reconfigureStations}
       </button>
+
+      <Separator />
+      
+      <button 
+        className="w-full flex items-center justify-start p-2 hover:bg-muted rounded-md transition-colors text-sm font-mono min-h-[44px] text-destructive hover:text-destructive" 
+        onClick={() => {
+          onChangeCountry();
+          setOpen(false);
+        }}
+      >
+        <Globe className="h-4 w-4 mr-2" />
+        {t.changeCountry || 'Land ändern'}
+      </button>
     </div>
   );
 
@@ -272,6 +287,16 @@ export function SettingsMenu({
             onClick={onReconfigureStations}
           >
             {t.reconfigureStations}
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+          
+          <DropdownMenuItem 
+            className="cursor-pointer font-mono text-destructive focus:text-destructive" 
+            onClick={onChangeCountry}
+          >
+            <Globe className="h-4 w-4 mr-2" />
+            {t.changeCountry || 'Land ändern'}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

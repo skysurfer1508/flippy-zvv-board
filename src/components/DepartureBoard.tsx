@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Loader, Clock, AlertCircle } from "lucide-react";
@@ -383,10 +384,6 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
                           delay: index * 0.08,
                           layout: {
                             duration: 0.4
-                          },
-                          exit: {
-                            duration: 1.0,
-                            ease: "easeOut"
                           }
                         }}
                         className="zvv-departure-row grid grid-cols-12 gap-2 px-6 py-4 hover:bg-muted transition-colors departure-item"

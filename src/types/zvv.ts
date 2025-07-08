@@ -1,3 +1,4 @@
+
 export interface Location {
   id: string;
   name: string;
@@ -88,7 +89,10 @@ export type SupportedLanguage = 'de' | 'en' | 'fr' | 'it' | 'gsw';
 
 export type Theme = 'default' | 'led' | 'blackwhite' | 'modern' | 'classic';
 
+export type Country = 'switzerland' | 'germany' | 'austria' | 'france' | 'italy';
+
 export interface AppState {
+  country: Country;
   stationCount: number;
   stations: StationConfig[];
   customColors: {
@@ -96,7 +100,7 @@ export interface AppState {
     bus: string;
     train: string;
   };
-  phase: 'count-selection' | 'station-selection' | 'customization' | 'monitoring';
+  phase: 'country-selection' | 'count-selection' | 'station-selection' | 'customization' | 'monitoring';
   language: SupportedLanguage;
   theme: Theme;
   isFullscreen: boolean;

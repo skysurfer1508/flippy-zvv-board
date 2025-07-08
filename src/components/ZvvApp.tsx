@@ -1,16 +1,19 @@
+
 import { useState, useEffect } from "react";
 import { StationCountSelector } from "./StationCountSelector";
 import { StationSelection } from "./StationSelection";
 import { StationCustomization } from "./StationCustomization";
 import { DepartureBoard } from "./DepartureBoard";
 import { SettingsMenu } from "./SettingsMenu";
-import { AppState, StationConfig, SupportedLanguage, Theme } from "@/types/zvv";
+import { CountrySelection } from "./CountrySelection";
+import { AppState, StationConfig, SupportedLanguage, Theme, Country } from "@/types/zvv";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "@/utils/translations";
 
 const INITIAL_STATE: AppState = {
+  country: 'switzerland',
   stationCount: 2,
   stations: [],
   customColors: {
@@ -18,7 +21,7 @@ const INITIAL_STATE: AppState = {
     bus: '#ff6b6b', 
     train: '#ffd700'
   },
-  phase: 'count-selection',
+  phase: 'country-selection',
   language: 'de',
   theme: 'default',
   isFullscreen: false
@@ -45,6 +48,10 @@ export function ZvvApp() {
           
           if (!parsed.theme) {
             parsed.theme = 'default';
+          }
+
+          if (!parsed.country) {
+            parsed.country = 'switzerland';
           }
 
           if (parsed.isFullscreen === undefined) {
@@ -103,6 +110,15 @@ export function ZvvApp() {
       console.error('ZvvApp: Error saving state:', error);
     }
   }, [appState, isLoading]);
+
+  const handleCountrySelect = (country: string) => {
+    console.log('ZvvApp: Country selected:', country);
+    setAppState(prev => ({
+      ...prev,
+      country: country as Country,
+      phase: 'count-selection'
+    }));
+  };
 
   const handleCountSelect = (count: number) => {
     console.log('ZvvApp: Count selected:', count);
@@ -183,6 +199,11 @@ export function ZvvApp() {
     setAppState(prev => ({ ...prev, phase: 'count-selection' }));
   };
 
+  const handleChangeCountry = () => {
+    console.log('ZvvApp: Change country button clicked');
+    setAppState(prev => ({ ...prev, phase: 'country-selection' }));
+  };
+
   const handleFullscreenToggle = () => {
     console.log('ZvvApp: Fullscreen toggled:', !appState.isFullscreen);
     setAppState(prev => ({
@@ -196,7 +217,9 @@ export function ZvvApp() {
 
   const handleBack = () => {
     console.log('ZvvApp: Back button clicked, current phase:', appState.phase);
-    if (appState.phase === 'station-selection') {
+    if (appState.phase === 'count-selection') {
+      setAppState(prev => ({ ...prev, phase: 'country-selection' }));
+    } else if (appState.phase === 'station-selection') {
       setAppState(prev => ({ ...prev, phase: 'count-selection' }));
     } else if (appState.phase === 'customization') {
       setAppState(prev => ({ ...prev, phase: 'station-selection' }));
@@ -237,11 +260,37 @@ export function ZvvApp() {
         )}
 
         <main>
-          {appState.phase === 'count-selection' && (
-            <StationCountSelector 
-              selectedCount={appState.stationCount}
-              onCountSelect={handleCountSelect}
+          {appState.phase === 'country-selection' && (
+            <CountrySelection
+              selectedCountry={appState.country}
+              language={appState.language}
+              onCountrySelect={handleCountrySelect}
             />
+          )}
+
+          {appState.phase === 'count-selection' && (
+            <div className="space-y-8">
+              <StationCountSelector 
+                selectedCount={appState.stationCount}
+                onCountSelect={handleCountSelect}
+              />
+              <div className="text-center">
+                <button
+                  onClick={handleBack}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 border-2 border-primary shadow-lg font-bold px-8 py-4 text-lg font-mono rounded-lg transition-all duration-200 hover:scale-105"
+                  style={{
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                    background: 'hsl(var(--primary))',
+                    color: 'hsl(var(--primary-foreground))',
+                    borderColor: 'hsl(var(--primary))'
+                  }}
+                >
+                  <ChevronLeft className="h-5 w-5 mr-2 inline" />
+                  {t.backToCountrySelection || 'Zurück zur Länderauswahl'}
+                </button>
+              </div>
+            </div>
           )}
 
           {appState.phase === 'station-selection' && (
@@ -316,6 +365,7 @@ export function ZvvApp() {
                 onFullscreenToggle={handleFullscreenToggle}
                 onReconfigureStations={handleReconfigure}
                 onEditColors={() => setAppState(prev => ({ ...prev, phase: 'customization' }))}
+                onChangeCountry={handleChangeCountry}
               />
             </div>
           )}
