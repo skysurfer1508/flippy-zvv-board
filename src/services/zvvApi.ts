@@ -1,3 +1,4 @@
+
 import { LocationsResponse, StationBoardResponse } from '@/types/zvv';
 
 const API_BASE_SWISS = 'https://transport.opendata.ch/v1';
@@ -12,14 +13,16 @@ export class ZvvApi {
     try {
       let response;
       
+      console.log(`ZvvApi: Searching stations - Country: ${country}, Query: "${query}"`);
+      
       if (country === 'canada') {
-        response = await fetch(
-          `${API_BASE_CANADA}/locations?country=ca&q=${encodeURIComponent(query)}`
-        );
+        const url = `${API_BASE_CANADA}/locations?country=ca&q=${encodeURIComponent(query)}`;
+        console.log(`ZvvApi: Fetching from Canadian API: ${url}`);
+        response = await fetch(url);
       } else {
-        response = await fetch(
-          `${API_BASE_SWISS}/locations?query=${encodeURIComponent(query)}&type=station`
-        );
+        const url = `${API_BASE_SWISS}/locations?query=${encodeURIComponent(query)}&type=station`;
+        console.log(`ZvvApi: Fetching from Swiss API: ${url}`);
+        response = await fetch(url);
       }
       
       if (!response.ok) {
@@ -27,25 +30,15 @@ export class ZvvApi {
       }
       
       const data = await response.json();
+      console.log(`ZvvApi: API response for ${country}:`, data);
       
-      if (country === 'canada') {
-        // Transform Canadian API response to match Swiss format
-        return { 
-          stations: data.map((station: any) => ({
-            id: station.id,
-            name: station.name,
-            coordinate: station.lat && station.lon ? {
-              type: 'WGS84',
-              x: station.lat,
-              y: station.lon
-            } : undefined
-          }))
-        };
-      }
+      // Both APIs now return consistent format: { stations: [...] }
+      const result = { stations: data.stations || [] };
+      console.log(`ZvvApi: Returning ${result.stations.length} stations for ${country}`);
       
-      return { stations: data.stations || [] };
+      return result;
     } catch (error) {
-      console.error('Error searching stations:', error);
+      console.error('ZvvApi: Error searching stations:', error);
       return { stations: [] };
     }
   }
@@ -54,14 +47,16 @@ export class ZvvApi {
     try {
       let response;
       
+      console.log(`ZvvApi: Getting station board - Country: ${country}, StationId: ${stationId}`);
+      
       if (country === 'canada') {
-        response = await fetch(
-          `${API_BASE_CANADA}/board?country=ca&stop_id=${encodeURIComponent(stationId)}`
-        );
+        const url = `${API_BASE_CANADA}/board?country=ca&stop_id=${encodeURIComponent(stationId)}`;
+        console.log(`ZvvApi: Fetching Canadian board from: ${url}`);
+        response = await fetch(url);
       } else {
-        response = await fetch(
-          `${API_BASE_SWISS}/stationboard?station=${encodeURIComponent(stationId)}&limit=20`
-        );
+        const url = `${API_BASE_SWISS}/stationboard?station=${encodeURIComponent(stationId)}&limit=20`;
+        console.log(`ZvvApi: Fetching Swiss board from: ${url}`);
+        response = await fetch(url);
       }
       
       if (!response.ok) {
@@ -69,10 +64,11 @@ export class ZvvApi {
       }
       
       const data = await response.json();
+      console.log(`ZvvApi: Board response for ${country}:`, data);
       
       if (country === 'canada') {
         // Transform Canadian API response to match Swiss format
-        return {
+        const result = {
           station: {
             id: stationId,
             name: data.station_name || 'Unknown Station'
@@ -94,11 +90,14 @@ export class ZvvApi {
             operator: 'BC Transit'
           })) || []
         };
+        console.log(`ZvvApi: Transformed Canadian board result:`, result);
+        return result;
       }
       
+      console.log(`ZvvApi: Returning Swiss board data as-is`);
       return data;
     } catch (error) {
-      console.error('Error fetching station board:', error);
+      console.error('ZvvApi: Error fetching station board:', error);
       return null;
     }
   }
@@ -107,14 +106,14 @@ export class ZvvApi {
     try {
       let response;
       
+      console.log(`ZvvApi: Getting line directions - Country: ${country}, StationId: ${stationId}`);
+      
       if (country === 'canada') {
-        response = await fetch(
-          `${API_BASE_CANADA}/board?country=ca&stop_id=${encodeURIComponent(stationId)}`
-        );
+        const url = `${API_BASE_CANADA}/board?country=ca&stop_id=${encodeURIComponent(stationId)}`;
+        response = await fetch(url);
       } else {
-        response = await fetch(
-          `${API_BASE_SWISS}/stationboard?station=${encodeURIComponent(stationId)}&limit=50`
-        );
+        const url = `${API_BASE_SWISS}/stationboard?station=${encodeURIComponent(stationId)}&limit=50`;
+        response = await fetch(url);
       }
       
       if (!response.ok) {
@@ -160,9 +159,10 @@ export class ZvvApi {
         result[line] = Array.from(directionsMap[line]);
       });
       
+      console.log(`ZvvApi: Line directions result for ${country}:`, result);
       return result;
     } catch (error) {
-      console.error('Error fetching line directions:', error);
+      console.error('ZvvApi: Error fetching line directions:', error);
       return {};
     }
   }
