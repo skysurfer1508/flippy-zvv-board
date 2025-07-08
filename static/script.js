@@ -38,17 +38,21 @@ class DualStationBoard {
     }
 
     setupEventListeners() {
-        // Station count selection
-        document.querySelectorAll('.count-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.selectStationCount(parseInt(e.target.dataset.count));
+        // Station count slider
+        const slider = document.getElementById('station-count-slider');
+        const display = document.getElementById('station-count-display');
+        
+        if (slider && display) {
+            slider.addEventListener('input', (e) => {
+                const count = parseInt(e.target.value);
+                display.textContent = count;
+                this.selectStationCount(count);
             });
-        });
-
-        // Station selection
-        document.getElementById('start-monitoring').addEventListener('click', () => {
-            this.showCustomizationPhase();
-        });
+            
+            // Set initial value
+            slider.value = this.stationCount;
+            display.textContent = this.stationCount;
+        }
 
         // Apply customization
         document.getElementById('apply-customization').addEventListener('click', () => {
@@ -89,12 +93,6 @@ class DualStationBoard {
 
     selectStationCount(count) {
         this.stationCount = count;
-        
-        // Update button styles
-        document.querySelectorAll('.count-btn').forEach(btn => {
-            btn.classList.remove('selected');
-        });
-        document.querySelector(`[data-count="${count}"]`).classList.add('selected');
         
         // Clear existing station data if count changed
         this.selectedStations = {};
@@ -140,18 +138,23 @@ class DualStationBoard {
             container.appendChild(inputGroup);
         }
         
-        // Add start button
-        const startButton = document.createElement('button');
-        startButton.id = 'start-monitoring';
-        startButton.className = 'start-btn';
-        startButton.disabled = true;
-        startButton.textContent = 'Abfahrtszeiten anzeigen';
-        container.parentNode.appendChild(startButton);
-        
-        // Re-attach event listener
-        startButton.addEventListener('click', () => {
-            this.showCustomizationPhase();
-        });
+        // Add start button (only if it doesn't exist)
+        let startButton = document.getElementById('start-monitoring');
+        if (!startButton) {
+            startButton = document.createElement('button');
+            startButton.id = 'start-monitoring';
+            startButton.className = 'start-btn';
+            startButton.disabled = true;
+            startButton.textContent = 'Abfahrtszeiten anzeigen';
+            container.parentNode.appendChild(startButton);
+            
+            // Re-attach event listener
+            startButton.addEventListener('click', () => {
+                this.showCustomizationPhase();
+            });
+        } else {
+            startButton.disabled = true;
+        }
     }
 
     setupAutoComplete() {
@@ -448,6 +451,7 @@ class DualStationBoard {
         if (this.currentLineForColor) {
             this.individualLineColors[this.currentLineForColor] = colorInput.value;
             this.saveToStorage();
+            this.applyCustomColors(); // Apply colors immediately
             
             // Refresh all displays
             for (let i = 1; i <= this.stationCount; i++) {

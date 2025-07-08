@@ -10,16 +10,14 @@
 <body>
     <div class="container">
         <header>
-            <h1>ZVV Doppel-Abfahrtszeiten</h1>
+            <h1>ZVV Abfahrtszeiten</h1>
             
             <!-- Station Count Selection Phase -->
             <div id="station-count-selection" class="station-count-selection">
                 <h2>Wie viele Stationen möchten Sie anzeigen?</h2>
-                <div class="count-selection">
-                    <button class="count-btn" data-count="1">1 Station</button>
-                    <button class="count-btn" data-count="2">2 Stationen</button>
-                    <button class="count-btn" data-count="3">3 Stationen</button>
-                    <button class="count-btn" data-count="4">4 Stationen</button>
+                <div class="slider-container">
+                    <label for="station-count-slider">Anzahl Stationen: <span id="station-count-display">2</span></label>
+                    <input type="range" id="station-count-slider" min="1" max="10" value="2" class="station-slider">
                 </div>
             </div>
 
