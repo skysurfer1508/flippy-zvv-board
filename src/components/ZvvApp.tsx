@@ -21,7 +21,6 @@ const INITIAL_STATE: AppState = {
   phase: 'count-selection',
   language: 'de',
   theme: 'default',
-  fontSize: 100,
   isFullscreen: false
 };
 
@@ -48,12 +47,13 @@ export function ZvvApp() {
             parsed.theme = 'default';
           }
 
-          if (!parsed.fontSize) {
-            parsed.fontSize = 100;
-          }
-
           if (parsed.isFullscreen === undefined) {
             parsed.isFullscreen = false;
+          }
+
+          // Remove fontSize from saved state if it exists
+          if (parsed.fontSize) {
+            delete parsed.fontSize;
           }
           
           const hasValidStations = parsed.stations?.length === parsed.stationCount;
@@ -182,14 +182,6 @@ export function ZvvApp() {
     setAppState(prev => ({ ...prev, phase: 'count-selection' }));
   };
 
-  const handleFontSizeChange = (fontSize: number) => {
-    console.log('ZvvApp: Font size changed to:', fontSize);
-    setAppState(prev => ({
-      ...prev,
-      fontSize
-    }));
-  };
-
   const handleFullscreenToggle = () => {
     console.log('ZvvApp: Fullscreen toggled:', !appState.isFullscreen);
     setAppState(prev => ({
@@ -311,18 +303,15 @@ export function ZvvApp() {
                 stations={appState.stations} 
                 language={appState.language}
                 theme={appState.theme}
-                fontSize={appState.fontSize}
                 isFullscreen={appState.isFullscreen}
               />
               
               <SettingsMenu 
                 language={appState.language}
                 theme={appState.theme}
-                fontSize={appState.fontSize}
                 isFullscreen={appState.isFullscreen}
                 onLanguageChange={handleLanguageChange}
                 onThemeChange={handleThemeChange}
-                onFontSizeChange={handleFontSizeChange}
                 onFullscreenToggle={handleFullscreenToggle}
                 onReconfigureStations={handleReconfigure}
                 onEditColors={() => setAppState(prev => ({ ...prev, phase: 'customization' }))}

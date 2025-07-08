@@ -20,7 +20,6 @@ import {
   DrawerTrigger
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { SupportedLanguage, Theme } from "@/types/zvv";
 import { useTranslations } from "@/utils/translations";
@@ -29,11 +28,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface SettingsMenuProps {
   language: SupportedLanguage;
   theme: Theme;
-  fontSize: number;
   isFullscreen: boolean;
   onLanguageChange: (language: SupportedLanguage) => void;
   onThemeChange: (theme: Theme) => void;
-  onFontSizeChange: (fontSize: number) => void;
   onFullscreenToggle: () => void;
   onReconfigureStations: () => void;
   onEditColors: () => void;
@@ -42,11 +39,9 @@ interface SettingsMenuProps {
 export function SettingsMenu({
   language,
   theme,
-  fontSize,
   isFullscreen,
   onLanguageChange,
   onThemeChange,
-  onFontSizeChange,
   onFullscreenToggle,
   onReconfigureStations,
   onEditColors
@@ -64,31 +59,6 @@ export function SettingsMenu({
 
   const SettingsContent = () => (
     <div className="space-y-4 p-4">
-      <div className="space-y-3">
-        <div className="text-sm font-medium text-muted-foreground">
-          {t.fontSize}
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <span className="text-xs">50%</span>
-            <Slider
-              value={[fontSize]}
-              onValueChange={(value) => onFontSizeChange(value[0])}
-              max={200}
-              min={50}
-              step={10}
-              className="flex-1"
-            />
-            <span className="text-xs">200%</span>
-          </div>
-          <div className="text-center text-xs text-muted-foreground">
-            {fontSize}%
-          </div>
-        </div>
-      </div>
-      
-      <Separator />
-      
       <button 
         className="w-full flex items-center justify-start p-2 hover:bg-muted rounded-md transition-colors text-sm font-mono min-h-[44px]" 
         onClick={() => {
@@ -239,31 +209,6 @@ export function SettingsMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-64 font-mono" align="end">
           <DropdownMenuLabel>{t.settings}</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          
-          <DropdownMenuGroup>
-            <DropdownMenuLabel className="px-2 text-xs font-normal text-muted-foreground">
-              {t.fontSize}
-            </DropdownMenuLabel>
-            <div className="px-3 py-2">
-              <div className="flex items-center space-x-2">
-                <span className="text-xs">50%</span>
-                <Slider
-                  value={[fontSize]}
-                  onValueChange={(value) => onFontSizeChange(value[0])}
-                  max={200}
-                  min={50}
-                  step={10}
-                  className="flex-1"
-                />
-                <span className="text-xs">200%</span>
-              </div>
-              <div className="text-center text-xs text-muted-foreground mt-1">
-                {fontSize}%
-              </div>
-            </div>
-          </DropdownMenuGroup>
-          
           <DropdownMenuSeparator />
           
           <DropdownMenuItem 

@@ -58,9 +58,6 @@ All colors MUST be HSL.
     --flip-dot-background: 0 0% 0%;
     --flip-dot-yellow: 48 100% 60%;
     --flip-dot-frame: 0 0% 20%;
-
-    /* Dynamic font sizing */
-    --dynamic-font-size: 100%;
   }
 
   /* ... keep existing code (theme definitions) */
@@ -229,79 +226,28 @@ All colors MUST be HSL.
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
-  /* ZVV Board specific styles with dynamic font sizing */
+  /* ZVV Board specific styles */
   .zvv-board {
     background: hsl(var(--zvv-black));
     color: hsl(var(--zvv-yellow));
     font-family: 'Courier New', monospace;
-    font-size: calc(1rem * var(--dynamic-font-size) / 100);
   }
 
   .zvv-header {
     background: hsl(var(--zvv-yellow));
     color: hsl(var(--zvv-black));
-    font-size: calc(1.5rem * var(--dynamic-font-size) / 100);
   }
 
-  .zvv-header h2 {
-    font-size: calc(2rem * var(--dynamic-font-size) / 100);
-  }
-
-  /* Enhanced departure row styling with explicit font sizes */
   .zvv-departure-row {
     border-bottom: 1px solid hsl(var(--border));
-    font-size: calc(1rem * var(--dynamic-font-size) / 100);
   }
 
   .zvv-departure-row:hover {
     background: hsl(var(--muted));
   }
 
-  /* Explicit font sizes for all text elements */
-  .zvv-departure-row .font-mono {
-    font-size: calc(1rem * var(--dynamic-font-size) / 100) !important;
-  }
-
-  .zvv-departure-row .text-lg {
-    font-size: calc(1.125rem * var(--dynamic-font-size) / 100) !important;
-  }
-
-  .zvv-departure-row .text-xs {
-    font-size: calc(0.75rem * var(--dynamic-font-size) / 100) !important;
-  }
-
-  .zvv-departure-row .text-sm {
-    font-size: calc(0.875rem * var(--dynamic-font-size) / 100) !important;
-  }
-
-  /* Line number styling */
-  .zvv-departure-row .line-number {
-    font-size: calc(0.875rem * var(--dynamic-font-size) / 100) !important;
-  }
-
-  /* Destination styling */
-  .zvv-departure-row .destination {
-    font-size: calc(1rem * var(--dynamic-font-size) / 100) !important;
-  }
-
-  /* Platform styling */
-  .zvv-departure-row .platform {
-    font-size: calc(1rem * var(--dynamic-font-size) / 100) !important;
-  }
-
-  /* Departure time styling */
-  .zvv-departure-row .departure-time {
-    font-size: calc(1.125rem * var(--dynamic-font-size) / 100) !important;
-  }
-
-  /* Delay styling */
-  .zvv-departure-row .delay {
-    font-size: calc(0.75rem * var(--dynamic-font-size) / 100) !important;
-  }
-
   .zvv-live-indicator {
     animation: blink 2s infinite;
-    font-size: calc(0.875rem * var(--dynamic-font-size) / 100);
   }
 
   @keyframes blink {
@@ -347,10 +293,9 @@ All colors MUST be HSL.
     overflow: hidden;
   }
 
-  /* Flip-dot display styles for LED theme - enhanced font size support */
+  /* Flip-dot display styles for LED theme */
   .theme-led .flip-dot-display {
     font-family: 'DotGothic16', 'VT323', monospace;
-    font-size: calc(1rem * var(--dynamic-font-size) / 100);
     letter-spacing: 0.08em;
     background: hsl(var(--flip-dot-background));
     color: hsl(var(--flip-dot-yellow));
@@ -359,7 +304,7 @@ All colors MUST be HSL.
     height: calc(100vh - 60px);
     height: calc(100dvh - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     margin: 0 auto;
-    border: calc(4px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-frame));
+    border: 4px solid hsl(var(--flip-dot-frame));
     border-radius: 0;
     display: flex;
     flex-direction: column;
@@ -370,31 +315,31 @@ All colors MUST be HSL.
     background: hsl(var(--flip-dot-background));
     color: hsl(var(--flip-dot-yellow));
     border: none;
-    padding: calc(10px * var(--dynamic-font-size) / 100) calc(16px * var(--dynamic-font-size) / 100);
+    padding: 10px 16px;
     font-family: 'DotGothic16', 'VT323', monospace;
-    font-size: calc(1.2rem * var(--dynamic-font-size) / 100);
+    font-size: 1.2rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     text-align: center;
-    border-bottom: calc(2px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-frame));
+    border-bottom: 2px solid hsl(var(--flip-dot-frame));
     flex-shrink: 0;
   }
 
   .theme-led .flip-dot-row {
     display: grid;
     grid-template-columns: minmax(80px, 120px) 1fr minmax(120px, 180px);
-    gap: calc(16px * var(--dynamic-font-size) / 100);
-    padding: calc(8px * var(--dynamic-font-size) / 100) calc(16px * var(--dynamic-font-size) / 100);
+    gap: 16px;
+    padding: 8px 16px;
     line-height: 1.2;
     border: none;
     background: hsl(var(--flip-dot-background));
     color: hsl(var(--flip-dot-yellow));
     font-family: 'DotGothic16', 'VT323', monospace;
-    font-size: calc(1rem * var(--dynamic-font-size) / 100);
+    font-size: 1rem;
     letter-spacing: 0.08em;
     animation: slideInUp 0.5s ease-out;
-    border-bottom: calc(1px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-frame));
-    min-height: calc(40px * var(--dynamic-font-size) / 100);
+    border-bottom: 1px solid hsl(var(--flip-dot-frame));
+    min-height: 40px;
     align-items: center;
     transition: all 0.3s ease-in-out;
   }
@@ -404,14 +349,14 @@ All colors MUST be HSL.
   }
 
   .theme-led .flip-dot-line {
-    font-size: calc(1rem * var(--dynamic-font-size) / 100);
+    font-size: 1rem;
     font-weight: bold;
     text-align: center;
     justify-self: center;
     align-self: center;
-    padding: calc(4px * var(--dynamic-font-size) / 100) calc(8px * var(--dynamic-font-size) / 100);
-    border: calc(2px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-yellow));
-    border-radius: calc(3px * var(--dynamic-font-size) / 100);
+    padding: 4px 8px;
+    border: 2px solid hsl(var(--flip-dot-yellow));
+    border-radius: 3px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -423,38 +368,40 @@ All colors MUST be HSL.
     white-space: nowrap;
     text-align: left;
     align-self: center;
-    padding-left: calc(8px * var(--dynamic-font-size) / 100);
-    font-size: calc(1rem * var(--dynamic-font-size) / 100);
+    padding-left: 8px;
+    font-size: 1rem;
   }
 
   .theme-led .flip-dot-time {
     text-align: center;
     align-self: center;
     font-variant-numeric: tabular-nums;
-    font-size: calc(1rem * var(--dynamic-font-size) / 100);
+    font-size: 1rem;
     font-weight: bold;
-    padding: calc(4px * var(--dynamic-font-size) / 100) calc(8px * var(--dynamic-font-size) / 100);
-    border: calc(2px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-yellow));
-    border-radius: calc(3px * var(--dynamic-font-size) / 100);
+    padding: 4px 8px;
+    border: 2px solid hsl(var(--flip-dot-yellow));
+    border-radius: 3px;
     justify-self: center;
     white-space: nowrap;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: calc(32px * var(--dynamic-font-size) / 100);
+    min-height: 32px;
   }
 
   .theme-led .flip-dot-delay {
-    font-size: calc(0.75rem * var(--dynamic-font-size) / 100);
+    font-size: 0.75rem;
     color: hsl(0 100% 60%);
     font-weight: bold;
-    margin-top: calc(2px * var(--dynamic-font-size) / 100);
+    margin-top: 2px;
     animation: blink 2s infinite;
-    min-height: calc(12px * var(--dynamic-font-size) / 100);
+    min-height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* ... keep existing code (remaining theme and media query styles) */
   .theme-led .zvv-board {
     background: hsl(var(--flip-dot-background));
     color: hsl(var(--flip-dot-yellow));
@@ -484,7 +431,7 @@ All colors MUST be HSL.
     to { opacity: 1; }
   }
 
-  /* Enhanced responsive breakpoints for better mobile scaling */
+  /* Enhanced responsive breakpoints */
   @media (max-width: 1200px) {
     .theme-led .flip-dot-display {
       height: calc(90vh - 50px);
@@ -493,9 +440,9 @@ All colors MUST be HSL.
     
     .theme-led .flip-dot-row {
       grid-template-columns: minmax(70px, 100px) 1fr minmax(100px, 140px);
-      gap: calc(12px * var(--dynamic-font-size) / 100);
-      padding: calc(6px * var(--dynamic-font-size) / 100) calc(12px * var(--dynamic-font-size) / 100);
-      min-height: calc(35px * var(--dynamic-font-size) / 100);
+      gap: 12px;
+      padding: 6px 12px;
+      min-height: 35px;
     }
   }
 
@@ -503,18 +450,18 @@ All colors MUST be HSL.
     .theme-led .flip-dot-display {
       height: calc(85vh - 40px);
       height: calc(85dvh - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-      border: calc(3px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-frame));
+      border: 3px solid hsl(var(--flip-dot-frame));
     }
     
     .theme-led .flip-dot-row {
       grid-template-columns: minmax(60px, 80px) 1fr minmax(80px, 100px);
-      gap: calc(8px * var(--dynamic-font-size) / 100);
-      padding: calc(4px * var(--dynamic-font-size) / 100) calc(8px * var(--dynamic-font-size) / 100);
-      min-height: calc(32px * var(--dynamic-font-size) / 100);
+      gap: 8px;
+      padding: 4px 8px;
+      min-height: 32px;
     }
     
     .theme-led .flip-dot-header {
-      padding: calc(6px * var(--dynamic-font-size) / 100) calc(10px * var(--dynamic-font-size) / 100);
+      padding: 6px 10px;
     }
 
     .fullscreen-board {

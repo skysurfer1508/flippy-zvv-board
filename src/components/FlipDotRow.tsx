@@ -42,10 +42,12 @@ export function FlipDotRow({ departure, formatTime }: FlipDotRowProps) {
           </span>
           {/* Always render delay container for consistent spacing */}
           <div className="flip-dot-delay">
-            {hasDelay && (
+            {hasDelay ? (
               <span>
                 +{delayNumber}′
               </span>
+            ) : (
+              <span>&nbsp;</span>
             )}
           </div>
         </div>

@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Loader, Clock, AlertCircle } from "lucide-react";
@@ -12,7 +11,6 @@ interface DepartureBoardProps {
   stations: StationConfig[];
   language: SupportedLanguage;
   theme?: string;
-  fontSize?: number;
   isFullscreen?: boolean;
 }
 
@@ -24,7 +22,7 @@ interface StationBoardData {
   departures: Departure[];
 }
 
-export function DepartureBoard({ stations, language, theme, fontSize = 100, isFullscreen = false }: DepartureBoardProps) {
+export function DepartureBoard({ stations, language, theme, isFullscreen = false }: DepartureBoardProps) {
   const { t } = useTranslations(language);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
@@ -34,15 +32,11 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
   // Use the new dynamic entries hook
   const maxEntries = useDynamicEntries({
     isFullscreen,
-    isLedTheme,
-    fontSize
+    isLedTheme
   });
 
-  // Set global font size CSS variable and manage fullscreen body class
-  useEffect(() => {
-    document.documentElement.style.setProperty('--dynamic-font-size', `${fontSize}%`);
-    console.log('Font size set to:', fontSize + '%');
-    
+  // Manage fullscreen body class
+  useEffect(() => {    
     // Add or remove fullscreen body class
     if (isFullscreen) {
       document.body.classList.add('fullscreen-mode');
@@ -54,7 +48,7 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
     return () => {
       document.body.classList.remove('fullscreen-mode');
     };
-  }, [fontSize, isFullscreen]);
+  }, [isFullscreen]);
 
   const { data: departureData, isLoading, error, refetch } = useQuery({
     queryKey: ['departures', stations.map(s => s.id)],
@@ -285,9 +279,13 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
                         </div>
                         {/* Always render delay container for consistent spacing */}
                         <div className="delay-container" style={{ minHeight: '1.25rem' }}>
-                          {hasDelay && (
+                          {hasDelay ? (
                             <div className="delay font-mono text-xs text-destructive">
                               +{delayNumber}'
+                            </div>
+                          ) : (
+                            <div className="delay font-mono text-xs text-transparent">
+                              &nbsp;
                             </div>
                           )}
                         </div>
