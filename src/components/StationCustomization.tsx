@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { StationConfig, Departure } from "@/types/zvv";
 import { ZvvApi } from "@/services/zvvApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader, Palette, ChevronRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Loader, Palette, ChevronRight, Check, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface StationCustomizationProps {
@@ -145,6 +145,31 @@ export function StationCustomization({
     });
   };
 
+  const handleSelectAllDirections = (lineNumber: string) => {
+    handleDirectionChange(lineNumber, []);
+  };
+
+  const handleDeselectAllDirections = (lineNumber: string, allDirections: string[]) => {
+    handleDirectionChange(lineNumber, allDirections);
+  };
+
+  const isDirectionSelected = (lineNumber: string, direction: string): boolean => {
+    const selectedDirections = currentStation.lineDirections?.[lineNumber] || [];
+    return selectedDirections.length === 0 || selectedDirections.includes(direction);
+  };
+
+  const getDirectionStatus = (lineNumber: string, totalDirections: number): { text: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' } => {
+    const selectedDirections = currentStation.lineDirections?.[lineNumber] || [];
+    
+    if (selectedDirections.length === 0) {
+      return { text: 'Alle Richtungen', variant: 'default' };
+    } else if (selectedDirections.length === totalDirections) {
+      return { text: 'Keine Richtungen', variant: 'destructive' };
+    } else {
+      return { text: `${totalDirections - selectedDirections.length} von ${totalDirections}`, variant: 'secondary' };
+    }
+  };
+
   const handleNextStation = () => {
     if (currentStationIndex < stations.length - 1) {
       setCurrentStationIndex(currentStationIndex + 1);
@@ -265,6 +290,7 @@ export function StationCustomization({
                 {currentLines.map((line) => {
                   const lineDirections = currentDirections[line.number] || [];
                   const selectedDirections = currentStation.lineDirections?.[line.number] || [];
+                  const status = getDirectionStatus(line.number, lineDirections.length);
                   
                   if (lineDirections.length <= 1) return null; // Skip lines with only one direction
                   
@@ -290,46 +316,87 @@ export function StationCustomization({
                             </div>
                           </div>
                         </div>
-                        <div className="text-xs text-muted-foreground font-mono">
-                          {selectedDirections.length === 0 ? 'Alle Richtungen' : `${selectedDirections.length} ausgewählt`}
+                        <div className="flex items-center space-x-2">
+                          <Badge variant={status.variant} className="font-mono text-xs">
+                            {status.text}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleSelectAllDirections(line.number)}
+                            className="h-7 px-2 text-xs font-mono"
+                          >
+                            <Check className="h-3 w-3 mr-1" />
+                            Alle
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeselectAllDirections(line.number, lineDirections)}
+                            className="h-7 px-2 text-xs font-mono"
+                          >
+                            <X className="h-3 w-3 mr-1" />
+                            Keine
+                          </Button>
                         </div>
                       </div>
                       
                       <div className="space-y-2">
-                        {lineDirections.map((direction) => (
-                          <label
-                            key={direction}
-                            className="flex items-center space-x-3 cursor-pointer hover:bg-background rounded p-2 transition-colors"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedDirections.length === 0 || selectedDirections.includes(direction)}
-                              onChange={(e) => {
-                                let newDirections: string[];
-                                if (selectedDirections.length === 0) {
-                                  // Currently showing all, start with all except unchecked
-                                  newDirections = e.target.checked ? [] : lineDirections.filter(d => d !== direction);
-                                } else {
-                                  // Some are selected
-                                  if (e.target.checked) {
-                                    newDirections = [...selectedDirections, direction];
-                                    // If all are selected, clear the filter (show all)
-                                    if (newDirections.length === lineDirections.length) {
-                                      newDirections = [];
-                                    }
+                        {lineDirections.map((direction) => {
+                          const isSelected = isDirectionSelected(line.number, direction);
+                          return (
+                            <label
+                              key={direction}
+                              className={`flex items-center space-x-3 cursor-pointer rounded p-2 transition-all duration-200 ${
+                                isSelected 
+                                  ? 'bg-primary/10 border border-primary/20 text-primary' 
+                                  : 'hover:bg-background/50 border border-transparent'
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={(e) => {
+                                  let newDirections: string[];
+                                  if (selectedDirections.length === 0) {
+                                    // Currently showing all, start with all except unchecked
+                                    newDirections = e.target.checked ? [] : lineDirections.filter(d => d !== direction);
                                   } else {
-                                    newDirections = selectedDirections.filter(d => d !== direction);
+                                    // Some are selected
+                                    if (e.target.checked) {
+                                      newDirections = [...selectedDirections, direction];
+                                      // If all are selected, clear the filter (show all)
+                                      if (newDirections.length === lineDirections.length) {
+                                        newDirections = [];
+                                      }
+                                    } else {
+                                      newDirections = selectedDirections.filter(d => d !== direction);
+                                    }
                                   }
-                                }
-                                handleDirectionChange(line.number, newDirections);
-                              }}
-                              className="rounded border-border"
-                            />
-                            <span className="font-mono text-sm flex-1">
-                              → {direction}
-                            </span>
-                          </label>
-                        ))}
+                                  handleDirectionChange(line.number, newDirections);
+                                }}
+                                className={`rounded border-2 ${
+                                  isSelected 
+                                    ? 'border-primary bg-primary text-primary-foreground' 
+                                    : 'border-border'
+                                }`}
+                              />
+                              <span className={`font-mono text-sm flex-1 ${
+                                isSelected ? 'font-medium' : ''
+                              }`}>
+                                → {direction}
+                              </span>
+                              {isSelected && (
+                                <Check className="h-4 w-4 text-primary" />
+                              )}
+                            </label>
+                          );
+                        })}
                       </div>
                     </div>
                   );
