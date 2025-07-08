@@ -81,6 +81,7 @@ export interface StationConfig {
   id: string;
   name: string;
   customName?: string;
+  lineColors?: Record<string, string>;
 }
 
 export interface AppState {

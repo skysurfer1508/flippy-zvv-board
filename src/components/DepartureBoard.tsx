@@ -11,6 +11,8 @@ interface DepartureBoardProps {
 interface StationBoardData {
   stationId: string;
   stationName: string;
+  customName?: string;
+  lineColors?: Record<string, string>;
   departures: Departure[];
 }
 
@@ -24,6 +26,8 @@ export function DepartureBoard({ stations }: DepartureBoardProps) {
           return {
             stationId: station.id,
             stationName: station.name,
+            customName: station.customName,
+            lineColors: station.lineColors,
             departures: response?.stationboard || []
           };
         })
@@ -50,12 +54,18 @@ export function DepartureBoard({ stations }: DepartureBoardProps) {
     });
   };
 
-  const getLineColor = (category: string) => {
+  const getLineColor = (category: string, lineNumber: string, customColors?: Record<string, string>) => {
+    // First check if there's a custom color for this specific line
+    if (customColors && customColors[lineNumber]) {
+      return customColors[lineNumber];
+    }
+    
+    // Fall back to default category colors
     const cat = category.toLowerCase();
-    if (cat.includes('tram') || cat.includes('str')) return 'bg-blue-600';
-    if (cat.includes('bus')) return 'bg-red-600';
-    if (cat.includes('train') || cat.includes('s')) return 'bg-green-600';
-    return 'bg-gray-600';
+    if (cat.includes('tram') || cat.includes('str')) return '#4ecdc4';
+    if (cat.includes('bus')) return '#ff6b6b';
+    if (cat.includes('train') || cat.includes('s')) return '#ffd700';
+    return '#6b7280';
   };
 
   if (isLoading) {
@@ -94,7 +104,9 @@ export function DepartureBoard({ stations }: DepartureBoardProps) {
         <div key={stationData.stationId} className="zvv-board rounded-lg overflow-hidden border border-border">
           {/* Station Header */}
           <div className="zvv-header px-6 py-4 flex items-center justify-between">
-            <h2 className="text-2xl font-bold font-mono">{stationData.stationName}</h2>
+            <h2 className="text-2xl font-bold font-mono">
+              {stationData.customName || stationData.stationName}
+            </h2>
             <div className="flex items-center text-sm font-mono zvv-live-indicator">
               <Clock className="h-4 w-4 mr-2" />
               LIVE
@@ -118,50 +130,58 @@ export function DepartureBoard({ stations }: DepartureBoardProps) {
               </div>
             ) : (
               <div className="max-h-96 overflow-y-auto">
-                {stationData.departures.slice(0, 10).map((departure, index) => (
-                  <div
-                    key={`${departure.name}-${departure.stop.departure}-${index}`}
-                    className="zvv-departure-row grid grid-cols-12 gap-2 px-6 py-4 hover:bg-muted transition-colors"
-                  >
-                    {/* Line Number */}
-                    <div className="col-span-2 flex items-center">
-                      <span className={`zvv-line-number px-3 py-1 rounded text-xs font-bold min-w-[3rem] text-center ${getLineColor(departure.category)}`}>
-                        {departure.number || departure.name}
-                      </span>
-                    </div>
-
-                    {/* Destination */}
-                    <div className="col-span-6 flex flex-col justify-center">
-                      <div className="font-mono font-bold text-foreground truncate">
-                        {departure.to}
-                      </div>
-                      <div className="font-mono text-xs text-muted-foreground uppercase">
-                        {departure.category}
-                      </div>
-                    </div>
-
-                    {/* Platform */}
-                    <div className="col-span-2 flex items-center justify-center">
-                      {departure.stop.platform && (
-                        <span className="font-mono font-bold text-primary">
-                          {departure.stop.platform}
+                {stationData.departures.slice(0, 10).map((departure, index) => {
+                  const lineNumber = departure.number || departure.name;
+                  const lineColor = getLineColor(departure.category, lineNumber, stationData.lineColors);
+                  
+                  return (
+                    <div
+                      key={`${departure.name}-${departure.stop.departure}-${index}`}
+                      className="zvv-departure-row grid grid-cols-12 gap-2 px-6 py-4 hover:bg-muted transition-colors"
+                    >
+                      {/* Line Number */}
+                      <div className="col-span-2 flex items-center">
+                        <span 
+                          className="text-white px-3 py-1 rounded text-xs font-bold min-w-[3rem] text-center"
+                          style={{ backgroundColor: lineColor }}
+                        >
+                          {lineNumber}
                         </span>
-                      )}
-                    </div>
-
-                    {/* Departure Time */}
-                    <div className="col-span-2 flex flex-col items-end justify-center">
-                      <div className="font-mono font-bold text-lg text-primary">
-                        {formatDepartureTime(departure)}
                       </div>
-                      {departure.stop.delay && departure.stop.delay > 0 && (
-                        <div className="font-mono text-xs text-destructive">
-                          +{departure.stop.delay}'
+
+                      {/* Destination */}
+                      <div className="col-span-6 flex flex-col justify-center">
+                        <div className="font-mono font-bold text-foreground truncate">
+                          {departure.to}
                         </div>
-                      )}
+                        <div className="font-mono text-xs text-muted-foreground uppercase">
+                          {departure.category}
+                        </div>
+                      </div>
+
+                      {/* Platform */}
+                      <div className="col-span-2 flex items-center justify-center">
+                        {departure.stop.platform && (
+                          <span className="font-mono font-bold text-primary">
+                            {departure.stop.platform}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Departure Time */}
+                      <div className="col-span-2 flex flex-col items-end justify-center">
+                        <div className="font-mono font-bold text-lg text-primary">
+                          {formatDepartureTime(departure)}
+                        </div>
+                        {departure.stop.delay && departure.stop.delay > 0 && (
+                          <div className="font-mono text-xs text-destructive">
+                            +{departure.stop.delay}'
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

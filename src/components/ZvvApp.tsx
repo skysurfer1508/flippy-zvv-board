@@ -1,6 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { StationCountSelector } from "./StationCountSelector";
 import { StationSelection } from "./StationSelection";
+import { StationCustomization } from "./StationCustomization";
 import { DepartureBoard } from "./DepartureBoard";
 import { AppState, StationConfig } from "@/types/zvv";
 import { toast } from "@/hooks/use-toast";
@@ -42,12 +44,12 @@ export function ZvvApp() {
           
           console.log('ZvvApp: Validation - hasValidStations:', hasValidStations, 'allStationsConfigured:', allStationsConfigured);
           
-          if (allStationsConfigured) {
-            // Auto-navigate to monitoring if all stations are configured
+          if (allStationsConfigured && parsed.phase === 'monitoring') {
+            // Auto-navigate to monitoring if all stations are configured and we were in monitoring
             console.log('ZvvApp: All stations configured, auto-loading to monitoring phase');
             setAppState({ ...parsed, phase: 'monitoring' });
           } else {
-            console.log('ZvvApp: Loading saved state as-is, stations not fully configured');
+            console.log('ZvvApp: Loading saved state as-is');
             setAppState(parsed);
           }
         } else {
@@ -90,7 +92,7 @@ export function ZvvApp() {
       ...prev,
       stationCount: count,
       stations: Array.from({ length: count }, (_, i) => 
-        prev.stations[i] || { id: '', name: '', customName: '' }
+        prev.stations[i] || { id: '', name: '', customName: '', lineColors: {} }
       ),
       phase: 'station-selection'
     }));
@@ -100,7 +102,12 @@ export function ZvvApp() {
     console.log('ZvvApp: Station changed at index', index, ':', { stationId, stationName });
     setAppState(prev => {
       const newStations = [...prev.stations];
-      newStations[index] = { id: stationId, name: stationName, customName: '' };
+      newStations[index] = { 
+        id: stationId, 
+        name: stationName, 
+        customName: newStations[index]?.customName || '',
+        lineColors: newStations[index]?.lineColors || {}
+      };
       return {
         ...prev,
         stations: newStations
@@ -108,7 +115,27 @@ export function ZvvApp() {
     });
   };
 
-  const handleNext = () => {
+  const handleStationUpdate = (index: number, updates: Partial<StationConfig>) => {
+    console.log('ZvvApp: Station updated at index', index, ':', updates);
+    setAppState(prev => {
+      const newStations = [...prev.stations];
+      newStations[index] = { ...newStations[index], ...updates };
+      return {
+        ...prev,
+        stations: newStations
+      };
+    });
+  };
+
+  const handleToCustomization = () => {
+    console.log('ZvvApp: Moving to customization phase');
+    setAppState(prev => ({
+      ...prev,
+      phase: 'customization'
+    }));
+  };
+
+  const handleToMonitoring = () => {
     console.log('ZvvApp: Moving to monitoring phase');
     setAppState(prev => ({
       ...prev,
@@ -123,8 +150,10 @@ export function ZvvApp() {
     console.log('ZvvApp: Back button clicked, current phase:', appState.phase);
     if (appState.phase === 'station-selection') {
       setAppState(prev => ({ ...prev, phase: 'count-selection' }));
-    } else if (appState.phase === 'monitoring') {
+    } else if (appState.phase === 'customization') {
       setAppState(prev => ({ ...prev, phase: 'station-selection' }));
+    } else if (appState.phase === 'monitoring') {
+      setAppState(prev => ({ ...prev, phase: 'customization' }));
     }
   };
 
@@ -167,7 +196,7 @@ export function ZvvApp() {
                 stationCount={appState.stationCount}
                 stations={appState.stations}
                 onStationChange={handleStationChange}
-                onNext={handleNext}
+                onNext={handleToCustomization}
                 canProceed={canProceed}
               />
               <div className="text-center">
@@ -184,6 +213,32 @@ export function ZvvApp() {
                 >
                   <ChevronLeft className="h-5 w-5 mr-2 inline" />
                   ZURÜCK ZUR STATIONSANZAHL
+                </button>
+              </div>
+            </div>
+          )}
+
+          {appState.phase === 'customization' && (
+            <div className="space-y-8">
+              <StationCustomization
+                stations={appState.stations}
+                onStationUpdate={handleStationUpdate}
+                onNext={handleToMonitoring}
+              />
+              <div className="text-center">
+                <button
+                  onClick={handleBack}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 border-2 border-primary shadow-lg font-bold px-8 py-4 text-lg font-mono rounded-lg transition-all duration-200 hover:scale-105"
+                  style={{
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                    background: 'hsl(var(--primary))',
+                    color: 'hsl(var(--primary-foreground))',
+                    borderColor: 'hsl(var(--primary))'
+                  }}
+                >
+                  <ChevronLeft className="h-5 w-5 mr-2 inline" />
+                  ZURÜCK ZUR STATIONSAUSWAHL
                 </button>
               </div>
             </div>
