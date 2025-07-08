@@ -231,8 +231,18 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
                   const lineNumber = departure.number || departure.name;
                   const lineColor = getLineColor(departure.category, lineNumber, stationData.lineColors);
                   
-                  // Parse delay as number and only show if > 0
-                  const delay = departure.stop.delay ? parseInt(departure.stop.delay.toString(), 10) : 0;
+                  // Enhanced delay parsing with strict type checking
+                  const delayValue = departure.stop.delay;
+                  const delayNumber = delayValue ? Number(delayValue) : 0;
+                  const hasDelay = delayNumber > 0;
+                  
+                  console.log('DepartureBoard delay processing:', {
+                    lineNumber,
+                    delayValue,
+                    delayNumber,
+                    hasDelay,
+                    delayType: typeof delayValue
+                  });
                   
                   return (
                     <div
@@ -242,7 +252,7 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
                       {/* Line Number */}
                       <div className="col-span-2 flex items-center">
                         <span 
-                          className="text-white px-3 py-1 rounded text-xs font-bold min-w-[3rem] text-center"
+                          className="line-number text-white px-3 py-1 rounded text-xs font-bold min-w-[3rem] text-center"
                           style={{ backgroundColor: lineColor }}
                         >
                           {lineNumber}
@@ -251,7 +261,7 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
 
                       {/* Destination */}
                       <div className="col-span-6 flex flex-col justify-center">
-                        <div className="font-mono font-bold text-foreground truncate">
+                        <div className="destination font-mono font-bold text-foreground truncate">
                           {departure.to}
                         </div>
                         <div className="font-mono text-xs text-muted-foreground uppercase">
@@ -262,7 +272,7 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
                       {/* Platform */}
                       <div className="col-span-2 flex items-center justify-center">
                         {departure.stop.platform && (
-                          <span className="font-mono font-bold text-primary">
+                          <span className="platform font-mono font-bold text-primary">
                             {departure.stop.platform}
                           </span>
                         )}
@@ -270,14 +280,17 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
 
                       {/* Departure Time */}
                       <div className="col-span-2 flex flex-col items-end justify-center">
-                        <div className="font-mono font-bold text-lg text-primary">
+                        <div className="departure-time font-mono font-bold text-lg text-primary">
                           {formatDepartureTime(departure)}
                         </div>
-                        {delay > 0 && (
-                          <div className="font-mono text-xs text-destructive">
-                            +{delay}'
-                          </div>
-                        )}
+                        {/* Always render delay container for consistent spacing */}
+                        <div className="delay-container" style={{ minHeight: '1.25rem' }}>
+                          {hasDelay && (
+                            <div className="delay font-mono text-xs text-destructive">
+                              +{delayNumber}'
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );

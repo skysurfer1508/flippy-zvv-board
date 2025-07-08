@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -62,6 +63,7 @@ All colors MUST be HSL.
     --dynamic-font-size: 100%;
   }
 
+  /* ... keep existing code (theme definitions) */
   .dark {
     --background: 0 0% 0%;
     --foreground: 45 100% 70%;
@@ -130,7 +132,7 @@ All colors MUST be HSL.
     --flip-dot-frame: 0 0% 20%;
   }
 
-  /* Black & White Theme */
+  /* ... keep existing code (other theme definitions) */
   .theme-blackwhite {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
@@ -157,7 +159,6 @@ All colors MUST be HSL.
     --zvv-dark-gray: 0 0% 8%;
   }
 
-  /* Modern Theme */
   .theme-modern {
     --background: 220 13% 9%;
     --foreground: 220 9% 96%;
@@ -184,7 +185,6 @@ All colors MUST be HSL.
     --zvv-dark-gray: 220 13% 13%;
   }
 
-  /* Classic Theme */
   .theme-classic {
     --background: 210 40% 8%;
     --foreground: 210 40% 96%;
@@ -225,7 +225,7 @@ All colors MUST be HSL.
   body.fullscreen-mode {
     overflow: hidden;
     height: 100vh;
-    height: 100dvh; /* Use dynamic viewport height when available */
+    height: 100dvh;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
@@ -247,6 +247,7 @@ All colors MUST be HSL.
     font-size: calc(2rem * var(--dynamic-font-size) / 100);
   }
 
+  /* Enhanced departure row styling with explicit font sizes */
   .zvv-departure-row {
     border-bottom: 1px solid hsl(var(--border));
     font-size: calc(1rem * var(--dynamic-font-size) / 100);
@@ -256,20 +257,46 @@ All colors MUST be HSL.
     background: hsl(var(--muted));
   }
 
+  /* Explicit font sizes for all text elements */
   .zvv-departure-row .font-mono {
-    font-size: calc(1rem * var(--dynamic-font-size) / 100);
+    font-size: calc(1rem * var(--dynamic-font-size) / 100) !important;
   }
 
   .zvv-departure-row .text-lg {
-    font-size: calc(1.125rem * var(--dynamic-font-size) / 100);
+    font-size: calc(1.125rem * var(--dynamic-font-size) / 100) !important;
   }
 
   .zvv-departure-row .text-xs {
-    font-size: calc(0.75rem * var(--dynamic-font-size) / 100);
+    font-size: calc(0.75rem * var(--dynamic-font-size) / 100) !important;
   }
 
   .zvv-departure-row .text-sm {
-    font-size: calc(0.875rem * var(--dynamic-font-size) / 100);
+    font-size: calc(0.875rem * var(--dynamic-font-size) / 100) !important;
+  }
+
+  /* Line number styling */
+  .zvv-departure-row .line-number {
+    font-size: calc(0.875rem * var(--dynamic-font-size) / 100) !important;
+  }
+
+  /* Destination styling */
+  .zvv-departure-row .destination {
+    font-size: calc(1rem * var(--dynamic-font-size) / 100) !important;
+  }
+
+  /* Platform styling */
+  .zvv-departure-row .platform {
+    font-size: calc(1rem * var(--dynamic-font-size) / 100) !important;
+  }
+
+  /* Departure time styling */
+  .zvv-departure-row .departure-time {
+    font-size: calc(1.125rem * var(--dynamic-font-size) / 100) !important;
+  }
+
+  /* Delay styling */
+  .zvv-departure-row .delay {
+    font-size: calc(0.75rem * var(--dynamic-font-size) / 100) !important;
   }
 
   .zvv-live-indicator {
@@ -411,6 +438,11 @@ All colors MUST be HSL.
     border-radius: calc(3px * var(--dynamic-font-size) / 100);
     justify-self: center;
     white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(32px * var(--dynamic-font-size) / 100);
   }
 
   .theme-led .flip-dot-delay {
@@ -419,8 +451,10 @@ All colors MUST be HSL.
     font-weight: bold;
     margin-top: calc(2px * var(--dynamic-font-size) / 100);
     animation: blink 2s infinite;
+    min-height: calc(12px * var(--dynamic-font-size) / 100);
   }
 
+  /* ... keep existing code (remaining theme and media query styles) */
   .theme-led .zvv-board {
     background: hsl(var(--flip-dot-background));
     color: hsl(var(--flip-dot-yellow));
@@ -501,7 +535,7 @@ All colors MUST be HSL.
     }
   }
 
-  /* Cross-browser compatibility fixes */
+  /* ... keep existing code (remaining styles) */
   button {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -514,7 +548,6 @@ All colors MUST be HSL.
     appearance: none;
   }
 
-  /* Safari-specific fixes */
   @supports (-webkit-appearance: none) {
     input[type="text"] {
       -webkit-appearance: none;
@@ -522,21 +555,18 @@ All colors MUST be HSL.
     }
   }
 
-  /* Firefox-specific fixes */
   @-moz-document url-prefix() {
     button {
       outline: none;
     }
   }
 
-  /* High z-index for dropdowns and modals */
   .dropdown-content,
   .popover-content,
   .modal-content {
     z-index: 9999;
   }
 
-  /* Ensure animations work across browsers */
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -558,7 +588,6 @@ All colors MUST be HSL.
     -moz-animation: fadeIn 0.2s ease-in-out;
   }
 
-  /* Enhanced fullscreen adjustments with safe areas */
   .fullscreen-mode {
     height: 100vh;
     height: 100dvh;

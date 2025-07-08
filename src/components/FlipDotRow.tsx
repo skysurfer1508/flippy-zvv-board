@@ -9,13 +9,25 @@ interface FlipDotRowProps {
 export function FlipDotRow({ departure, formatTime }: FlipDotRowProps) {
   const lineNumber = departure.number || departure.name;
   const formattedTime = formatTime(departure);
-  const hasDelay = departure.stop.delay && departure.stop.delay > 0;
+  
+  // Enhanced delay parsing with strict type checking
+  const delayValue = departure.stop.delay;
+  const delayNumber = delayValue ? Number(delayValue) : 0;
+  const hasDelay = delayNumber > 0;
+  
+  console.log('FlipDotRow delay processing:', {
+    lineNumber,
+    delayValue,
+    delayNumber,
+    hasDelay,
+    delayType: typeof delayValue
+  });
   
   return (
     <div 
       className="flip-dot-row"
       role="listitem"
-      aria-label={`Linie ${lineNumber} nach ${departure.to}, Abfahrt in ${formattedTime}${hasDelay ? `, Verspätung ${departure.stop.delay} Minuten` : ''}`}
+      aria-label={`Linie ${lineNumber} nach ${departure.to}, Abfahrt in ${formattedTime}${hasDelay ? `, Verspätung ${delayNumber} Minuten` : ''}`}
     >
       <div className="flip-dot-line">
         {lineNumber}
@@ -28,11 +40,14 @@ export function FlipDotRow({ departure, formatTime }: FlipDotRowProps) {
           <span aria-label={`Abfahrt in ${formattedTime}`}>
             {formattedTime === "N/A" ? "N/A" : formattedTime.includes("'") ? formattedTime.replace("'", "′") : formattedTime}
           </span>
-          {hasDelay && (
-            <span className="flip-dot-delay">
-              +{departure.stop.delay}′
-            </span>
-          )}
+          {/* Always render delay container for consistent spacing */}
+          <div className="flip-dot-delay">
+            {hasDelay && (
+              <span>
+                +{delayNumber}′
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </div>
