@@ -21,50 +21,69 @@ const INITIAL_STATE: AppState = {
 
 export function ZvvApp() {
   const [appState, setAppState] = useState<AppState>(INITIAL_STATE);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load state from sessionStorage on mount with cross-browser compatibility
+  // Load state from sessionStorage on mount - only once
   useEffect(() => {
-    try {
-      const savedState = sessionStorage.getItem('zvv-app-state');
-      console.log('ZvvApp: Loading saved state:', savedState);
-      
-      if (savedState) {
-        const parsed = JSON.parse(savedState);
-        console.log('ZvvApp: Parsed state:', parsed);
+    const loadSavedState = async () => {
+      try {
+        console.log('ZvvApp: Loading saved state from sessionStorage...');
+        const savedState = sessionStorage.getItem('zvv-app-state');
         
-        // Validate that all required stations are configured
-        const allStationsConfigured = parsed.stations?.length === parsed.stationCount && 
-                                    parsed.stations.every((station: StationConfig) => station.id && station.name);
-        
-        if (allStationsConfigured && parsed.phase !== 'count-selection') {
-          // Auto-load to monitoring phase if stations are configured
-          console.log('ZvvApp: Auto-loading to monitoring phase');
-          setAppState(prev => ({ ...parsed, phase: 'monitoring' }));
+        if (savedState) {
+          const parsed = JSON.parse(savedState);
+          console.log('ZvvApp: Parsed saved state:', parsed);
+          
+          // Validate that all required stations are properly configured
+          const hasValidStations = parsed.stations?.length === parsed.stationCount;
+          const allStationsConfigured = hasValidStations && 
+                                      parsed.stations.every((station: StationConfig) => 
+                                        station.id && station.name && station.id.trim() !== '' && station.name.trim() !== ''
+                                      );
+          
+          console.log('ZvvApp: Validation - hasValidStations:', hasValidStations, 'allStationsConfigured:', allStationsConfigured);
+          
+          if (allStationsConfigured) {
+            // Auto-navigate to monitoring if all stations are configured
+            console.log('ZvvApp: All stations configured, auto-loading to monitoring phase');
+            setAppState({ ...parsed, phase: 'monitoring' });
+          } else {
+            console.log('ZvvApp: Loading saved state as-is, stations not fully configured');
+            setAppState(parsed);
+          }
         } else {
-          console.log('ZvvApp: Loading saved state as-is');
-          setAppState(parsed);
+          console.log('ZvvApp: No saved state found, using initial state');
         }
+      } catch (error) {
+        console.error('ZvvApp: Error loading saved state:', error);
+        toast({
+          title: "Fehler",
+          description: "Gespeicherte Daten konnten nicht geladen werden.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('ZvvApp: Error loading saved state:', error);
-      toast({
-        title: "Fehler",
-        description: "Gespeicherte Daten konnten nicht geladen werden.",
-        variant: "destructive"
-      });
-    }
-  }, []);
+    };
 
-  // Save state to sessionStorage whenever it changes
+    loadSavedState();
+  }, []); // Empty dependency array - only run once on mount
+
+  // Save state to sessionStorage - only when not loading
   useEffect(() => {
+    if (isLoading) {
+      console.log('ZvvApp: Skipping save during loading phase');
+      return;
+    }
+
     try {
       const stateToSave = JSON.stringify(appState);
-      console.log('ZvvApp: Saving state:', stateToSave);
+      console.log('ZvvApp: Saving state to sessionStorage:', stateToSave);
       sessionStorage.setItem('zvv-app-state', stateToSave);
     } catch (error) {
       console.error('ZvvApp: Error saving state:', error);
     }
-  }, [appState]);
+  }, [appState, isLoading]);
 
   const handleCountSelect = (count: number) => {
     console.log('ZvvApp: Count selected:', count);
@@ -115,6 +134,18 @@ export function ZvvApp() {
     setAppState(prev => ({ ...prev, phase: 'count-selection' }));
   };
 
+  // Show loading state briefly to prevent flash
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Lade Anwendung...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="container mx-auto max-w-4xl">
@@ -142,18 +173,18 @@ export function ZvvApp() {
               />
               <div className="text-center">
                 <Button
-                  variant="secondary"
+                  variant="default"
                   onClick={handleBack}
-                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-input shadow-sm font-medium px-6 py-2"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 border-2 border-primary shadow-lg font-semibold px-8 py-3 text-base"
                   style={{
                     WebkitAppearance: 'none',
                     MozAppearance: 'none',
-                    background: 'hsl(var(--secondary))',
-                    color: 'hsl(var(--secondary-foreground))',
-                    border: '1px solid hsl(var(--input))'
+                    background: 'hsl(var(--primary))',
+                    color: 'hsl(var(--primary-foreground))',
+                    borderColor: 'hsl(var(--primary))'
                   }}
                 >
-                  <ChevronLeft className="h-4 w-4 mr-2" />
+                  <ChevronLeft className="h-5 w-5 mr-2" />
                   Zurück zur Stationsanzahl
                 </Button>
               </div>
@@ -165,15 +196,18 @@ export function ZvvApp() {
               <DepartureBoard stations={appState.stations} />
               <div className="text-center">
                 <Button
-                  variant="outline"
+                  variant="default"
                   onClick={handleReconfigure}
-                  className="text-primary border-primary hover:bg-primary hover:text-primary-foreground font-medium px-6 py-2 shadow-sm"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 border-2 border-primary shadow-lg font-semibold px-8 py-3 text-base"
                   style={{
                     WebkitAppearance: 'none',
-                    MozAppearance: 'none'
+                    MozAppearance: 'none',
+                    background: 'hsl(var(--primary))',
+                    color: 'hsl(var(--primary-foreground))',
+                    borderColor: 'hsl(var(--primary))'
                   }}
                 >
-                  <ChevronLeft className="h-4 w-4 mr-2" />
+                  <ChevronLeft className="h-5 w-5 mr-2" />
                   Stationen neu konfigurieren
                 </Button>
               </div>
