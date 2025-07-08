@@ -18,8 +18,6 @@ export interface Translations {
   countryFranceDesc: string;
   countryItalyName: string;
   countryItalyDesc: string;
-  countryCanadaName: string;
-  countryCanadaDesc: string;
   selected: string;
   selectCountryButton: string;
   comingSoon: string;
@@ -84,7 +82,6 @@ export interface Translations {
   
   // Footer
   dataFrom: string;
-  dataFromCanada: string;
 }
 
 const de: Translations = {
@@ -105,8 +102,6 @@ const de: Translations = {
   countryFranceDesc: "Kommt bald",
   countryItalyName: "Italien",
   countryItalyDesc: "Kommt bald",
-  countryCanadaName: "Kanada (Kelowna)",
-  countryCanadaDesc: "BC Transit mit Live-Daten",
   selected: "Ausgewählt",
   selectCountryButton: "Auswählen",
   comingSoon: "Kommt bald",
@@ -171,7 +166,6 @@ const de: Translations = {
   
   // Footer
   dataFrom: "DATEN VON TRANSPORT.OPENDATA.CH",
-  dataFromCanada: "DATEN © BC TRANSIT, OGL BC",
 };
 
 const en: Translations = {
@@ -192,8 +186,6 @@ const en: Translations = {
   countryFranceDesc: "Coming soon",
   countryItalyName: "Italy",
   countryItalyDesc: "Coming soon",
-  countryCanadaName: "Canada (Kelowna)",
-  countryCanadaDesc: "BC Transit with live data",
   selected: "Selected",
   selectCountryButton: "Select",
   comingSoon: "Coming soon",
@@ -258,7 +250,6 @@ const en: Translations = {
   
   // Footer
   dataFrom: "DATA FROM TRANSPORT.OPENDATA.CH",
-  dataFromCanada: "DATA © BC TRANSIT, OGL BC",
 };
 
 const fr: Translations = {
@@ -279,8 +270,6 @@ const fr: Translations = {
   countryFranceDesc: "Prochainement",
   countryItalyName: "Italie",
   countryItalyDesc: "Prochainement",
-  countryCanadaName: "Canada (Kelowna)",
-  countryCanadaDesc: "BC Transit avec données en direct",
   selected: "Sélectionné",
   selectCountryButton: "Sélectionner",
   comingSoon: "Prochainement",
@@ -345,7 +334,6 @@ const fr: Translations = {
   
   // Footer
   dataFrom: "DONNÉES DE TRANSPORT.OPENDATA.CH",
-  dataFromCanada: "DONNÉES © BC TRANSIT, OGL BC",
 };
 
 const it: Translations = {
@@ -366,8 +354,6 @@ const it: Translations = {
   countryFranceDesc: "Prossimamente",
   countryItalyName: "Italia",
   countryItalyDesc: "Prossimamente",
-  countryCanadaName: "Canada (Kelowna)",
-  countryCanadaDesc: "BC Transit con dati in tempo reale",
   selected: "Selezionato",
   selectCountryButton: "Seleziona",
   comingSoon: "Prossimamente",
@@ -432,7 +418,6 @@ const it: Translations = {
   
   // Footer
   dataFrom: "DATI DA TRANSPORT.OPENDATA.CH",
-  dataFromCanada: "DATI © BC TRANSIT, OGL BC",
 };
 
 const gsw: Translations = {
@@ -453,8 +438,6 @@ const gsw: Translations = {
   countryFranceDesc: "Chunnt bald",
   countryItalyName: "Italie",
   countryItalyDesc: "Chunnt bald",
-  countryCanadaName: "Kanada (Kelowna)",
-  countryCanadaDesc: "BC Transit mit Live-Date",
   selected: "Usgwählt",
   selectCountryButton: "Uswähle",
   comingSoon: "Chunnt bald",
@@ -519,7 +502,6 @@ const gsw: Translations = {
   
   // Footer
   dataFrom: "DATE VO TRANSPORT.OPENDATA.CH",
-  dataFromCanada: "DATE © BC TRANSIT, OGL BC",
 };
 
 export const translations: Record<SupportedLanguage, Translations> = {

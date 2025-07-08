@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Loader, Clock, AlertCircle } from "lucide-react";
@@ -13,7 +14,6 @@ interface DepartureBoardProps {
   language: SupportedLanguage;
   theme?: string;
   isFullscreen?: boolean;
-  country?: string;
 }
 
 interface StationBoardData {
@@ -74,7 +74,7 @@ function filterDeparturesByDirection(departures: Departure[], station: StationCo
   });
 }
 
-export function DepartureBoard({ stations, language, theme, isFullscreen = false, country = 'switzerland' }: DepartureBoardProps) {
+export function DepartureBoard({ stations, language, theme, isFullscreen = false }: DepartureBoardProps) {
   const { t } = useTranslations(language);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
@@ -104,11 +104,11 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
   }, [isFullscreen]);
 
   const { data: departureData, isLoading, error, refetch } = useQuery({
-    queryKey: ['departures', stations.map(s => s.id), country],
+    queryKey: ['departures', stations.map(s => s.id)],
     queryFn: async (): Promise<StationBoardData[]> => {
       const results = await Promise.all(
         stations.map(async (station) => {
-          const response = await ZvvApi.getStationBoard(station.id, country);
+          const response = await ZvvApi.getStationBoard(station.id);
           return {
             stationId: station.id,
             stationName: station.name,

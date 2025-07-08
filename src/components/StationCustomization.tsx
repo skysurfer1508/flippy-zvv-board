@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { StationConfig, Departure } from "@/types/zvv";
 import { ZvvApi } from "@/services/zvvApi";
@@ -11,7 +12,6 @@ interface StationCustomizationProps {
   stations: StationConfig[];
   onStationUpdate: (index: number, updates: Partial<StationConfig>) => void;
   onNext: () => void;
-  country?: string;
 }
 
 interface LineInfo {
@@ -27,8 +27,7 @@ interface DirectionInfo {
 export function StationCustomization({ 
   stations, 
   onStationUpdate, 
-  onNext,
-  country = 'switzerland'
+  onNext 
 }: StationCustomizationProps) {
   const [currentStationIndex, setCurrentStationIndex] = useState(0);
   const [availableLines, setAvailableLines] = useState<Record<string, LineInfo[]>>({});
@@ -58,7 +57,7 @@ export function StationCustomization({
       try {
         const [boardResponse, directionsResponse] = await Promise.all([
           ZvvApi.getStationBoard(currentStation.id),
-          ZvvApi.getLineDirections(currentStation.id, country)
+          ZvvApi.getLineDirections(currentStation.id)
         ]);
         
         if (boardResponse?.stationboard) {
@@ -103,16 +102,6 @@ export function StationCustomization({
 
     loadLines();
   }, [currentStation, availableLines]);
-
-  const fetchLineDirections = async (stationId: string) => {
-    try {
-      const directions = await ZvvApi.getLineDirections(stationId, country);
-      return directions;
-    } catch (error) {
-      console.error('Error fetching line directions:', error);
-      return {};
-    }
-  };
 
   const getDefaultLineColor = (category: string): string => {
     const cat = category.toLowerCase();

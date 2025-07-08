@@ -1,3 +1,4 @@
+
 export interface Location {
   id: string;
   name: string;
@@ -88,7 +89,7 @@ export type SupportedLanguage = 'de' | 'en' | 'fr' | 'it' | 'gsw';
 
 export type Theme = 'default' | 'led' | 'blackwhite' | 'modern' | 'classic';
 
-export type Country = 'switzerland' | 'germany' | 'austria' | 'france' | 'italy' | 'canada';
+export type Country = 'switzerland' | 'germany' | 'austria' | 'france' | 'italy';
 
 export interface AppState {
   country: Country;
