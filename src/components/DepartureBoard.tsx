@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Loader, Clock, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ZvvApi } from "@/services/zvvApi";
 import { StationConfig, Departure, SupportedLanguage } from "@/types/zvv";
 import { useTranslations } from "@/utils/translations";
@@ -195,6 +196,36 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
     return "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6";
   };
 
+  // Animation variants for smooth transitions
+  const slideVariants = {
+    enter: {
+      y: 50,
+      opacity: 0,
+      scale: 0.95
+    },
+    center: {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.3,
+        ease: "easeOut"
+      }
+    },
+    exit: {
+      y: -30,
+      opacity: 0,
+      scale: 0.95,
+      transition: {
+        duration: 0.2,
+        ease: "easeIn"
+      }
+    }
+  };
+
+  // Check for reduced motion preference
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   // LED Theme - Flip-dot display
   if (isLedTheme) {
     return (
@@ -220,13 +251,16 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
                   <div></div>
                 </div>
               ) : (
-                stationData.departures.slice(0, maxEntries).map((departure, index) => (
-                  <FlipDotRow
-                    key={`${departure.name}-${departure.stop.departure}-${index}`}
-                    departure={departure}
-                    formatTime={formatDepartureTime}
-                  />
-                ))
+                <AnimatePresence mode="popLayout">
+                  {stationData.departures.slice(0, maxEntries).map((departure, index) => (
+                    <FlipDotRow
+                      key={`${departure.name}-${departure.stop.departure}-${index}`}
+                      departure={departure}
+                      formatTime={formatDepartureTime}
+                      prefersReducedMotion={prefersReducedMotion}
+                    />
+                  ))}
+                </AnimatePresence>
               )}
             </div>
           </div>
@@ -235,7 +269,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
     );
   }
 
-  // Default theme layout
+  // Default theme layout - with animations for all standard themes
   return (
     <div className={getGridClasses()}>
       {departureData?.map((stationData) => (
@@ -273,81 +307,88 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
               </div>
             ) : (
               <div className={`${isFullscreen ? 'fullscreen-departures' : 'max-h-96 overflow-y-auto'}`}>
-                {stationData.departures.slice(0, maxEntries).map((departure, index) => {
-                  const lineNumber = getDisplayLineNumber(departure);
-                  const lineColor = getLineColor(departure.category, lineNumber, stationData.lineColors);
-                  
-                  // Enhanced delay parsing with strict type checking
-                  const delayValue = departure.stop.delay;
-                  const delayNumber = delayValue ? Number(delayValue) : 0;
-                  const hasDelay = delayNumber > 0;
-                  
-                  console.log('DepartureBoard delay processing:', {
-                    lineNumber,
-                    delayValue,
-                    delayNumber,
-                    hasDelay,
-                    delayType: typeof delayValue,
-                    category: departure.category,
-                    number: departure.number,
-                    displayLineNumber: lineNumber
-                  });
-                  
-                  return (
-                    <div
-                      key={`${departure.name}-${departure.stop.departure}-${index}`}
-                      className="zvv-departure-row grid grid-cols-12 gap-2 px-6 py-4 hover:bg-muted transition-colors departure-item"
-                    >
-                      {/* Line Number */}
-                      <div className="col-span-2 flex items-center">
-                        <span 
-                          className="line-number text-white px-3 py-1 rounded text-xs font-bold min-w-[3rem] text-center"
-                          style={{ backgroundColor: lineColor }}
-                        >
-                          {lineNumber}
-                        </span>
-                      </div>
-
-                      {/* Destination */}
-                      <div className="col-span-6 flex flex-col justify-center">
-                        <div className="destination font-mono font-bold text-foreground truncate">
-                          {departure.to}
-                        </div>
-                        <div className="font-mono text-xs text-muted-foreground uppercase">
-                          {departure.category}
-                        </div>
-                      </div>
-
-                      {/* Platform */}
-                      <div className="col-span-2 flex items-center justify-center">
-                        {departure.stop.platform && (
-                          <span className="platform font-mono font-bold text-primary">
-                            {departure.stop.platform}
+                <AnimatePresence mode="popLayout">
+                  {stationData.departures.slice(0, maxEntries).map((departure, index) => {
+                    const lineNumber = getDisplayLineNumber(departure);
+                    const lineColor = getLineColor(departure.category, lineNumber, stationData.lineColors);
+                    
+                    // Enhanced delay parsing with strict type checking
+                    const delayValue = departure.stop.delay;
+                    const delayNumber = delayValue ? Number(delayValue) : 0;
+                    const hasDelay = delayNumber > 0;
+                    
+                    console.log('DepartureBoard delay processing:', {
+                      lineNumber,
+                      delayValue,
+                      delayNumber,
+                      hasDelay,
+                      delayType: typeof delayValue,
+                      category: departure.category,
+                      number: departure.number,
+                      displayLineNumber: lineNumber
+                    });
+                    
+                    return (
+                      <motion.div
+                        key={`${departure.name}-${departure.stop.departure}-${index}`}
+                        variants={prefersReducedMotion ? {} : slideVariants}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        layout={!prefersReducedMotion}
+                        className="zvv-departure-row grid grid-cols-12 gap-2 px-6 py-4 hover:bg-muted transition-colors departure-item"
+                      >
+                        {/* Line Number */}
+                        <div className="col-span-2 flex items-center">
+                          <span 
+                            className="line-number text-white px-3 py-1 rounded text-xs font-bold min-w-[3rem] text-center"
+                            style={{ backgroundColor: lineColor }}
+                          >
+                            {lineNumber}
                           </span>
-                        )}
-                      </div>
-
-                      {/* Departure Time */}
-                      <div className="col-span-2 flex flex-col items-end justify-center">
-                        <div className="departure-time font-mono font-bold text-lg text-primary">
-                          {formatDepartureTime(departure)}
                         </div>
-                        {/* Always render delay container for consistent spacing */}
-                        <div className="delay-container" style={{ minHeight: '1.25rem' }}>
-                          {hasDelay ? (
-                            <div className="delay font-mono text-sm text-destructive">
-                              +{delayNumber}'
-                            </div>
-                          ) : (
-                            <div className="delay font-mono text-sm text-transparent">
-                              &nbsp;
-                            </div>
+
+                        {/* Destination */}
+                        <div className="col-span-6 flex flex-col justify-center">
+                          <div className="destination font-mono font-bold text-foreground truncate">
+                            {departure.to}
+                          </div>
+                          <div className="font-mono text-xs text-muted-foreground uppercase">
+                            {departure.category}
+                          </div>
+                        </div>
+
+                        {/* Platform */}
+                        <div className="col-span-2 flex items-center justify-center">
+                          {departure.stop.platform && (
+                            <span className="platform font-mono font-bold text-primary">
+                              {departure.stop.platform}
+                            </span>
                           )}
                         </div>
-                      </div>
-                    </div>
-                  );
-                })}
+
+                        {/* Departure Time */}
+                        <div className="col-span-2 flex flex-col items-end justify-center">
+                          <div className="departure-time font-mono font-bold text-lg text-primary">
+                            {formatDepartureTime(departure)}
+                          </div>
+                          {/* Always render delay container for consistent spacing */}
+                          <div className="delay-container" style={{ minHeight: '1.25rem' }}>
+                            {hasDelay ? (
+                              <div className="delay font-mono text-sm text-destructive">
+                                +{delayNumber}'
+                              </div>
+                            ) : (
+                              <div className="delay font-mono text-sm text-transparent">
+                                &nbsp;
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
               </div>
             )}
           </div>

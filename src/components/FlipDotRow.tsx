@@ -1,9 +1,11 @@
 
+import { motion } from "framer-motion";
 import { Departure } from "@/types/zvv";
 
 interface FlipDotRowProps {
   departure: Departure;
   formatTime: (departure: Departure) => string;
+  prefersReducedMotion?: boolean;
 }
 
 function getDisplayLineNumber(departure: Departure): string {
@@ -39,7 +41,7 @@ function getDisplayLineNumber(departure: Departure): string {
   return name || '?';
 }
 
-export function FlipDotRow({ departure, formatTime }: FlipDotRowProps) {
+export function FlipDotRow({ departure, formatTime, prefersReducedMotion = false }: FlipDotRowProps) {
   const lineNumber = getDisplayLineNumber(departure);
   const formattedTime = formatTime(departure);
   
@@ -58,10 +60,39 @@ export function FlipDotRow({ departure, formatTime }: FlipDotRowProps) {
     number: departure.number,
     displayLineNumber: lineNumber
   });
+
+  // LED-specific animation variants with retro feel
+  const ledSlideVariants = {
+    enter: {
+      y: 40,
+      opacity: 0
+    },
+    center: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.4,
+        ease: "easeOut"
+      }
+    },
+    exit: {
+      y: -20,
+      opacity: 0,
+      transition: {
+        duration: 0.3,
+        ease: "easeIn"
+      }
+    }
+  };
   
   return (
-    <div 
+    <motion.div 
       className="flip-dot-row"
+      variants={prefersReducedMotion ? {} : ledSlideVariants}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      layout={!prefersReducedMotion}
       role="listitem"
       aria-label={`Linie ${lineNumber} nach ${departure.to}, Abfahrt in ${formattedTime}${hasDelay ? `, Verspätung ${delayNumber} Minuten` : ''}`}
     >
@@ -88,6 +119,6 @@ export function FlipDotRow({ departure, formatTime }: FlipDotRowProps) {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
