@@ -12,9 +12,20 @@
         <header>
             <h1>ZVV Doppel-Abfahrtszeiten</h1>
             
+            <!-- Station Count Selection Phase -->
+            <div id="station-count-selection" class="station-count-selection">
+                <h2>Wie viele Stationen möchten Sie anzeigen?</h2>
+                <div class="count-selection">
+                    <button class="count-btn" data-count="1">1 Station</button>
+                    <button class="count-btn" data-count="2">2 Stationen</button>
+                    <button class="count-btn" data-count="3">3 Stationen</button>
+                    <button class="count-btn" data-count="4">4 Stationen</button>
+                </div>
+            </div>
+
             <!-- Station Selection Phase -->
-            <div id="station-selection" class="station-selection">
-                <div class="dual-input-container">
+            <div id="station-selection" class="station-selection hidden">
+                <div class="dynamic-input-container">
                     <div class="station-input-group">
                         <label for="station1-input">Station 1 (Links)</label>
                         <div class="search-container">
@@ -124,6 +135,18 @@
             <p>Daten von transport.opendata.ch | Aktualisierung alle 25 Sekunden</p>
             <button id="change-stations" class="change-stations-btn hidden">Stationen ändern</button>
         </footer>
+    </div>
+
+    <!-- Color Picker Modal -->
+    <div id="color-picker-modal" class="color-modal hidden">
+        <div class="color-modal-content">
+            <h3>Farbe für Linie <span id="color-modal-line"></span> auswählen</h3>
+            <input type="color" id="color-modal-input" />
+            <div class="color-modal-buttons">
+                <button id="color-modal-apply" class="start-btn">Übernehmen</button>
+                <button id="color-modal-cancel" class="change-stations-btn">Abbrechen</button>
+            </div>
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>

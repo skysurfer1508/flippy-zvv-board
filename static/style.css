@@ -30,13 +30,58 @@ h1 {
     letter-spacing: 2px;
 }
 
+/* Station Count Selection Phase */
+.station-count-selection {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.station-count-selection h2 {
+    color: #ffd700;
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+}
+
+.count-selection {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.count-btn {
+    background: #333;
+    color: #ffd700;
+    border: 2px solid #ffd700;
+    padding: 20px 15px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
+}
+
+.count-btn:hover {
+    background: #ffd700;
+    color: #1a1a1a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+}
+
+.count-btn.selected {
+    background: #ffd700;
+    color: #1a1a1a;
+}
+
 /* Station Selection Phase */
 .station-selection {
     max-width: 800px;
     margin: 0 auto;
 }
 
-.dual-input-container {
+.dynamic-input-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 40px;
@@ -494,4 +539,64 @@ footer {
         grid-template-columns: 1fr;
         gap: 15px;
     }
+    
+    .count-selection {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .count-selection {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Color Picker Modal */
+.color-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.color-modal-content {
+    background: #333;
+    padding: 30px;
+    border-radius: 12px;
+    border: 2px solid #ffd700;
+    text-align: center;
+    min-width: 300px;
+}
+
+.color-modal-content h3 {
+    color: #ffd700;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+}
+
+.color-modal-content input[type="color"] {
+    width: 80px;
+    height: 80px;
+    border: 2px solid #ffd700;
+    border-radius: 8px;
+    background: none;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.color-modal-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.color-modal-buttons button {
+    margin: 0;
+    padding: 10px 20px;
 }
