@@ -98,4 +98,6 @@ export interface AppState {
   phase: 'count-selection' | 'station-selection' | 'customization' | 'monitoring';
   language: SupportedLanguage;
   theme: Theme;
+  fontSize: number;
+  isFullscreen: boolean;
 }

@@ -48,6 +48,9 @@ export interface Translations {
   swissGerman: string;
   editColors: string;
   reconfigureStations: string;
+  fontSize: string;
+  fullscreen: string;
+  exitFullscreen: string;
   
   // Theme Settings
   theme: string;
@@ -109,6 +112,9 @@ const de: Translations = {
   swissGerman: "Schweizerdeutsch",
   editColors: "Farben anpassen",
   reconfigureStations: "Stationen neu konfigurieren",
+  fontSize: "Schriftgröße",
+  fullscreen: "Vollbild",
+  exitFullscreen: "Vollbild verlassen",
   
   // Theme Settings
   theme: "Design",
@@ -170,6 +176,9 @@ const en: Translations = {
   swissGerman: "Swiss German",
   editColors: "Edit colors",
   reconfigureStations: "Reconfigure stations",
+  fontSize: "Font Size",
+  fullscreen: "Fullscreen",
+  exitFullscreen: "Exit Fullscreen",
   
   // Theme Settings
   theme: "Theme",
@@ -231,6 +240,9 @@ const fr: Translations = {
   swissGerman: "Suisse allemand",
   editColors: "Modifier les couleurs",
   reconfigureStations: "Reconfigurer les stations",
+  fontSize: "Taille de police",
+  fullscreen: "Plein écran",
+  exitFullscreen: "Quitter le plein écran",
   
   // Theme Settings
   theme: "Thème",
@@ -292,6 +304,9 @@ const it: Translations = {
   swissGerman: "Svizzero tedesco",
   editColors: "Modifica colori",
   reconfigureStations: "Riconfigura stazioni",
+  fontSize: "Dimensione carattere",
+  fullscreen: "Schermo intero",
+  exitFullscreen: "Esci da schermo intero",
   
   // Theme Settings
   theme: "Tema",
@@ -353,6 +368,9 @@ const gsw: Translations = {
   swissGerman: "Schwiizerdüütsch",
   editColors: "Farbä aapassä",
   reconfigureStations: "Statione neu konfiguriere",
+  fontSize: "Schriftgröössi",
+  fullscreen: "Vollbild",
+  exitFullscreen: "Vollbild verlah",
   
   // Theme Settings
   theme: "Design",

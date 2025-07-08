@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -58,6 +57,9 @@ All colors MUST be HSL.
     --flip-dot-background: 0 0% 0%;
     --flip-dot-yellow: 48 100% 60%;
     --flip-dot-frame: 0 0% 20%;
+
+    /* Dynamic font sizing */
+    --dynamic-font-size: 100%;
   }
 
   .dark {
@@ -369,6 +371,259 @@ All colors MUST be HSL.
     from { opacity: 0; }
     to { opacity: 1; }
   }
+
+  /* Cross-browser compatibility fixes */
+  button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  input {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  /* Safari-specific fixes */
+  @supports (-webkit-appearance: none) {
+    input[type="text"] {
+      -webkit-appearance: none;
+      border-radius: 0;
+    }
+  }
+
+  /* Firefox-specific fixes */
+  @-moz-document url-prefix() {
+    button {
+      outline: none;
+    }
+  }
+
+  /* High z-index for dropdowns and modals */
+  .dropdown-content,
+  .popover-content,
+  .modal-content {
+    z-index: 9999;
+  }
+
+  /* Ensure animations work across browsers */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @-webkit-keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @-moz-keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.2s ease-in-out;
+    -webkit-animation: fadeIn 0.2s ease-in-out;
+    -moz-animation: fadeIn 0.2s ease-in-out;
+  }
+
+  /* Responsive adjustments for horizontal displays */
+  @media (max-width: 1200px) {
+    .theme-led .flip-dot-display {
+      aspect-ratio: 4/3;
+    }
+    
+    .theme-led .flip-dot-row {
+      grid-template-columns: 100px 1fr 140px;
+      gap: 15px;
+      padding: 6px 15px;
+      min-height: 50px;
+    }
+    
+    .theme-led .flip-dot-line {
+      min-width: 70px;
+      font-size: calc(1.4vw + 12px);
+    }
+    
+    .theme-led .flip-dot-time {
+      min-width: 100px;
+      font-size: calc(1.4vw + 10px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .theme-led .flip-dot-display {
+      aspect-ratio: 3/2;
+      border: 4px solid hsl(var(--flip-dot-frame));
+    }
+    
+    .theme-led .flip-dot-row {
+      grid-template-columns: 80px 1fr 100px;
+      gap: 10px;
+      padding: 5px 10px;
+      min-height: 40px;
+    }
+    
+    .theme-led .flip-dot-header {
+      padding: 8px 15px;
+      font-size: calc(2vw + 10px);
+    }
+    
+    .theme-led .flip-dot-line {
+      min-width: 60px;
+      font-size: calc(2vw + 8px);
+    }
+    
+    .theme-led .flip-dot-destination {
+      font-size: calc(2vw + 6px);
+    }
+    
+    .theme-led .flip-dot-time {
+      min-width: 80px;
+      font-size: calc(2vw + 8px);
+    }
+  }
+}
+
+/* Dynamic font sizing utility */
+.dynamic-font-size {
+  font-size: calc(1rem * var(--dynamic-font-size) / 100);
+}
+
+.dynamic-font-size * {
+  font-size: inherit !important;
+}
+
+/* Flip-dot display styles for LED theme - fully responsive and scalable */
+.theme-led .flip-dot-display {
+  font-family: 'DotGothic16', 'VT323', monospace;
+  font-size: calc((1.2vw + 0.8vh + 10px) * var(--dynamic-font-size) / 100);
+  letter-spacing: 0.08em;
+  background: hsl(var(--flip-dot-background));
+  color: hsl(var(--flip-dot-yellow));
+  max-width: 100%;
+  width: 100%;
+  height: calc(100vh - 120px);
+  margin: 0 auto;
+  border: calc(4px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-frame));
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.theme-led .flip-dot-header {
+  background: hsl(var(--flip-dot-background));
+  color: hsl(var(--flip-dot-yellow));
+  border: none;
+  padding: calc(10px * var(--dynamic-font-size) / 100) calc(16px * var(--dynamic-font-size) / 100);
+  font-family: 'DotGothic16', 'VT323', monospace;
+  font-size: calc((1.5vw + 1vh + 12px) * var(--dynamic-font-size) / 100);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: calc(2px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-frame));
+  flex-shrink: 0;
+}
+
+.theme-led .flip-dot-row {
+  display: grid;
+  grid-template-columns: minmax(80px, 120px) 1fr minmax(120px, 180px);
+  gap: calc(16px * var(--dynamic-font-size) / 100);
+  padding: calc(6px * var(--dynamic-font-size) / 100) calc(16px * var(--dynamic-font-size) / 100);
+  line-height: 1.1;
+  border: none;
+  background: hsl(var(--flip-dot-background));
+  color: hsl(var(--flip-dot-yellow));
+  font-family: 'DotGothic16', 'VT323', monospace;
+  font-size: calc((1.2vw + 0.8vh + 10px) * var(--dynamic-font-size) / 100);
+  letter-spacing: 0.08em;
+  animation: fadeIn 0.3s ease-in;
+  border-bottom: calc(1px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-frame));
+  min-height: calc(50px * var(--dynamic-font-size) / 100);
+  align-items: center;
+}
+
+.theme-led .flip-dot-row:hover {
+  background: hsl(var(--flip-dot-background));
+}
+
+.theme-led .flip-dot-line {
+  font-size: calc((1.4vw + 1vh + 12px) * var(--dynamic-font-size) / 100);
+  font-weight: bold;
+  text-align: center;
+  justify-self: center;
+  align-self: center;
+  padding: calc(3px * var(--dynamic-font-size) / 100) calc(6px * var(--dynamic-font-size) / 100);
+  border: calc(2px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-yellow));
+  border-radius: calc(3px * var(--dynamic-font-size) / 100);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.theme-led .flip-dot-destination {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  align-self: center;
+  padding-left: calc(8px * var(--dynamic-font-size) / 100);
+  font-size: calc((1.3vw + 0.9vh + 10px) * var(--dynamic-font-size) / 100);
+}
+
+.theme-led .flip-dot-time {
+  text-align: center;
+  align-self: center;
+  font-variant-numeric: tabular-nums;
+  font-size: calc((1.4vw + 1vh + 12px) * var(--dynamic-font-size) / 100);
+  font-weight: bold;
+  padding: calc(3px * var(--dynamic-font-size) / 100) calc(6px * var(--dynamic-font-size) / 100);
+  border: calc(2px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-yellow));
+  border-radius: calc(3px * var(--dynamic-font-size) / 100);
+  justify-self: center;
+  white-space: nowrap;
+}
+
+/* Responsive breakpoints for better scaling */
+@media (max-width: 1200px) {
+  .theme-led .flip-dot-display {
+    height: calc(90vh - 100px);
+  }
+  
+  .theme-led .flip-dot-row {
+    grid-template-columns: minmax(70px, 100px) 1fr minmax(100px, 140px);
+    gap: calc(12px * var(--dynamic-font-size) / 100);
+    padding: calc(5px * var(--dynamic-font-size) / 100) calc(12px * var(--dynamic-font-size) / 100);
+    min-height: calc(45px * var(--dynamic-font-size) / 100);
+  }
+}
+
+@media (max-width: 768px) {
+  .theme-led .flip-dot-display {
+    height: calc(85vh - 80px);
+    border: calc(3px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-frame));
+  }
+  
+  .theme-led .flip-dot-row {
+    grid-template-columns: minmax(60px, 80px) 1fr minmax(80px, 100px);
+    gap: calc(8px * var(--dynamic-font-size) / 100);
+    padding: calc(4px * var(--dynamic-font-size) / 100) calc(8px * var(--dynamic-font-size) / 100);
+    min-height: calc(40px * var(--dynamic-font-size) / 100);
+  }
+  
+  .theme-led .flip-dot-header {
+    padding: calc(6px * var(--dynamic-font-size) / 100) calc(10px * var(--dynamic-font-size) / 100);
+  }
+}
+
+@media (max-width: 480px) {
+  .theme-led .flip-dot-display {
+    height: calc(80vh - 60px);
+  }
+}
 
   /* Cross-browser compatibility fixes */
   button {

@@ -20,7 +20,9 @@ const INITIAL_STATE: AppState = {
   },
   phase: 'count-selection',
   language: 'de',
-  theme: 'default'
+  theme: 'default',
+  fontSize: 100,
+  isFullscreen: false
 };
 
 export function ZvvApp() {
@@ -44,6 +46,14 @@ export function ZvvApp() {
           
           if (!parsed.theme) {
             parsed.theme = 'default';
+          }
+
+          if (!parsed.fontSize) {
+            parsed.fontSize = 100;
+          }
+
+          if (parsed.isFullscreen === undefined) {
+            parsed.isFullscreen = false;
           }
           
           const hasValidStations = parsed.stations?.length === parsed.stationCount;
@@ -172,6 +182,22 @@ export function ZvvApp() {
     setAppState(prev => ({ ...prev, phase: 'count-selection' }));
   };
 
+  const handleFontSizeChange = (fontSize: number) => {
+    console.log('ZvvApp: Font size changed to:', fontSize);
+    setAppState(prev => ({
+      ...prev,
+      fontSize
+    }));
+  };
+
+  const handleFullscreenToggle = () => {
+    console.log('ZvvApp: Fullscreen toggled:', !appState.isFullscreen);
+    setAppState(prev => ({
+      ...prev,
+      isFullscreen: !prev.isFullscreen
+    }));
+  };
+
   const canProceed = appState.stations.length === appState.stationCount && 
                     appState.stations.every(station => station.id && station.name);
 
@@ -208,12 +234,14 @@ export function ZvvApp() {
   };
 
   return (
-    <div className={`min-h-screen bg-background p-4 ${getThemeClass()}`}>
+    <div className={`min-h-screen bg-background ${appState.isFullscreen ? 'p-2' : 'p-4'} ${getThemeClass()}`}>
       <div className="container mx-auto max-w-6xl">
-        <header className="text-center mb-8">
-          <h1 className="text-5xl font-bold mb-4 text-primary font-mono tracking-wider">{t.appTitle}</h1>
-          <p className="text-muted-foreground font-mono text-lg uppercase tracking-wide">{t.appSubtitle}</p>
-        </header>
+        {!appState.isFullscreen && (
+          <header className="text-center mb-8">
+            <h1 className="text-5xl font-bold mb-4 text-primary font-mono tracking-wider">{t.appTitle}</h1>
+            <p className="text-muted-foreground font-mono text-lg uppercase tracking-wide">{t.appSubtitle}</p>
+          </header>
+        )}
 
         <main>
           {appState.phase === 'count-selection' && (
@@ -283,13 +311,19 @@ export function ZvvApp() {
                 stations={appState.stations} 
                 language={appState.language}
                 theme={appState.theme}
+                fontSize={appState.fontSize}
+                isFullscreen={appState.isFullscreen}
               />
               
               <SettingsMenu 
                 language={appState.language}
                 theme={appState.theme}
+                fontSize={appState.fontSize}
+                isFullscreen={appState.isFullscreen}
                 onLanguageChange={handleLanguageChange}
                 onThemeChange={handleThemeChange}
+                onFontSizeChange={handleFontSizeChange}
+                onFullscreenToggle={handleFullscreenToggle}
                 onReconfigureStations={handleReconfigure}
                 onEditColors={() => setAppState(prev => ({ ...prev, phase: 'customization' }))}
               />
@@ -297,9 +331,11 @@ export function ZvvApp() {
           )}
         </main>
 
-        <footer className="text-center mt-12 text-sm text-muted-foreground font-mono">
-          <p>{t.dataFrom}</p>
-        </footer>
+        {!appState.isFullscreen && (
+          <footer className="text-center mt-12 text-sm text-muted-foreground font-mono">
+            <p>{t.dataFrom}</p>
+          </footer>
+        )}
       </div>
     </div>
   );

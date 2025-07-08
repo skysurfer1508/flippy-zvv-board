@@ -10,6 +10,8 @@ interface DepartureBoardProps {
   stations: StationConfig[];
   language: SupportedLanguage;
   theme?: string;
+  fontSize?: number;
+  isFullscreen?: boolean;
 }
 
 interface StationBoardData {
@@ -20,12 +22,17 @@ interface StationBoardData {
   departures: Departure[];
 }
 
-export function DepartureBoard({ stations, language, theme }: DepartureBoardProps) {
+export function DepartureBoard({ stations, language, theme, fontSize = 100, isFullscreen = false }: DepartureBoardProps) {
   const { t } = useTranslations(language);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   // Check if LED theme is active
   const isLedTheme = theme === 'led';
+
+  // Generate dynamic styles for font sizing
+  const fontSizeStyle = {
+    '--dynamic-font-size': `${fontSize}%`,
+  } as React.CSSProperties;
 
   const { data: departureData, isLoading, error, refetch } = useQuery({
     queryKey: ['departures', stations.map(s => s.id)],
@@ -123,9 +130,12 @@ export function DepartureBoard({ stations, language, theme }: DepartureBoardProp
   // LED Theme - Flip-dot display
   if (isLedTheme) {
     return (
-      <div className="space-y-8">
+      <div 
+        className="space-y-8" 
+        style={fontSizeStyle}
+      >
         {departureData?.map((stationData) => (
-          <div key={stationData.stationId} className="flip-dot-display">
+          <div key={stationData.stationId} className="flip-dot-display dynamic-font-size">
             <div className="flip-dot-header">
               <div className="text-center">
                 {stationData.customName || stationData.stationName}
@@ -160,11 +170,14 @@ export function DepartureBoard({ stations, language, theme }: DepartureBoardProp
     );
   }
 
-  // Default theme layout (keep existing code for other themes)
+  // Default theme layout
   return (
-    <div className="space-y-8">
+    <div 
+      className="space-y-8" 
+      style={fontSizeStyle}
+    >
       {departureData?.map((stationData) => (
-        <div key={stationData.stationId} className="zvv-board rounded-lg overflow-hidden border border-border">
+        <div key={stationData.stationId} className="zvv-board rounded-lg overflow-hidden border border-border dynamic-font-size">
           {/* Station Header */}
           <div className="zvv-header px-6 py-4 flex items-center justify-between">
             <h2 className="text-2xl font-bold font-mono">
