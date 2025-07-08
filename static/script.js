@@ -1,4 +1,3 @@
-
 // ZVV Departure Board Script
 let currentLanguage = 'de';
 let selectedStationCount = 0;
@@ -619,4 +618,57 @@ function updateBoardHeaders() {
     headerDestinations.forEach(el => el.textContent = translations[currentLanguage].destination);
     headerPlatforms.forEach(el => el.textContent = translations[currentLanguage].platform);
     headerDepartures.forEach(el => el.textContent = translations[currentLanguage].departure);
+}
+
+function formatDelay(delay) {
+    if (!delay || delay === 0) return '';
+    
+    // Convert delay to minutes and round to whole number
+    const delayMinutes = Math.round(delay / 60);
+    
+    if (delayMinutes === 0) return '';
+    return delayMinutes > 0 ? `+${delayMinutes}` : `${delayMinutes}`;
+}
+
+function updateDepartureBoard(stationName, data, customName) {
+    const board = document.querySelector(`[data-station="${stationName}"] .departures-list`);
+    if (!board) return;
+
+    if (!data || !data.stationboard || data.stationboard.length === 0) {
+        board.innerHTML = '<div class="no-data">Keine Abfahrten verfügbar</div>';
+        return;
+    }
+
+    const now = new Date();
+    const departures = data.stationboard
+        .filter(dep => new Date(dep.stop.departure) > now)
+        .slice(0, 20);
+
+    board.innerHTML = departures.map(dep => {
+        const depTime = new Date(dep.stop.departure);
+        const scheduledTime = new Date(dep.stop.prognosis?.departure || dep.stop.departure);
+        const delay = dep.stop.delay || 0;
+        
+        // Format delay properly
+        const delayText = formatDelay(delay);
+        
+        const minutes = Math.max(0, Math.floor((depTime - now) / 60000));
+        const timeStr = minutes === 0 ? 'Jetzt' : minutes < 60 ? `${minutes}'` : 
+                       depTime.toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' });
+
+        const lineClass = dep.category?.toLowerCase() === 'bus' ? 'bus' : 
+                         dep.category?.toLowerCase() === 'tram' ? 'tram' : '';
+
+        return `
+            <div class="departure-row">
+                <div class="line-number ${lineClass}">${dep.number || dep.name}</div>
+                <div class="destination">${dep.to}</div>
+                <div class="platform">${dep.stop.platform || ''}</div>
+                <div class="departure-time">
+                    ${timeStr}
+                    ${delayText ? `<span class="delay">${delayText}</span>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
 }
