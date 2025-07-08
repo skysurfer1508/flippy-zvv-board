@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Loader, Clock, AlertCircle } from "lucide-react";
@@ -40,12 +39,16 @@ export function DepartureBoard({ stations, language }: DepartureBoardProps) {
       );
       return results;
     },
-    refetchInterval: 20000, // Updated to 20 seconds as requested
-    enabled: stations.length > 0,
-    onSuccess: () => {
+    refetchInterval: 20000, // 20 seconds as requested
+    enabled: stations.length > 0
+  });
+
+  // Update lastUpdated when data changes
+  useEffect(() => {
+    if (departureData) {
       setLastUpdated(new Date());
     }
-  });
+  }, [departureData]);
 
   const formatDepartureTime = (departure: Departure) => {
     if (!departure.stop.departure) return "N/A";

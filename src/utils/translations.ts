@@ -1,4 +1,3 @@
-
 import { SupportedLanguage } from "@/types/zvv";
 
 export interface Translations {
@@ -13,15 +12,15 @@ export interface Translations {
   
   // Station Selection
   stationSelectionTitle: string;
-  stationSelectionSubtitle: string;
-  stationLabel: string;
-  stationSearchPlaceholder: string;
+  stationSelectionSubtitle: string | ((count: number) => string);
+  stationLabel: string | ((index: number) => string);
+  stationSearchPlaceholder: string | ((index: number) => string);
   nextToCustomization: string;
   backToStationCount: string;
   
   // Customization
   customizationTitle: string;
-  customizationStationOf: string;
+  customizationStationOf: string | ((index: number, total: number, name: string) => string);
   displayNameLabel: string;
   lineColorsLabel: string;
   loadingLines: string;
@@ -332,24 +331,20 @@ export const useTranslations = (language: SupportedLanguage) => {
   return {
     t: translations[language],
     formatStationSubtitle: (count: number) => {
-      return typeof translations[language].stationSelectionSubtitle === 'function'
-        ? translations[language].stationSelectionSubtitle(count)
-        : translations[language].stationSelectionSubtitle;
+      const subtitle = translations[language].stationSelectionSubtitle;
+      return typeof subtitle === 'function' ? subtitle(count) : subtitle;
     },
     formatStationLabel: (index: number) => {
-      return typeof translations[language].stationLabel === 'function'
-        ? translations[language].stationLabel(index + 1)
-        : `${translations[language].stationLabel} ${index + 1}`;
+      const label = translations[language].stationLabel;
+      return typeof label === 'function' ? label(index + 1) : `${label} ${index + 1}`;
     },
     formatStationSearchPlaceholder: (index: number) => {
-      return typeof translations[language].stationSearchPlaceholder === 'function'
-        ? translations[language].stationSearchPlaceholder(index + 1)
-        : `${translations[language].stationSearchPlaceholder} ${index + 1}`;
+      const placeholder = translations[language].stationSearchPlaceholder;
+      return typeof placeholder === 'function' ? placeholder(index + 1) : `${placeholder} ${index + 1}`;
     },
     formatCustomizationStationOf: (index: number, total: number, name: string) => {
-      return typeof translations[language].customizationStationOf === 'function'
-        ? translations[language].customizationStationOf(index + 1, total, name)
-        : `${translations[language].customizationStationOf} ${index + 1} ${total}: ${name}`;
+      const stationOf = translations[language].customizationStationOf;
+      return typeof stationOf === 'function' ? stationOf(index + 1, total, name) : `${stationOf} ${index + 1} ${total}: ${name}`;
     }
   };
 };
