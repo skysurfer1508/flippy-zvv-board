@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Loader, Clock, AlertCircle } from "lucide-react";
@@ -215,7 +214,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
     return "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6";
   };
 
-  // Enhanced animation variants for chain reaction effect
+  // Enhanced animation variants for chain reaction effect - Fixed TypeScript issues
   const chainAnimationVariants = {
     enter: {
       y: 60,
@@ -230,15 +229,11 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
     exit: {
       y: -30,
       opacity: 0,
-      scale: 0.95,
-      transition: {
-        duration: 0.8,
-        ease: "easeInOut"
-      }
+      scale: 0.95
     }
   };
 
-  // LED-specific animation variants with longer durations for retro feel
+  // LED-specific animation variants - Fixed TypeScript issues
   const ledChainVariants = {
     enter: {
       y: 50,
@@ -250,11 +245,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
     },
     exit: {
       y: -25,
-      opacity: 0,
-      transition: {
-        duration: 1.0,
-        ease: "easeOut"
-      }
+      opacity: 0
     }
   };
 
@@ -387,11 +378,15 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
                         exit="exit"
                         layout={!prefersReducedMotion}
                         transition={{
-                          duration: 0.5,
-                          ease: "easeOut",
-                          delay: index * 0.08, // Staggered chain reaction
+                          duration: 0.8,
+                          ease: "easeInOut",
+                          delay: index * 0.08,
                           layout: {
                             duration: 0.4
+                          },
+                          exit: {
+                            duration: 1.0,
+                            ease: "easeOut"
                           }
                         }}
                         className="zvv-departure-row grid grid-cols-12 gap-2 px-6 py-4 hover:bg-muted transition-colors departure-item"

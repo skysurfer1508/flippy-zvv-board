@@ -69,7 +69,7 @@ export function FlipDotRow({
     displayLineNumber: lineNumber
   });
 
-  // Use provided variants or fallback to default LED variants
+  // Use provided variants or fallback to default LED variants - Fixed TypeScript issues
   const animationVariants = variants || {
     enter: {
       y: 50,
@@ -81,11 +81,7 @@ export function FlipDotRow({
     },
     exit: {
       y: -25,
-      opacity: 0,
-      transition: {
-        duration: 1.0,
-        ease: "easeOut"
-      }
+      opacity: 0
     }
   };
   
@@ -101,9 +97,13 @@ export function FlipDotRow({
       transition={{
         duration: 0.6,
         ease: "easeOut",
-        delay: index * 0.12, // Longer staggered delay for LED theme
+        delay: index * 0.12,
         layout: {
           duration: 0.5
+        },
+        exit: {
+          duration: 1.0,
+          ease: "easeOut"
         }
       }}
       role="listitem"
