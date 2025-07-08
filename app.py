@@ -1,12 +1,13 @@
 
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, send_from_directory, send_file
 from flask_cors import CORS
 import requests
 import time
 from datetime import datetime
 import threading
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='')
 CORS(app)
 
 # Cache für Stationsdaten
@@ -72,7 +73,17 @@ def fetch_departures(station_id, limit=15):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    """Serve the React app"""
+    return send_file('static/index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve static files or fallback to React app for SPA routing"""
+    if os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        # Fallback to React app for SPA routing
+        return send_file('static/index.html')
 
 @app.route('/api/locations')
 def locations():

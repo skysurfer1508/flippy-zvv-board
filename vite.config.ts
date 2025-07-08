@@ -13,9 +13,13 @@ export default defineConfig(({ mode }) => ({
       '/api': {
         target: 'http://localhost:6162',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => path.replace(/^\/api/, '/api')
       }
     }
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
   },
   plugins: [
     react(),
