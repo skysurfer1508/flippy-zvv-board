@@ -196,7 +196,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
     return "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6";
   };
 
-  // Animation variants for smooth transitions
+  // Animation variants for smooth transitions - Fixed TypeScript issues
   const slideVariants = {
     enter: {
       y: 50,
@@ -209,7 +209,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
       scale: 1,
       transition: {
         duration: 0.3,
-        ease: "easeOut"
+        ease: [0.25, 0.46, 0.45, 0.94] // Custom cubic bezier for easeOut
       }
     },
     exit: {
@@ -218,7 +218,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
       scale: 0.95,
       transition: {
         duration: 0.2,
-        ease: "easeIn"
+        ease: [0.55, 0.06, 0.68, 0.19] // Custom cubic bezier for easeIn
       }
     }
   };

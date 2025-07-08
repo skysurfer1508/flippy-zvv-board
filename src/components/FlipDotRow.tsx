@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Departure } from "@/types/zvv";
 
@@ -61,7 +60,7 @@ export function FlipDotRow({ departure, formatTime, prefersReducedMotion = false
     displayLineNumber: lineNumber
   });
 
-  // LED-specific animation variants with retro feel
+  // LED-specific animation variants with retro feel - Fixed TypeScript issues
   const ledSlideVariants = {
     enter: {
       y: 40,
@@ -72,7 +71,7 @@ export function FlipDotRow({ departure, formatTime, prefersReducedMotion = false
       opacity: 1,
       transition: {
         duration: 0.4,
-        ease: "easeOut"
+        ease: [0.25, 0.46, 0.45, 0.94] // Custom cubic bezier for easeOut
       }
     },
     exit: {
@@ -80,7 +79,7 @@ export function FlipDotRow({ departure, formatTime, prefersReducedMotion = false
       opacity: 0,
       transition: {
         duration: 0.3,
-        ease: "easeIn"
+        ease: [0.55, 0.06, 0.68, 0.19] // Custom cubic bezier for easeIn
       }
     }
   };
