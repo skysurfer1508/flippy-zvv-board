@@ -22,6 +22,14 @@ export function StationInput({ label, value, onChange, placeholder }: StationInp
   const inputRef = useRef<HTMLInputElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
+  // Synchronize query with value prop for cross-browser compatibility
+  useEffect(() => {
+    console.log('StationInput: value prop changed to:', value);
+    if (value !== query) {
+      setQuery(value);
+    }
+  }, [value]);
+
   useEffect(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -31,6 +39,7 @@ export function StationInput({ label, value, onChange, placeholder }: StationInp
       setIsLoading(true);
       timeoutRef.current = setTimeout(async () => {
         try {
+          console.log('StationInput: Searching for:', query);
           const response = await ZvvApi.searchStations(query);
           setSuggestions(response.stations.slice(0, 8));
           setShowSuggestions(true);
@@ -56,21 +65,37 @@ export function StationInput({ label, value, onChange, placeholder }: StationInp
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
+    console.log('StationInput: Input changed to:', newValue);
     setQuery(newValue);
   };
 
   const handleSuggestionClick = (station: Location) => {
+    console.log('StationInput: Station selected:', station);
     setQuery(station.name);
     onChange(station.id, station.name);
     setShowSuggestions(false);
     setSuggestions([]);
   };
 
-  const handleInputBlur = () => {
-    // Delay hiding suggestions to allow clicks
+  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Cross-browser event handling with fallback
+    const relatedTarget = e.relatedTarget as HTMLElement;
+    
+    // Check if blur is caused by clicking on suggestion
+    if (relatedTarget && relatedTarget.closest('[data-suggestion]')) {
+      return;
+    }
+    
+    // Delay hiding suggestions to allow clicks - cross-browser compatible
     setTimeout(() => {
       setShowSuggestions(false);
     }, 200);
+  };
+
+  const handleInputFocus = () => {
+    if (suggestions.length > 0) {
+      setShowSuggestions(true);
+    }
   };
 
   return (
@@ -86,13 +111,10 @@ export function StationInput({ label, value, onChange, placeholder }: StationInp
           value={query}
           onChange={handleInputChange}
           onBlur={handleInputBlur}
-          onFocus={() => {
-            if (suggestions.length > 0) {
-              setShowSuggestions(true);
-            }
-          }}
+          onFocus={handleInputFocus}
           placeholder={placeholder || "Station eingeben..."}
           className="w-full"
+          autoComplete="off"
         />
         {isLoading && (
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -102,14 +124,20 @@ export function StationInput({ label, value, onChange, placeholder }: StationInp
       </div>
       
       {showSuggestions && suggestions.length > 0 && (
-        <Card className="absolute top-full left-0 right-0 z-50 mt-1 max-h-64 overflow-y-auto">
+        <Card className="absolute top-full left-0 right-0 z-[9999] mt-1 max-h-64 overflow-y-auto bg-background border shadow-lg">
           <div className="p-1">
             {suggestions.map((station) => (
               <button
                 key={station.id}
-                className="w-full text-left px-3 py-2 hover:bg-accent hover:text-accent-foreground rounded-sm transition-colors"
+                data-suggestion="true"
+                className="w-full text-left px-3 py-2 hover:bg-accent hover:text-accent-foreground rounded-sm transition-colors focus:bg-accent focus:text-accent-foreground focus:outline-none"
                 onMouseDown={(e) => {
                   e.preventDefault(); // Prevent input blur
+                  handleSuggestionClick(station);
+                }}
+                onTouchStart={(e) => {
+                  // Mobile Safari compatibility
+                  e.preventDefault();
                   handleSuggestionClick(station);
                 }}
               >

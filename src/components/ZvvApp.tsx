@@ -22,39 +22,52 @@ const INITIAL_STATE: AppState = {
 export function ZvvApp() {
   const [appState, setAppState] = useState<AppState>(INITIAL_STATE);
 
-  // Load state from sessionStorage on mount
+  // Load state from sessionStorage on mount with cross-browser compatibility
   useEffect(() => {
-    const savedState = sessionStorage.getItem('zvv-app-state');
-    if (savedState) {
-      try {
+    try {
+      const savedState = sessionStorage.getItem('zvv-app-state');
+      console.log('ZvvApp: Loading saved state:', savedState);
+      
+      if (savedState) {
         const parsed = JSON.parse(savedState);
+        console.log('ZvvApp: Parsed state:', parsed);
+        
         // Validate that all required stations are configured
         const allStationsConfigured = parsed.stations?.length === parsed.stationCount && 
                                     parsed.stations.every((station: StationConfig) => station.id && station.name);
         
         if (allStationsConfigured && parsed.phase !== 'count-selection') {
           // Auto-load to monitoring phase if stations are configured
+          console.log('ZvvApp: Auto-loading to monitoring phase');
           setAppState(prev => ({ ...parsed, phase: 'monitoring' }));
         } else {
+          console.log('ZvvApp: Loading saved state as-is');
           setAppState(parsed);
         }
-      } catch (error) {
-        console.error('Error loading saved state:', error);
-        toast({
-          title: "Fehler",
-          description: "Gespeicherte Daten konnten nicht geladen werden.",
-          variant: "destructive"
-        });
       }
+    } catch (error) {
+      console.error('ZvvApp: Error loading saved state:', error);
+      toast({
+        title: "Fehler",
+        description: "Gespeicherte Daten konnten nicht geladen werden.",
+        variant: "destructive"
+      });
     }
   }, []);
 
   // Save state to sessionStorage whenever it changes
   useEffect(() => {
-    sessionStorage.setItem('zvv-app-state', JSON.stringify(appState));
+    try {
+      const stateToSave = JSON.stringify(appState);
+      console.log('ZvvApp: Saving state:', stateToSave);
+      sessionStorage.setItem('zvv-app-state', stateToSave);
+    } catch (error) {
+      console.error('ZvvApp: Error saving state:', error);
+    }
   }, [appState]);
 
   const handleCountSelect = (count: number) => {
+    console.log('ZvvApp: Count selected:', count);
     setAppState(prev => ({
       ...prev,
       stationCount: count,
@@ -66,6 +79,7 @@ export function ZvvApp() {
   };
 
   const handleStationChange = (index: number, stationId: string, stationName: string) => {
+    console.log('ZvvApp: Station changed at index', index, ':', { stationId, stationName });
     setAppState(prev => {
       const newStations = [...prev.stations];
       newStations[index] = { id: stationId, name: stationName, customName: '' };
@@ -77,6 +91,7 @@ export function ZvvApp() {
   };
 
   const handleNext = () => {
+    console.log('ZvvApp: Moving to monitoring phase');
     setAppState(prev => ({
       ...prev,
       phase: 'monitoring'
@@ -87,6 +102,7 @@ export function ZvvApp() {
                     appState.stations.every(station => station.id && station.name);
 
   const handleBack = () => {
+    console.log('ZvvApp: Back button clicked, current phase:', appState.phase);
     if (appState.phase === 'station-selection') {
       setAppState(prev => ({ ...prev, phase: 'count-selection' }));
     } else if (appState.phase === 'monitoring') {
@@ -95,6 +111,7 @@ export function ZvvApp() {
   };
 
   const handleReconfigure = () => {
+    console.log('ZvvApp: Reconfigure button clicked');
     setAppState(prev => ({ ...prev, phase: 'count-selection' }));
   };
 
@@ -125,9 +142,16 @@ export function ZvvApp() {
               />
               <div className="text-center">
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   onClick={handleBack}
-                  className="text-primary hover:text-primary/80"
+                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-input shadow-sm font-medium px-6 py-2"
+                  style={{
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                    background: 'hsl(var(--secondary))',
+                    color: 'hsl(var(--secondary-foreground))',
+                    border: '1px solid hsl(var(--input))'
+                  }}
                 >
                   <ChevronLeft className="h-4 w-4 mr-2" />
                   Zurück zur Stationsanzahl
@@ -143,7 +167,11 @@ export function ZvvApp() {
                 <Button
                   variant="outline"
                   onClick={handleReconfigure}
-                  className="text-primary border-primary hover:bg-primary hover:text-primary-foreground"
+                  className="text-primary border-primary hover:bg-primary hover:text-primary-foreground font-medium px-6 py-2 shadow-sm"
+                  style={{
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none'
+                  }}
                 >
                   <ChevronLeft className="h-4 w-4 mr-2" />
                   Stationen neu konfigurieren

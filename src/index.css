@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -101,5 +102,62 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Cross-browser compatibility fixes */
+  button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  input {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  /* Safari-specific fixes */
+  @supports (-webkit-appearance: none) {
+    input[type="text"] {
+      -webkit-appearance: none;
+      border-radius: 0;
+    }
+  }
+
+  /* Firefox-specific fixes */
+  @-moz-document url-prefix() {
+    button {
+      outline: none;
+    }
+  }
+
+  /* High z-index for dropdowns and modals */
+  .dropdown-content,
+  .popover-content,
+  .modal-content {
+    z-index: 9999;
+  }
+
+  /* Ensure animations work across browsers */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @-webkit-keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @-moz-keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.2s ease-in-out;
+    -webkit-animation: fadeIn 0.2s ease-in-out;
+    -moz-animation: fadeIn 0.2s ease-in-out;
   }
 }
