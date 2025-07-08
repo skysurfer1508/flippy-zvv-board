@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -91,6 +92,114 @@ All colors MUST be HSL.
     --sidebar-border: 0 0% 20%;
     --sidebar-ring: 45 100% 70%;
   }
+
+  /* LED Theme */
+  .theme-led {
+    --background: 0 0% 0%;
+    --foreground: 120 100% 75%;
+    --card: 0 0% 2%;
+    --card-foreground: 120 100% 75%;
+    --popover: 0 0% 2%;
+    --popover-foreground: 120 100% 75%;
+    --primary: 120 100% 75%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 5%;
+    --secondary-foreground: 120 100% 75%;
+    --muted: 0 0% 3%;
+    --muted-foreground: 120 80% 60%;
+    --accent: 0 0% 3%;
+    --accent-foreground: 120 100% 75%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 120 100% 75%;
+    --border: 120 50% 25%;
+    --input: 120 50% 15%;
+    --ring: 120 100% 75%;
+    --zvv-yellow: 120 100% 75%;
+    --zvv-orange: 45 100% 75%;
+    --zvv-black: 0 0% 0%;
+    --zvv-dark-gray: 0 0% 3%;
+  }
+
+  /* Black & White Theme */
+  .theme-blackwhite {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 0 0% 8%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 0% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 100%;
+    --zvv-yellow: 0 0% 100%;
+    --zvv-orange: 0 0% 80%;
+    --zvv-black: 0 0% 0%;
+    --zvv-dark-gray: 0 0% 8%;
+  }
+
+  /* Modern Theme */
+  .theme-modern {
+    --background: 220 13% 9%;
+    --foreground: 220 9% 96%;
+    --card: 220 13% 13%;
+    --card-foreground: 220 9% 96%;
+    --popover: 220 13% 13%;
+    --popover-foreground: 220 9% 96%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 13% 16%;
+    --secondary-foreground: 220 9% 96%;
+    --muted: 220 13% 16%;
+    --muted-foreground: 220 9% 65%;
+    --accent: 220 13% 16%;
+    --accent-foreground: 220 9% 96%;
+    --destructive: 0 63% 50%;
+    --destructive-foreground: 220 9% 96%;
+    --border: 220 13% 16%;
+    --input: 220 13% 16%;
+    --ring: 217 91% 60%;
+    --zvv-yellow: 217 91% 60%;
+    --zvv-orange: 25 95% 60%;
+    --zvv-black: 220 13% 9%;
+    --zvv-dark-gray: 220 13% 13%;
+  }
+
+  /* Classic Theme */
+  .theme-classic {
+    --background: 210 40% 8%;
+    --foreground: 210 40% 96%;
+    --card: 210 40% 12%;
+    --card-foreground: 210 40% 96%;
+    --popover: 210 40% 12%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 210 40% 96%;
+    --primary-foreground: 210 40% 8%;
+    --secondary: 210 40% 16%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 210 40% 16%;
+    --muted-foreground: 210 40% 70%;
+    --accent: 210 40% 16%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 0 63% 50%;
+    --destructive-foreground: 210 40% 96%;
+    --border: 210 40% 20%;
+    --input: 210 40% 20%;
+    --ring: 210 40% 96%;
+    --zvv-yellow: 210 40% 96%;
+    --zvv-orange: 25 95% 60%;
+    --zvv-black: 210 40% 8%;
+    --zvv-dark-gray: 210 40% 12%;
+  }
 }
 
 @layer base {
@@ -135,6 +244,23 @@ All colors MUST be HSL.
   @keyframes blink {
     0%, 50% { opacity: 1; }
     51%, 100% { opacity: 0.7; }
+  }
+
+  /* LED Theme specific styles */
+  .theme-led .zvv-board {
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+  }
+
+  .theme-led .zvv-header {
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+  }
+
+  .theme-led .zvv-departure-row {
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+  }
+
+  .theme-led .zvv-live-indicator {
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
   }
 
   /* Cross-browser compatibility fixes */

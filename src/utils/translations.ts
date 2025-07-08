@@ -49,6 +49,14 @@ export interface Translations {
   editColors: string;
   reconfigureStations: string;
   
+  // Theme Settings
+  theme: string;
+  themeDefault: string;
+  themeLed: string;
+  themeBlackWhite: string;
+  themeModern: string;
+  themeClassic: string;
+  
   // Footer
   dataFrom: string;
 }
@@ -101,6 +109,14 @@ const de: Translations = {
   swissGerman: "Schweizerdeutsch",
   editColors: "Farben anpassen",
   reconfigureStations: "Stationen neu konfigurieren",
+  
+  // Theme Settings
+  theme: "Design",
+  themeDefault: "Standard ZVV",
+  themeLed: "LED-Anzeige",
+  themeBlackWhite: "Schwarz-Weiss",
+  themeModern: "Modern",
+  themeClassic: "Klassisch",
   
   // Footer
   dataFrom: "DATEN VON TRANSPORT.OPENDATA.CH",
@@ -155,6 +171,14 @@ const en: Translations = {
   editColors: "Edit colors",
   reconfigureStations: "Reconfigure stations",
   
+  // Theme Settings
+  theme: "Theme",
+  themeDefault: "Default ZVV",
+  themeLed: "LED Display",
+  themeBlackWhite: "Black & White",
+  themeModern: "Modern",
+  themeClassic: "Classic",
+  
   // Footer
   dataFrom: "DATA FROM TRANSPORT.OPENDATA.CH",
 };
@@ -207,6 +231,14 @@ const fr: Translations = {
   swissGerman: "Suisse allemand",
   editColors: "Modifier les couleurs",
   reconfigureStations: "Reconfigurer les stations",
+  
+  // Theme Settings
+  theme: "Thème",
+  themeDefault: "ZVV par défaut",
+  themeLed: "Affichage LED",
+  themeBlackWhite: "Noir et blanc",
+  themeModern: "Moderne",
+  themeClassic: "Classique",
   
   // Footer
   dataFrom: "DONNÉES DE TRANSPORT.OPENDATA.CH",
@@ -261,6 +293,14 @@ const it: Translations = {
   editColors: "Modifica colori",
   reconfigureStations: "Riconfigura stazioni",
   
+  // Theme Settings
+  theme: "Tema",
+  themeDefault: "ZVV predefinito",
+  themeLed: "Display LED",
+  themeBlackWhite: "Bianco e nero",
+  themeModern: "Moderno",
+  themeClassic: "Classico",
+  
   // Footer
   dataFrom: "DATI DA TRANSPORT.OPENDATA.CH",
 };
@@ -313,6 +353,14 @@ const gsw: Translations = {
   swissGerman: "Schwiizerdüütsch",
   editColors: "Farbä aapassä",
   reconfigureStations: "Statione neu konfiguriere",
+  
+  // Theme Settings
+  theme: "Design",
+  themeDefault: "Standard ZVV",
+  themeLed: "LED-Aazäig",
+  themeBlackWhite: "Schwarz-Wyss",
+  themeModern: "Modern",
+  themeClassic: "Klassisch",
   
   // Footer
   dataFrom: "DATE VO TRANSPORT.OPENDATA.CH",

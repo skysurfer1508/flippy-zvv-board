@@ -13,19 +13,23 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { SupportedLanguage } from "@/types/zvv";
+import { SupportedLanguage, Theme } from "@/types/zvv";
 import { useTranslations } from "@/utils/translations";
 
 interface SettingsMenuProps {
   language: SupportedLanguage;
+  theme: Theme;
   onLanguageChange: (language: SupportedLanguage) => void;
+  onThemeChange: (theme: Theme) => void;
   onReconfigureStations: () => void;
   onEditColors: () => void;
 }
 
 export function SettingsMenu({
   language,
+  theme,
   onLanguageChange,
+  onThemeChange,
   onReconfigureStations,
   onEditColors
 }: SettingsMenuProps) {
@@ -59,6 +63,21 @@ export function SettingsMenu({
               <DropdownMenuRadioItem value="fr">{t.french}</DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="it">{t.italian}</DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="gsw">{t.swissGerman}</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuGroup>
+          
+          <DropdownMenuSeparator />
+          
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="px-2 text-xs font-normal text-muted-foreground">
+              {t.theme}
+            </DropdownMenuLabel>
+            <DropdownMenuRadioGroup value={theme} onValueChange={(value) => onThemeChange(value as Theme)}>
+              <DropdownMenuRadioItem value="default">{t.themeDefault}</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="led">{t.themeLed}</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="blackwhite">{t.themeBlackWhite}</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="modern">{t.themeModern}</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="classic">{t.themeClassic}</DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuGroup>
           

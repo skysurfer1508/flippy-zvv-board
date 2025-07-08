@@ -20,7 +20,8 @@ const INITIAL_STATE: AppState = {
     train: '#ffd700'
   },
   phase: 'count-selection',
-  language: 'de'
+  language: 'de',
+  theme: 'default'
 };
 
 export function ZvvApp() {
@@ -42,6 +43,11 @@ export function ZvvApp() {
           // Ensure language field exists
           if (!parsed.language) {
             parsed.language = 'de';
+          }
+          
+          // Ensure theme field exists
+          if (!parsed.theme) {
+            parsed.theme = 'default';
           }
           
           // Validate that all required stations are properly configured
@@ -160,6 +166,14 @@ export function ZvvApp() {
     }));
   };
 
+  const handleThemeChange = (theme: Theme) => {
+    console.log('ZvvApp: Theme changed to:', theme);
+    setAppState(prev => ({
+      ...prev,
+      theme
+    }));
+  };
+
   const handleReconfigure = () => {
     console.log('ZvvApp: Reconfigure button clicked');
     setAppState(prev => ({ ...prev, phase: 'count-selection' }));
@@ -191,8 +205,18 @@ export function ZvvApp() {
     );
   }
 
+  const getThemeClass = () => {
+    switch (appState.theme) {
+      case 'led': return 'theme-led';
+      case 'blackwhite': return 'theme-blackwhite';
+      case 'modern': return 'theme-modern';
+      case 'classic': return 'theme-classic';
+      default: return '';
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className={`min-h-screen bg-background p-4 ${getThemeClass()}`}>
       <div className="container mx-auto max-w-6xl">
         <header className="text-center mb-8">
           <h1 className="text-5xl font-bold mb-4 text-primary font-mono tracking-wider">{t.appTitle}</h1>
@@ -268,7 +292,9 @@ export function ZvvApp() {
               {/* Settings Menu instead of the reconfigure button */}
               <SettingsMenu 
                 language={appState.language}
+                theme={appState.theme}
                 onLanguageChange={handleLanguageChange}
+                onThemeChange={handleThemeChange}
                 onReconfigureStations={handleReconfigure}
                 onEditColors={() => setAppState(prev => ({ ...prev, phase: 'customization' }))}
               />

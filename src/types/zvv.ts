@@ -1,4 +1,3 @@
-
 export interface Location {
   id: string;
   name: string;
@@ -86,6 +85,8 @@ export interface StationConfig {
 
 export type SupportedLanguage = 'de' | 'en' | 'fr' | 'it' | 'gsw';
 
+export type Theme = 'default' | 'led' | 'blackwhite' | 'modern' | 'classic';
+
 export interface AppState {
   stationCount: number;
   stations: StationConfig[];
@@ -96,4 +97,5 @@ export interface AppState {
   };
   phase: 'count-selection' | 'station-selection' | 'customization' | 'monitoring';
   language: SupportedLanguage;
+  theme: Theme;
 }
