@@ -338,7 +338,6 @@ All colors MUST be HSL.
     font-size: 1rem;
     letter-spacing: 0.08em;
     animation: slideInUp 0.5s ease-out;
-    border-bottom: 1px solid hsl(var(--flip-dot-frame));
     min-height: 40px;
     align-items: center;
     transition: all 0.3s ease-in-out;
@@ -355,8 +354,6 @@ All colors MUST be HSL.
     justify-self: center;
     align-self: center;
     padding: 4px 8px;
-    border: 2px solid hsl(var(--flip-dot-yellow));
-    border-radius: 3px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -379,8 +376,6 @@ All colors MUST be HSL.
     font-size: 1rem;
     font-weight: bold;
     padding: 4px 8px;
-    border: 2px solid hsl(var(--flip-dot-yellow));
-    border-radius: 3px;
     justify-self: center;
     white-space: nowrap;
     display: flex;
