@@ -46,12 +46,20 @@ class DualStationBoard {
             slider.addEventListener('input', (e) => {
                 const count = parseInt(e.target.value);
                 display.textContent = count;
-                this.selectStationCount(count);
+                this.stationCount = count; // Update count immediately for display
             });
             
             // Set initial value
             slider.value = this.stationCount;
             display.textContent = this.stationCount;
+        }
+
+        // Station count confirmation button
+        const confirmBtn = document.getElementById('confirm-station-count');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+                this.selectStationCount(this.stationCount);
+            });
         }
 
         // Apply customization
@@ -138,7 +146,7 @@ class DualStationBoard {
             container.appendChild(inputGroup);
         }
         
-        // Add start button (only if it doesn't exist)
+        // Ensure there's only one start button
         let startButton = document.getElementById('start-monitoring');
         if (!startButton) {
             startButton = document.createElement('button');
@@ -146,15 +154,17 @@ class DualStationBoard {
             startButton.className = 'start-btn';
             startButton.disabled = true;
             startButton.textContent = 'Abfahrtszeiten anzeigen';
-            container.parentNode.appendChild(startButton);
             
-            // Re-attach event listener
+            // Add to station selection container
+            const stationSelection = document.getElementById('station-selection');
+            stationSelection.appendChild(startButton);
+            
+            // Add event listener
             startButton.addEventListener('click', () => {
                 this.showCustomizationPhase();
             });
-        } else {
-            startButton.disabled = true;
         }
+        startButton.disabled = true;
     }
 
     setupAutoComplete() {
