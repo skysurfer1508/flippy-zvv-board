@@ -22,6 +22,39 @@ interface StationBoardData {
   departures: Departure[];
 }
 
+function getDisplayLineNumber(departure: Departure): string {
+  const category = departure.category;
+  const number = departure.number;
+  const name = departure.name;
+  
+  // If we have both category and number, combine them intelligently
+  if (category && number) {
+    // For trains, combine category + number (e.g., "S12", "IR75", "IC8")
+    if (['S', 'IR', 'IC', 'ICE', 'R', 'RE'].includes(category.toUpperCase())) {
+      return `${category.toUpperCase()}${number}`;
+    }
+    // For other transport types, just use the number
+    return number;
+  }
+  
+  // If we only have category, use it
+  if (category) {
+    return category.toUpperCase();
+  }
+  
+  // If we only have number, use it
+  if (number) {
+    return number;
+  }
+  
+  // Fallback to name, but truncate if too long
+  if (name && name.length > 6) {
+    return name.substring(0, 4) + '..';
+  }
+  
+  return name || '?';
+}
+
 export function DepartureBoard({ stations, language, theme, isFullscreen = false }: DepartureBoardProps) {
   const { t } = useTranslations(language);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -222,7 +255,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
             ) : (
               <div className={`${isFullscreen ? 'fullscreen-departures' : 'max-h-96 overflow-y-auto'}`}>
                 {stationData.departures.slice(0, maxEntries).map((departure, index) => {
-                  const lineNumber = departure.number || departure.name;
+                  const lineNumber = getDisplayLineNumber(departure);
                   const lineColor = getLineColor(departure.category, lineNumber, stationData.lineColors);
                   
                   // Enhanced delay parsing with strict type checking
@@ -235,7 +268,10 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
                     delayValue,
                     delayNumber,
                     hasDelay,
-                    delayType: typeof delayValue
+                    delayType: typeof delayValue,
+                    category: departure.category,
+                    number: departure.number,
+                    displayLineNumber: lineNumber
                   });
                   
                   return (

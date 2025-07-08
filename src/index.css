@@ -386,12 +386,12 @@ All colors MUST be HSL.
   }
 
   .theme-led .flip-dot-delay {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     color: hsl(0 100% 60%);
     font-weight: bold;
     margin-top: 2px;
     animation: blink 2s infinite;
-    min-height: 16px;
+    min-height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
