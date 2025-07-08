@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Loader, Clock, AlertCircle } from "lucide-react";
@@ -5,6 +6,7 @@ import { ZvvApi } from "@/services/zvvApi";
 import { StationConfig, Departure, SupportedLanguage } from "@/types/zvv";
 import { useTranslations } from "@/utils/translations";
 import { FlipDotRow } from "./FlipDotRow";
+import { useDynamicEntries } from "@/hooks/use-dynamic-entries";
 
 interface DepartureBoardProps {
   stations: StationConfig[];
@@ -25,10 +27,16 @@ interface StationBoardData {
 export function DepartureBoard({ stations, language, theme, fontSize = 100, isFullscreen = false }: DepartureBoardProps) {
   const { t } = useTranslations(language);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const [maxEntries, setMaxEntries] = useState(8);
 
   // Check if LED theme is active
   const isLedTheme = theme === 'led';
+
+  // Use the new dynamic entries hook
+  const maxEntries = useDynamicEntries({
+    isFullscreen,
+    isLedTheme,
+    fontSize
+  });
 
   // Set global font size CSS variable and manage fullscreen body class
   useEffect(() => {
@@ -46,50 +54,6 @@ export function DepartureBoard({ stations, language, theme, fontSize = 100, isFu
       document.body.classList.remove('fullscreen-mode');
     };
   }, [fontSize, isFullscreen]);
-
-  // Calculate dynamic number of entries based on screen height and theme
-  useEffect(() => {
-    const calculateMaxEntries = () => {
-      const windowHeight = window.innerHeight;
-      const fontSizeFactor = fontSize / 100;
-      
-      if (isLedTheme) {
-        // LED theme calculations
-        const headerHeight = 80 * fontSizeFactor;
-        const rowHeight = 60 * fontSizeFactor;
-        const padding = 40;
-        const availableHeight = windowHeight - headerHeight - padding;
-        const calculatedEntries = Math.floor(availableHeight / rowHeight);
-        
-        if (isFullscreen) {
-          setMaxEntries(Math.max(8, Math.min(calculatedEntries, 20)));
-        } else {
-          setMaxEntries(8);
-        }
-      } else {
-        // Standard theme calculations
-        const headerHeight = 120 * fontSizeFactor;
-        const tableHeaderHeight = 50 * fontSizeFactor;
-        const rowHeight = 70 * fontSizeFactor;
-        const padding = 60;
-        const availableHeight = windowHeight - headerHeight - tableHeaderHeight - padding;
-        const calculatedEntries = Math.floor(availableHeight / rowHeight);
-        
-        if (isFullscreen) {
-          setMaxEntries(Math.max(10, Math.min(calculatedEntries, 25)));
-        } else {
-          setMaxEntries(10);
-        }
-      }
-    };
-
-    calculateMaxEntries();
-    
-    if (isFullscreen) {
-      window.addEventListener('resize', calculateMaxEntries);
-      return () => window.removeEventListener('resize', calculateMaxEntries);
-    }
-  }, [isFullscreen, isLedTheme, fontSize]);
 
   const { data: departureData, isLoading, error, refetch } = useQuery({
     queryKey: ['departures', stations.map(s => s.id)],

@@ -222,10 +222,12 @@ All colors MUST be HSL.
     @apply bg-background text-foreground font-mono;
   }
 
-  /* Fullscreen mode - disable scrolling */
+  /* Fullscreen mode - enhanced for mobile */
   body.fullscreen-mode {
     overflow: hidden;
     height: 100vh;
+    height: 100dvh; /* Use dynamic viewport height when available */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
   /* ZVV Board specific styles */
@@ -289,9 +291,10 @@ All colors MUST be HSL.
     }
   }
 
-  /* Fullscreen specific styles */
+  /* Enhanced fullscreen specific styles with safe areas */
   .fullscreen-board {
     height: calc(100vh - 60px);
+    height: calc(100dvh - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
   }
@@ -305,10 +308,11 @@ All colors MUST be HSL.
 
   .fullscreen-flip-dot {
     height: 100vh;
+    height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     overflow: hidden;
   }
 
-  /* Flip-dot display styles for LED theme - fully responsive and scalable */
+  /* Flip-dot display styles for LED theme - enhanced mobile support */
   .theme-led .flip-dot-display {
     font-family: 'DotGothic16', 'VT323', monospace;
     font-size: calc((1.2vw + 0.8vh + 10px) * var(--dynamic-font-size) / 100);
@@ -318,6 +322,7 @@ All colors MUST be HSL.
     max-width: 100%;
     width: 100%;
     height: calc(100vh - 120px);
+    height: calc(100dvh - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     margin: 0 auto;
     border: calc(4px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-frame));
     border-radius: 0;
@@ -437,10 +442,11 @@ All colors MUST be HSL.
     to { opacity: 1; }
   }
 
-  /* Responsive breakpoints for better scaling */
+  /* Enhanced responsive breakpoints for better mobile scaling */
   @media (max-width: 1200px) {
     .theme-led .flip-dot-display {
       height: calc(90vh - 100px);
+      height: calc(90dvh - 100px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
     
     .theme-led .flip-dot-row {
@@ -454,6 +460,7 @@ All colors MUST be HSL.
   @media (max-width: 768px) {
     .theme-led .flip-dot-display {
       height: calc(85vh - 80px);
+      height: calc(85dvh - 80px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
       border: calc(3px * var(--dynamic-font-size) / 100) solid hsl(var(--flip-dot-frame));
     }
     
@@ -470,16 +477,19 @@ All colors MUST be HSL.
 
     .fullscreen-board {
       height: calc(100vh - 40px);
+      height: calc(100dvh - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
   }
 
   @media (max-width: 480px) {
     .theme-led .flip-dot-display {
       height: calc(80vh - 60px);
+      height: calc(80dvh - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
 
     .fullscreen-board {
       height: calc(100vh - 30px);
+      height: calc(100dvh - 30px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
   }
 
@@ -540,14 +550,16 @@ All colors MUST be HSL.
     -moz-animation: fadeIn 0.2s ease-in-out;
   }
 
-  /* Fullscreen adjustments */
+  /* Enhanced fullscreen adjustments with safe areas */
   .fullscreen-mode {
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
   }
 
   .fullscreen-mode .theme-led .flip-dot-display {
     height: 100vh;
+    height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     border: none;
   }
 }
