@@ -1,15 +1,18 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface DynamicEntriesOptions {
   isFullscreen: boolean;
   isLedTheme: boolean;
   containerRef?: React.RefObject<HTMLElement>;
+  stationCount?: number;
 }
 
 export function useDynamicEntries({
   isFullscreen,
   isLedTheme,
-  containerRef
+  containerRef,
+  stationCount = 1
 }: DynamicEntriesOptions) {
   const [maxEntries, setMaxEntries] = useState(isLedTheme ? 8 : 10);
   const resizeTimeoutRef = useRef<NodeJS.Timeout>();
@@ -17,8 +20,16 @@ export function useDynamicEntries({
   const calculateMaxEntries = useCallback(() => {
     if (!isFullscreen) {
       const baseEntries = isLedTheme ? 8 : 10;
+      
+      // Adjust entries based on station count for grid layouts
+      let adjustedEntries = baseEntries;
+      if (stationCount > 1 && window.innerWidth >= 1024) {
+        // Reduce entries when stations are side-by-side on larger screens
+        adjustedEntries = Math.max(6, Math.floor(baseEntries * 0.8));
+      }
+      
       // For LED theme, subtract 1 to show the end of the list
-      setMaxEntries(isLedTheme ? baseEntries - 1 : baseEntries);
+      setMaxEntries(isLedTheme ? adjustedEntries - 1 : adjustedEntries);
       return;
     }
 
@@ -47,15 +58,34 @@ export function useDynamicEntries({
       headerHeight = 0; // Already included in additionalSpace
     }
 
+    // Adjust available height for multiple stations in grid layout
+    let effectiveHeight = viewportHeight;
+    if (stationCount > 1 && window.innerWidth >= 1024) {
+      // Account for grid layout - stations share vertical space
+      const isGridLayout = (stationCount === 2 && window.innerWidth >= 1024) || 
+                          (stationCount > 2 && window.innerWidth >= 1280);
+      if (isGridLayout) {
+        // Don't reduce height as much since stations are side-by-side
+        effectiveHeight = viewportHeight;
+      }
+    }
+
     // Calculate available height for entries
-    const availableHeight = viewportHeight - additionalSpace - buffer;
+    const availableHeight = effectiveHeight - additionalSpace - buffer;
     const calculatedEntries = Math.floor(availableHeight / rowHeight);
 
     // Set reasonable bounds - increased maximums
     const minEntries = isLedTheme ? 6 : 8;
     const maxEntriesLimit = isLedTheme ? 50 : 60;
     
-    let finalEntries = Math.max(minEntries, Math.min(calculatedEntries, maxEntriesLimit));
+    // Adjust based on station count and screen size
+    let adjustmentFactor = 1;
+    if (stationCount > 1 && window.innerWidth >= 1024) {
+      // Slightly reduce entries per station when multiple stations are visible
+      adjustmentFactor = stationCount === 2 ? 0.9 : 0.8;
+    }
+    
+    let finalEntries = Math.max(minEntries, Math.min(Math.floor(calculatedEntries * adjustmentFactor), maxEntriesLimit));
     
     // For LED theme, subtract 1 to leave space at the bottom to show list end
     if (isLedTheme) {
@@ -64,6 +94,7 @@ export function useDynamicEntries({
     
     console.log('Dynamic entries calculation:', {
       viewportHeight,
+      effectiveHeight,
       headerHeight,
       rowHeight,
       additionalSpace,
@@ -71,13 +102,15 @@ export function useDynamicEntries({
       availableHeight,
       calculatedEntries,
       finalEntries,
+      stationCount,
+      adjustmentFactor,
       theme: isLedTheme ? 'LED' : 'Standard',
       isMobile,
       ledAdjustment: isLedTheme ? 'Reduced by 1 for list end visibility' : 'No adjustment'
     });
 
     setMaxEntries(finalEntries);
-  }, [isFullscreen, isLedTheme]);
+  }, [isFullscreen, isLedTheme, stationCount]);
 
   const debouncedCalculate = useCallback(() => {
     if (resizeTimeoutRef.current) {

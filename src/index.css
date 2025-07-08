@@ -292,6 +292,19 @@ All colors MUST be HSL.
     overflow: hidden;
   }
 
+  /* Grid layout adjustments for multiple stations */
+  .fullscreen-mode .fullscreen-board {
+    /* Adjust height for grid layouts in fullscreen */
+    height: calc(100vh - 15px);
+    height: calc(100dvh - 15px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+
+  .fullscreen-mode .fullscreen-flip-dot {
+    /* Adjust LED display height for grid layouts */
+    height: calc(100vh - 10px);
+    height: calc(100dvh - 10px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+
   /* General delay styling for all themes */
   .delay {
     font-size: 1rem;
@@ -437,7 +450,7 @@ All colors MUST be HSL.
     to { opacity: 1; }
   }
 
-  /* Enhanced responsive breakpoints */
+  /* Enhanced responsive breakpoints for grid layouts */
   @media (max-width: 1200px) {
     .theme-led .flip-dot-display {
       height: calc(90vh - 50px);
@@ -449,6 +462,12 @@ All colors MUST be HSL.
       gap: 12px;
       padding: 6px 12px;
       min-height: 35px;
+    }
+
+    /* Adjust standard theme grid for smaller screens */
+    .fullscreen-board {
+      height: calc(90vh - 25px);
+      height: calc(90dvh - 25px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
   }
 
@@ -474,6 +493,13 @@ All colors MUST be HSL.
       height: calc(100vh - 20px);
       height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
+
+    /* Force single column on mobile for better readability */
+    .grid.grid-cols-1.lg\:grid-cols-2,
+    .grid.grid-cols-1.lg\:grid-cols-2.xl\:grid-cols-2,
+    .grid.grid-cols-1.lg\:grid-cols-2.xl\:grid-cols-3 {
+      grid-template-columns: 1fr !important;
+    }
   }
 
   @media (max-width: 480px) {
@@ -485,6 +511,25 @@ All colors MUST be HSL.
     .fullscreen-board {
       height: calc(100vh - 15px);
       height: calc(100dvh - 15px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+  }
+
+  /* Grid layout responsive adjustments */
+  @media (min-width: 1024px) {
+    /* Ensure proper spacing for side-by-side stations */
+    .grid.grid-cols-1.lg\:grid-cols-2 .zvv-board,
+    .grid.grid-cols-1.lg\:grid-cols-2 .flip-dot-display {
+      min-width: 400px;
+      max-width: 600px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    /* Three column layout adjustments */
+    .grid.grid-cols-1.lg\:grid-cols-2.xl\:grid-cols-3 .zvv-board,
+    .grid.grid-cols-1.lg\:grid-cols-2.xl\:grid-cols-3 .flip-dot-display {
+      min-width: 350px;
+      max-width: 450px;
     }
   }
 

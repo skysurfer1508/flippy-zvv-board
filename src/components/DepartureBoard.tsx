@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Loader, Clock, AlertCircle } from "lucide-react";
@@ -63,10 +62,11 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
   // Check if LED theme is active
   const isLedTheme = theme === 'led';
 
-  // Use the new dynamic entries hook
+  // Use the new dynamic entries hook with station count for grid layouts
   const maxEntries = useDynamicEntries({
     isFullscreen,
-    isLedTheme
+    isLedTheme,
+    stationCount: stations.length
   });
 
   // Manage fullscreen body class
@@ -177,10 +177,28 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
     );
   }
 
+  // Get responsive grid classes based on station count
+  const getGridClasses = () => {
+    const stationCount = stations.length;
+    
+    if (isFullscreen) {
+      if (stationCount === 1) return "grid grid-cols-1";
+      if (stationCount === 2) return "grid grid-cols-1 lg:grid-cols-2 gap-4";
+      if (stationCount <= 4) return "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4";
+      return "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4";
+    }
+    
+    // Non-fullscreen responsive grid
+    if (stationCount === 1) return "space-y-8";
+    if (stationCount === 2) return "grid grid-cols-1 lg:grid-cols-2 gap-6";
+    if (stationCount <= 4) return "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-6";
+    return "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6";
+  };
+
   // LED Theme - Flip-dot display
   if (isLedTheme) {
     return (
-      <div className="space-y-8">
+      <div className={getGridClasses()}>
         {departureData?.map((stationData) => (
           <div key={stationData.stationId} className={`flip-dot-display ${isFullscreen ? 'fullscreen-flip-dot' : ''}`}>
             <div className="flip-dot-header">
@@ -219,7 +237,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
 
   // Default theme layout
   return (
-    <div className="space-y-8">
+    <div className={getGridClasses()}>
       {departureData?.map((stationData) => (
         <div key={stationData.stationId} className={`zvv-board rounded-lg overflow-hidden border border-border ${isFullscreen ? 'fullscreen-board' : ''}`}>
           {/* Station Header */}
