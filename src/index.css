@@ -53,6 +53,11 @@ All colors MUST be HSL.
     --zvv-orange: 30 100% 65%;
     --zvv-black: 0 0% 0%;
     --zvv-dark-gray: 0 0% 8%;
+
+    /* Flip-dot display colors */
+    --flip-dot-background: 0 0% 0%;
+    --flip-dot-yellow: 48 100% 60%;
+    --flip-dot-frame: 0 0% 20%;
   }
 
   .dark {
@@ -93,31 +98,34 @@ All colors MUST be HSL.
     --sidebar-ring: 45 100% 70%;
   }
 
-  /* LED Theme */
+  /* LED Theme - Classic Zurich Flip-Dot Display */
   .theme-led {
     --background: 0 0% 0%;
-    --foreground: 120 100% 75%;
-    --card: 0 0% 2%;
-    --card-foreground: 120 100% 75%;
-    --popover: 0 0% 2%;
-    --popover-foreground: 120 100% 75%;
-    --primary: 120 100% 75%;
+    --foreground: 48 100% 60%;
+    --card: 0 0% 0%;
+    --card-foreground: 48 100% 60%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 48 100% 60%;
+    --primary: 48 100% 60%;
     --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 5%;
-    --secondary-foreground: 120 100% 75%;
-    --muted: 0 0% 3%;
-    --muted-foreground: 120 80% 60%;
-    --accent: 0 0% 3%;
-    --accent-foreground: 120 100% 75%;
+    --secondary: 0 0% 0%;
+    --secondary-foreground: 48 100% 60%;
+    --muted: 0 0% 0%;
+    --muted-foreground: 48 100% 60%;
+    --accent: 0 0% 0%;
+    --accent-foreground: 48 100% 60%;
     --destructive: 0 100% 50%;
-    --destructive-foreground: 120 100% 75%;
-    --border: 120 50% 25%;
-    --input: 120 50% 15%;
-    --ring: 120 100% 75%;
-    --zvv-yellow: 120 100% 75%;
-    --zvv-orange: 45 100% 75%;
+    --destructive-foreground: 48 100% 60%;
+    --border: 0 0% 20%;
+    --input: 0 0% 0%;
+    --ring: 48 100% 60%;
+    --zvv-yellow: 48 100% 60%;
+    --zvv-orange: 48 100% 60%;
     --zvv-black: 0 0% 0%;
-    --zvv-dark-gray: 0 0% 3%;
+    --zvv-dark-gray: 0 0% 0%;
+    --flip-dot-background: 0 0% 0%;
+    --flip-dot-yellow: 48 100% 60%;
+    --flip-dot-frame: 0 0% 20%;
   }
 
   /* Black & White Theme */
@@ -246,21 +254,109 @@ All colors MUST be HSL.
     51%, 100% { opacity: 0.7; }
   }
 
-  /* LED Theme specific styles */
+  /* Flip-dot display styles for LED theme */
+  .theme-led .flip-dot-display {
+    font-family: 'DotGothic16', 'VT323', monospace;
+    font-size: calc(2vw + 8px);
+    letter-spacing: 0.1em;
+    background: hsl(var(--flip-dot-background));
+    color: hsl(var(--flip-dot-yellow));
+    max-width: 640px;
+    margin: 0 auto;
+    border: 4px solid hsl(var(--flip-dot-frame));
+    border-radius: 0;
+  }
+
+  .theme-led .flip-dot-header {
+    background: hsl(var(--flip-dot-background));
+    color: hsl(var(--flip-dot-yellow));
+    border: none;
+    padding: 8px 12px;
+    font-family: 'DotGothic16', 'VT323', monospace;
+    font-size: calc(2vw + 10px);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .theme-led .flip-dot-row {
+    display: grid;
+    grid-template-columns: 1fr 8fr 3fr;
+    gap: 8px;
+    padding: 4px 12px;
+    line-height: 1.1;
+    border: none;
+    background: hsl(var(--flip-dot-background));
+    color: hsl(var(--flip-dot-yellow));
+    font-family: 'DotGothic16', 'VT323', monospace;
+    font-size: calc(2vw + 8px);
+    letter-spacing: 0.1em;
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  .theme-led .flip-dot-row:hover {
+    background: hsl(var(--flip-dot-background));
+  }
+
+  .theme-led .flip-dot-line {
+    font-size: calc(2vw + 16px);
+    font-weight: bold;
+    text-align: center;
+    justify-self: center;
+    align-self: center;
+  }
+
+  .theme-led .flip-dot-destination {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+    align-self: center;
+  }
+
+  .theme-led .flip-dot-time {
+    text-align: right;
+    align-self: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .theme-led .flip-dot-wheelchair {
+    position: relative;
+    font-size: calc(2vw + 8px);
+  }
+
+  .theme-led .flip-dot-wheelchair::before {
+    content: "♿";
+    font-size: calc(2vw + 8px);
+    filter: contrast(1.5);
+  }
+
   .theme-led .zvv-board {
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    background: hsl(var(--flip-dot-background));
+    color: hsl(var(--flip-dot-yellow));
+    border: 4px solid hsl(var(--flip-dot-frame));
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .theme-led .zvv-header {
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    background: hsl(var(--flip-dot-background));
+    color: hsl(var(--flip-dot-yellow));
+    border: none;
+    text-shadow: none;
   }
 
   .theme-led .zvv-departure-row {
-    text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+    border: none;
+    text-shadow: none;
   }
 
   .theme-led .zvv-live-indicator {
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+    text-shadow: none;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   /* Cross-browser compatibility fixes */

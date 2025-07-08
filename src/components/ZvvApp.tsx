@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { StationCountSelector } from "./StationCountSelector";
 import { StationSelection } from "./StationSelection";
@@ -29,7 +28,6 @@ export function ZvvApp() {
   const [isLoading, setIsLoading] = useState(true);
   const { t, formatStationSubtitle } = useTranslations(appState.language);
 
-  // Load state from sessionStorage on mount - only once
   useEffect(() => {
     const loadSavedState = async () => {
       try {
@@ -40,17 +38,14 @@ export function ZvvApp() {
           const parsed = JSON.parse(savedState);
           console.log('ZvvApp: Parsed saved state:', parsed);
           
-          // Ensure language field exists
           if (!parsed.language) {
             parsed.language = 'de';
           }
           
-          // Ensure theme field exists
           if (!parsed.theme) {
             parsed.theme = 'default';
           }
           
-          // Validate that all required stations are properly configured
           const hasValidStations = parsed.stations?.length === parsed.stationCount;
           const allStationsConfigured = hasValidStations && 
                                       parsed.stations.every((station: StationConfig) => 
@@ -60,7 +55,6 @@ export function ZvvApp() {
           console.log('ZvvApp: Validation - hasValidStations:', hasValidStations, 'allStationsConfigured:', allStationsConfigured);
           
           if (allStationsConfigured && parsed.phase === 'monitoring') {
-            // Auto-navigate to monitoring if all stations are configured and we were in monitoring
             console.log('ZvvApp: All stations configured, auto-loading to monitoring phase');
             setAppState({ ...parsed, phase: 'monitoring' });
           } else {
@@ -83,9 +77,8 @@ export function ZvvApp() {
     };
 
     loadSavedState();
-  }, []); // Empty dependency array - only run once on mount
+  }, []);
 
-  // Save state to sessionStorage - only when not loading
   useEffect(() => {
     if (isLoading) {
       console.log('ZvvApp: Skipping save during loading phase');
@@ -193,7 +186,6 @@ export function ZvvApp() {
     }
   };
 
-  // Show loading state briefly to prevent flash
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background p-4 flex items-center justify-center">
@@ -287,9 +279,12 @@ export function ZvvApp() {
 
           {appState.phase === 'monitoring' && (
             <div className="space-y-8">
-              <DepartureBoard stations={appState.stations} language={appState.language} />
+              <DepartureBoard 
+                stations={appState.stations} 
+                language={appState.language}
+                theme={appState.theme}
+              />
               
-              {/* Settings Menu instead of the reconfigure button */}
               <SettingsMenu 
                 language={appState.language}
                 theme={appState.theme}
