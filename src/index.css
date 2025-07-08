@@ -293,6 +293,18 @@ All colors MUST be HSL.
     overflow: hidden;
   }
 
+  /* General delay styling for all themes */
+  .delay {
+    font-size: 0.875rem;
+    color: hsl(var(--destructive));
+    font-weight: bold;
+    animation: blink 2s infinite;
+    min-height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   /* Flip-dot display styles for LED theme */
   .theme-led .flip-dot-display {
     font-family: 'DotGothic16', 'VT323', monospace;
