@@ -30,42 +30,35 @@ export function CountrySelection({ selectedCountry, language, onCountrySelect }:
       name: t.countrySwitzerlandName || 'Schweiz',
       flag: '🇨🇭',
       supported: true,
-      description: t.countrySwitzerlandDesc || 'ZVV API'
+      description: t.countrySwitzerlandDesc || 'Vollständig unterstützt mit ZVV API'
     },
     {
       id: 'germany',
       name: t.countryGermanyName || 'Deutschland',
       flag: '🇩🇪',
-      supported: true,
-      description: t.countryGermanyDesc || 'transport.rest'
+      supported: false,
+      description: t.countryGermanyDesc || 'Kommt bald'
     },
     {
       id: 'austria',
       name: t.countryAustriaName || 'Österreich',
       flag: '🇦🇹',
-      supported: true,
-      description: t.countryAustriaDesc || 'AnachB'
+      supported: false,
+      description: t.countryAustriaDesc || 'Kommt bald'
     },
     {
       id: 'france',
       name: t.countryFranceName || 'Frankreich',
       flag: '🇫🇷',
-      supported: true,
-      description: t.countryFranceDesc || 'SNCF'
+      supported: false,
+      description: t.countryFranceDesc || 'Kommt bald'
     },
     {
       id: 'italy',
       name: t.countryItalyName || 'Italien',
       flag: '🇮🇹',
-      supported: true,
-      description: t.countryItalyDesc || 'ViaggiaTreno'
-    },
-    {
-      id: 'canada',
-      name: t.countryCanadaName || 'Kanada',
-      flag: '🇨🇦',
-      supported: true,
-      description: t.countryCanadaDesc || 'Kelowna Transit'
+      supported: false,
+      description: t.countryItalyDesc || 'Kommt bald'
     }
   ];
 
@@ -147,7 +140,7 @@ export function CountrySelection({ selectedCountry, language, onCountrySelect }:
         ))}
       </div>
 
-      {(selectedCountry === 'switzerland' || selectedCountry === 'germany' || selectedCountry === 'austria' || selectedCountry === 'france' || selectedCountry === 'italy' || selectedCountry === 'canada') && (
+      {selectedCountry === 'switzerland' && (
         <div className="text-center">
           <Button
             onClick={() => onCountrySelect(selectedCountry)}

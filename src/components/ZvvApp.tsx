@@ -301,7 +301,6 @@ export function ZvvApp() {
                 onStationChange={handleStationChange}
                 onNext={handleToCustomization}
                 canProceed={canProceed}
-                country={appState.country}
               />
               <div className="text-center">
                 <button
@@ -328,7 +327,6 @@ export function ZvvApp() {
                 stations={appState.stations}
                 onStationUpdate={handleStationUpdate}
                 onNext={handleToMonitoring}
-                country={appState.country}
               />
               <div className="text-center">
                 <button
@@ -356,7 +354,6 @@ export function ZvvApp() {
                 language={appState.language}
                 theme={appState.theme}
                 isFullscreen={appState.isFullscreen}
-                country={appState.country}
               />
               
               <SettingsMenu 

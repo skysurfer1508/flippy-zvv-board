@@ -14,7 +14,6 @@ interface DepartureBoardProps {
   language: SupportedLanguage;
   theme?: string;
   isFullscreen?: boolean;
-  country?: string;
 }
 
 interface StationBoardData {
@@ -75,7 +74,7 @@ function filterDeparturesByDirection(departures: Departure[], station: StationCo
   });
 }
 
-export function DepartureBoard({ stations, language, theme, isFullscreen = false, country = 'switzerland' }: DepartureBoardProps) {
+export function DepartureBoard({ stations, language, theme, isFullscreen = false }: DepartureBoardProps) {
   const { t } = useTranslations(language);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
@@ -110,7 +109,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
     queryFn: async (): Promise<StationBoardData[]> => {
       const results = await Promise.all(
         stations.map(async (station) => {
-          const response = await ZvvApi.getStationBoard(station.id, country as any);
+          const response = await ZvvApi.getStationBoard(station.id);
           return {
             stationId: station.id,
             stationName: station.name,

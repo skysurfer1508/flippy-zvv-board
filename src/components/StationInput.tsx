@@ -12,10 +12,9 @@ interface StationInputProps {
   value: string;
   onChange: (stationId: string, stationName: string) => void;
   placeholder?: string;
-  country?: string;
 }
 
-export function StationInput({ label, value, onChange, placeholder, country = 'switzerland' }: StationInputProps) {
+export function StationInput({ label, value, onChange, placeholder }: StationInputProps) {
   const [query, setQuery] = useState(value);
   const [suggestions, setSuggestions] = useState<Location[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,7 +40,7 @@ export function StationInput({ label, value, onChange, placeholder, country = 's
       timeoutRef.current = setTimeout(async () => {
         try {
           console.log('StationInput: Searching for:', query);
-          const response = await ZvvApi.searchStations(query, country as any);
+          const response = await ZvvApi.searchStations(query);
           setSuggestions(response.stations.slice(0, 8));
           setShowSuggestions(true);
         } catch (error) {
