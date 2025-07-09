@@ -12,6 +12,7 @@ interface StationCustomizationProps {
   stations: StationConfig[];
   onStationUpdate: (index: number, updates: Partial<StationConfig>) => void;
   onNext: () => void;
+  country?: string;
 }
 
 interface LineInfo {
@@ -27,7 +28,8 @@ interface DirectionInfo {
 export function StationCustomization({ 
   stations, 
   onStationUpdate, 
-  onNext 
+  onNext,
+  country = 'switzerland'
 }: StationCustomizationProps) {
   const [currentStationIndex, setCurrentStationIndex] = useState(0);
   const [availableLines, setAvailableLines] = useState<Record<string, LineInfo[]>>({});
@@ -56,8 +58,8 @@ export function StationCustomization({
       setIsLoading(true);
       try {
         const [boardResponse, directionsResponse] = await Promise.all([
-          ZvvApi.getStationBoard(currentStation.id),
-          ZvvApi.getLineDirections(currentStation.id)
+          ZvvApi.getStationBoard(currentStation.id, country as any),
+          ZvvApi.getLineDirections(currentStation.id, country as any)
         ]);
         
         if (boardResponse?.stationboard) {
