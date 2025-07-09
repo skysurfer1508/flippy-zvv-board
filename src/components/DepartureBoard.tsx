@@ -109,7 +109,7 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
     queryFn: async (): Promise<StationBoardData[]> => {
       const results = await Promise.all(
         stations.map(async (station) => {
-          const response = await ZvvApi.getStationBoard(station.id);
+          const response = await ZvvApi.getStationBoard(station.id, 'ch'); // TODO: Pass actual country
           return {
             stationId: station.id,
             stationName: station.name,

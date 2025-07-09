@@ -18,6 +18,8 @@ export interface Translations {
   countryFranceDesc: string;
   countryItalyName: string;
   countryItalyDesc: string;
+  countryCanadaName: string;
+  countryCanadaDesc: string;
   selected: string;
   selectCountryButton: string;
   comingSoon: string;
@@ -101,7 +103,9 @@ const de: Translations = {
   countryFranceName: "Frankreich",
   countryFranceDesc: "Kommt bald",
   countryItalyName: "Italien",
-  countryItalyDesc: "Kommt bald",
+  countryItalyDesc: "ViaggiaTreno",
+  countryCanadaName: "Kanada",
+  countryCanadaDesc: "BC Transit Kelowna",
   selected: "Ausgewählt",
   selectCountryButton: "Auswählen",
   comingSoon: "Kommt bald",
@@ -185,7 +189,9 @@ const en: Translations = {
   countryFranceName: "France",
   countryFranceDesc: "Coming soon",
   countryItalyName: "Italy",
-  countryItalyDesc: "Coming soon",
+  countryItalyDesc: "ViaggiaTreno",
+  countryCanadaName: "Canada",
+  countryCanadaDesc: "BC Transit Kelowna",
   selected: "Selected",
   selectCountryButton: "Select",
   comingSoon: "Coming soon",
@@ -269,7 +275,9 @@ const fr: Translations = {
   countryFranceName: "France",
   countryFranceDesc: "Prochainement",
   countryItalyName: "Italie",
-  countryItalyDesc: "Prochainement",
+  countryItalyDesc: "ViaggiaTreno",
+  countryCanadaName: "Canada",
+  countryCanadaDesc: "BC Transit Kelowna",
   selected: "Sélectionné",
   selectCountryButton: "Sélectionner",
   comingSoon: "Prochainement",
@@ -353,7 +361,9 @@ const it: Translations = {
   countryFranceName: "Francia",
   countryFranceDesc: "Prossimamente",
   countryItalyName: "Italia",
-  countryItalyDesc: "Prossimamente",
+  countryItalyDesc: "ViaggiaTreno",
+  countryCanadaName: "Canada",
+  countryCanadaDesc: "BC Transit Kelowna",
   selected: "Selezionato",
   selectCountryButton: "Seleziona",
   comingSoon: "Prossimamente",
@@ -437,7 +447,9 @@ const gsw: Translations = {
   countryFranceName: "Frankrych",
   countryFranceDesc: "Chunnt bald",
   countryItalyName: "Italie",
-  countryItalyDesc: "Chunnt bald",
+  countryItalyDesc: "ViaggiaTreno",
+  countryCanadaName: "Kanada",
+  countryCanadaDesc: "BC Transit Kelowna",
   selected: "Usgwählt",
   selectCountryButton: "Uswähle",
   comingSoon: "Chunnt bald",

@@ -301,6 +301,7 @@ export function ZvvApp() {
                 onStationChange={handleStationChange}
                 onNext={handleToCustomization}
                 canProceed={canProceed}
+                country={appState.country}
               />
               <div className="text-center">
                 <button
