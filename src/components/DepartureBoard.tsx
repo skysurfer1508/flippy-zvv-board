@@ -77,6 +77,7 @@ function filterDeparturesByDirection(departures: Departure[], station: StationCo
 export function DepartureBoard({ stations, language, theme, isFullscreen = false }: DepartureBoardProps) {
   const { t } = useTranslations(language);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
   // Check if LED theme is active
   const isLedTheme = theme === 'led';
@@ -130,6 +131,15 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
       setLastUpdated(new Date());
     }
   }, [departureData]);
+
+  // Update current time every minute for LED display
+  useEffect(() => {
+    const updateTime = () => setCurrentTime(new Date());
+    updateTime(); // Set initial time
+    
+    const interval = setInterval(updateTime, 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, []);
 
   const formatDepartureTime = (departure: Departure) => {
     if (!departure.stop.departure) return "N/A";
@@ -260,8 +270,18 @@ export function DepartureBoard({ stations, language, theme, isFullscreen = false
         {departureData?.map((stationData) => (
           <div key={stationData.stationId} className={`flip-dot-display ${isFullscreen ? 'fullscreen-flip-dot' : ''}`}>
             <div className="flip-dot-header">
-              <div className="text-center">
-                {stationData.customName || stationData.stationName}
+              <div className="flex items-center justify-between">
+                <div className="flip-dot-time-display">
+                  {currentTime.toLocaleTimeString(language === 'en' ? 'en-US' : 'de-CH', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: false 
+                  })}
+                </div>
+                <div className="text-center flex-1">
+                  {stationData.customName || stationData.stationName}
+                </div>
+                <div className="w-16"></div> {/* Spacer for balance */}
               </div>
             </div>
 
