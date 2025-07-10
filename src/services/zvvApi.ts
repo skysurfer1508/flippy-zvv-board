@@ -4,15 +4,14 @@ import { LocationsResponse, StationBoardResponse } from '@/types/zvv';
 const API_BASE = 'https://transport.opendata.ch/v1';
 
 export class ZvvApi {
-  static async searchStations(query: string, country: string = 'ch'): Promise<LocationsResponse> {
+  static async searchStations(query: string): Promise<LocationsResponse> {
     if (!query || query.length < 2) {
       return { stations: [] };
     }
 
     try {
-      // Use the Flask backend API for all countries
       const response = await fetch(
-        `/api/locations?country=${encodeURIComponent(country)}&q=${encodeURIComponent(query)}`
+        `${API_BASE}/locations?query=${encodeURIComponent(query)}&type=station`
       );
       
       if (!response.ok) {
@@ -20,28 +19,17 @@ export class ZvvApi {
       }
       
       const data = await response.json();
-      // Convert the backend format to frontend format
-      const stations = data.map((station: any) => ({
-        id: station.id,
-        name: station.name,
-        coordinate: station.lat && station.lon ? {
-          type: 'WGS84',
-          x: station.lon,
-          y: station.lat
-        } : undefined
-      }));
-      return { stations };
+      return { stations: data.stations || [] };
     } catch (error) {
       console.error('Error searching stations:', error);
       return { stations: [] };
     }
   }
 
-  static async getStationBoard(stationId: string, country: string = 'ch'): Promise<StationBoardResponse | null> {
+  static async getStationBoard(stationId: string): Promise<StationBoardResponse | null> {
     try {
-      // Use the Flask backend API for all countries
       const response = await fetch(
-        `/api/board?country=${encodeURIComponent(country)}&stop_id=${encodeURIComponent(stationId)}`
+        `${API_BASE}/stationboard?station=${encodeURIComponent(stationId)}&limit=20`
       );
       
       if (!response.ok) {
@@ -49,35 +37,7 @@ export class ZvvApi {
       }
       
       const data = await response.json();
-      
-      // Convert backend format to frontend format
-      const stationboard = data.departures?.map((dep: any) => ({
-        stop: {
-          station: {
-            id: stationId,
-            name: '',
-            coordinate: undefined
-          },
-          departure: dep.time,
-          platform: dep.platform || '',
-          prognosis: dep.delay > 0 ? {
-            departure: dep.time,
-            delay: dep.delay
-          } : undefined
-        },
-        name: dep.line,
-        category: dep.line.match(/\d/) ? 'T' : 'BUS', // Simple categorization
-        to: dep.dest,
-        number: dep.line
-      })) || [];
-
-      return {
-        station: {
-          id: stationId,
-          name: data.station || ''
-        },
-        stationboard
-      };
+      return data;
     } catch (error) {
       console.error('Error fetching station board:', error);
       return null;

@@ -3,7 +3,3 @@ Flask==2.3.3
 Flask-CORS==4.0.0
 requests==2.31.0
 gunicorn==21.2.0
-xmltodict==0.13.0
-protobuf==4.25.1
-gtfs-realtime-bindings==1.0.0
-schedule==1.2.0
