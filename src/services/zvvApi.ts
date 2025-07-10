@@ -1,86 +1,102 @@
 
+import { countryProviders } from './countries';
 import { LocationsResponse, StationBoardResponse } from '@/types/zvv';
 
-const API_BASE = 'https://transport.opendata.ch/v1';
-
 export class ZvvApi {
-  static async searchStations(query: string): Promise<LocationsResponse> {
+  static async searchStations(query: string, country: string = 'ch'): Promise<LocationsResponse> {
     if (!query || query.length < 2) {
       return { stations: [] };
     }
 
+    const provider = countryProviders[country];
+    if (!provider) {
+      console.warn(`No provider found for country: ${country}`);
+      return { stations: [] };
+    }
+
     try {
-      const response = await fetch(
-        `${API_BASE}/locations?query=${encodeURIComponent(query)}&type=station`
-      );
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return { stations: data.stations || [] };
+      const locations = await provider.searchStations(query);
+      return { 
+        stations: locations.map(loc => ({
+          id: loc.id,
+          name: loc.name,
+          coordinate: loc.lat && loc.lon ? {
+            type: 'WGS84',
+            x: loc.lat,
+            y: loc.lon
+          } : undefined
+        }))
+      };
     } catch (error) {
-      console.error('Error searching stations:', error);
+      console.error(`Error searching stations in ${country}:`, error);
       return { stations: [] };
     }
   }
 
-  static async getStationBoard(stationId: string): Promise<StationBoardResponse | null> {
+  static async getStationBoard(stationId: string, country: string = 'ch'): Promise<StationBoardResponse | null> {
+    const provider = countryProviders[country];
+    if (!provider) {
+      console.warn(`No provider found for country: ${country}`);
+      return null;
+    }
+
     try {
-      const response = await fetch(
-        `${API_BASE}/stationboard?station=${encodeURIComponent(stationId)}&limit=20`
-      );
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data;
+      const boardData = await provider.getStationBoard(stationId);
+      if (!boardData) return null;
+
+      return {
+        station: {
+          id: boardData.station.id,
+          name: boardData.station.name
+        },
+        stationboard: boardData.departures.map(dep => ({
+          stop: {
+            station: {
+              id: boardData.station.id,
+              name: boardData.station.name
+            },
+            departure: dep.departure,
+            platform: dep.platform,
+            prognosis: dep.delay > 0 ? {
+              departure: new Date(new Date(dep.departure).getTime() + dep.delay * 60000).toISOString()
+            } : undefined
+          },
+          name: dep.line,
+          category: dep.category,
+          number: dep.line,
+          to: dep.destination,
+          operator: 'Unknown'
+        }))
+      };
     } catch (error) {
-      console.error('Error fetching station board:', error);
+      console.error(`Error fetching station board in ${country}:`, error);
       return null;
     }
   }
 
-  static async getLineDirections(stationId: string): Promise<Record<string, string[]>> {
-    try {
-      const response = await fetch(
-        `${API_BASE}/stationboard?station=${encodeURIComponent(stationId)}&limit=50`
-      );
+  static async getLineDirections(stationId: string, country: string = 'ch'): Promise<Record<string, string[]>> {
+    const boardData = await this.getStationBoard(stationId, country);
+    if (!boardData) return {};
+    
+    const directionsMap: Record<string, Set<string>> = {};
+    
+    boardData.stationboard.forEach(departure => {
+      const lineNumber = departure.number || departure.name;
+      const direction = departure.to;
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (lineNumber && direction) {
+        if (!directionsMap[lineNumber]) {
+          directionsMap[lineNumber] = new Set();
+        }
+        directionsMap[lineNumber].add(direction);
       }
-      
-      const data = await response.json();
-      const directionsMap: Record<string, Set<string>> = {};
-      
-      if (data.stationboard) {
-        data.stationboard.forEach((departure: any) => {
-          const lineNumber = departure.number || departure.name;
-          const direction = departure.to;
-          
-          if (lineNumber && direction) {
-            if (!directionsMap[lineNumber]) {
-              directionsMap[lineNumber] = new Set();
-            }
-            directionsMap[lineNumber].add(direction);
-          }
-        });
-      }
-      
-      // Convert Sets to Arrays
-      const result: Record<string, string[]> = {};
-      Object.keys(directionsMap).forEach(line => {
-        result[line] = Array.from(directionsMap[line]);
-      });
-      
-      return result;
-    } catch (error) {
-      console.error('Error fetching line directions:', error);
-      return {};
-    }
+    });
+    
+    const result: Record<string, string[]> = {};
+    Object.keys(directionsMap).forEach(line => {
+      result[line] = Array.from(directionsMap[line]);
+    });
+    
+    return result;
   }
 }
