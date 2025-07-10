@@ -26,39 +26,46 @@ export function CountrySelection({ selectedCountry, language, onCountrySelect }:
 
   const countries: Country[] = [
     {
-      id: 'switzerland',
+      id: 'ch',
       name: t.countrySwitzerlandName || 'Schweiz',
       flag: '🇨🇭',
       supported: true,
-      description: t.countrySwitzerlandDesc || 'Vollständig unterstützt mit ZVV API'
+      description: t.countrySwitzerlandDesc || 'Open Data'
     },
     {
-      id: 'germany',
+      id: 'de',
       name: t.countryGermanyName || 'Deutschland',
       flag: '🇩🇪',
-      supported: false,
-      description: t.countryGermanyDesc || 'Kommt bald'
+      supported: true,
+      description: t.countryGermanyDesc || 'transport.rest'
     },
     {
-      id: 'austria',
+      id: 'at',
       name: t.countryAustriaName || 'Österreich',
       flag: '🇦🇹',
-      supported: false,
-      description: t.countryAustriaDesc || 'Kommt bald'
+      supported: true,
+      description: t.countryAustriaDesc || 'AnachB VDV'
     },
     {
-      id: 'france',
+      id: 'fr',
       name: t.countryFranceName || 'Frankreich',
       flag: '🇫🇷',
-      supported: false,
-      description: t.countryFranceDesc || 'Kommt bald'
+      supported: true,
+      description: t.countryFranceDesc || 'SNCF Navitia'
     },
     {
-      id: 'italy',
+      id: 'it',
       name: t.countryItalyName || 'Italien',
       flag: '🇮🇹',
-      supported: false,
-      description: t.countryItalyDesc || 'Kommt bald'
+      supported: true,
+      description: t.countryItalyDesc || 'ViaggiaTreno'
+    },
+    {
+      id: 'ca',
+      name: t.countryCanadaName || 'Kanada',
+      flag: '🇨🇦',
+      supported: true,
+      description: t.countryCanadaDesc || 'BC Transit'
     }
   ];
 
@@ -140,7 +147,7 @@ export function CountrySelection({ selectedCountry, language, onCountrySelect }:
         ))}
       </div>
 
-      {selectedCountry === 'switzerland' && (
+      {selectedCountry && countries.find(c => c.id === selectedCountry)?.supported && (
         <div className="text-center">
           <Button
             onClick={() => onCountrySelect(selectedCountry)}

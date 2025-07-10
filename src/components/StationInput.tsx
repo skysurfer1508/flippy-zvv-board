@@ -40,7 +40,7 @@ export function StationInput({ label, value, onChange, placeholder }: StationInp
       timeoutRef.current = setTimeout(async () => {
         try {
           console.log('StationInput: Searching for:', query);
-          const response = await ZvvApi.searchStations(query);
+          const response = await ZvvApi.searchStations(query, sessionStorage.getItem('selectedCountry') || 'ch');
           setSuggestions(response.stations.slice(0, 8));
           setShowSuggestions(true);
         } catch (error) {

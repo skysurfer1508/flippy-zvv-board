@@ -1,35 +1,33 @@
 
 import { LocationsResponse, StationBoardResponse } from '@/types/zvv';
 
-const API_BASE = 'https://transport.opendata.ch/v1';
-
 export class ZvvApi {
-  static async searchStations(query: string): Promise<LocationsResponse> {
+  static async searchStations(query: string, country: string = 'ch'): Promise<LocationsResponse> {
     if (!query || query.length < 2) {
       return { stations: [] };
     }
 
     try {
       const response = await fetch(
-        `${API_BASE}/locations?query=${encodeURIComponent(query)}&type=station`
+        `/api/locations?country=${encodeURIComponent(country)}&q=${encodeURIComponent(query)}`
       );
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const data = await response.json();
-      return { stations: data.stations || [] };
+      const stations = await response.json();
+      return { stations: stations || [] };
     } catch (error) {
       console.error('Error searching stations:', error);
       return { stations: [] };
     }
   }
 
-  static async getStationBoard(stationId: string): Promise<StationBoardResponse | null> {
+  static async getStationBoard(stationId: string, country: string = 'ch'): Promise<StationBoardResponse | null> {
     try {
       const response = await fetch(
-        `${API_BASE}/stationboard?station=${encodeURIComponent(stationId)}&limit=20`
+        `/api/board?country=${encodeURIComponent(country)}&stop_id=${encodeURIComponent(stationId)}`
       );
       
       if (!response.ok) {
@@ -44,10 +42,10 @@ export class ZvvApi {
     }
   }
 
-  static async getLineDirections(stationId: string): Promise<Record<string, string[]>> {
+  static async getLineDirections(stationId: string, country: string = 'ch'): Promise<Record<string, string[]>> {
     try {
       const response = await fetch(
-        `${API_BASE}/stationboard?station=${encodeURIComponent(stationId)}&limit=50`
+        `/api/board?country=${encodeURIComponent(country)}&stop_id=${encodeURIComponent(stationId)}`
       );
       
       if (!response.ok) {
@@ -57,10 +55,10 @@ export class ZvvApi {
       const data = await response.json();
       const directionsMap: Record<string, Set<string>> = {};
       
-      if (data.stationboard) {
-        data.stationboard.forEach((departure: any) => {
-          const lineNumber = departure.number || departure.name;
-          const direction = departure.to;
+      if (data.departures) {
+        data.departures.forEach((departure: any) => {
+          const lineNumber = departure.line;
+          const direction = departure.dest;
           
           if (lineNumber && direction) {
             if (!directionsMap[lineNumber]) {
