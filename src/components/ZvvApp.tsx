@@ -301,7 +301,6 @@ export function ZvvApp() {
                 onStationChange={handleStationChange}
                 onNext={handleToCustomization}
                 canProceed={canProceed}
-                country={appState.country === 'switzerland' ? 'ch' : appState.country === 'germany' ? 'de' : appState.country === 'austria' ? 'at' : appState.country === 'france' ? 'fr' : appState.country === 'italy' ? 'it' : appState.country === 'canada' ? 'ca' : 'ch'}
               />
               <div className="text-center">
                 <button

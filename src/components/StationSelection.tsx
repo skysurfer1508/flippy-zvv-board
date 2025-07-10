@@ -10,7 +10,6 @@ interface StationSelectionProps {
   onStationChange: (index: number, stationId: string, stationName: string) => void;
   onNext: () => void;
   canProceed: boolean;
-  country: string;
 }
 
 export function StationSelection({
@@ -18,8 +17,7 @@ export function StationSelection({
   stations,
   onStationChange,
   onNext,
-  canProceed,
-  country
+  canProceed
 }: StationSelectionProps) {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -43,7 +41,6 @@ export function StationSelection({
               value={stations[index]?.name || ''}
               onChange={(stationId, stationName) => onStationChange(index, stationId, stationName)}
               placeholder={`Station ${index + 1} suchen...`}
-              country={country}
             />
           </div>
         ))}
